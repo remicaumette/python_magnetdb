@@ -10,6 +10,7 @@ from models import MSiteBase, MSite, MSiteCreate, MSiteRead, MSiteUpdate
 from models import MRecordBase, MRecord, MRecordCreate, MRecordRead, MRecordUpdate
 from models import MaterialBase, Material, MaterialCreate, MaterialRead, MaterialUpdate
 from models import MagnetReadWithMSite, MSiteReadWithMagnets
+from models import MPartReadWithMagnet, MagnetReadWithMParts
 
 def get_session():
     with Session(engine) as session:
@@ -84,14 +85,12 @@ def read_mparts(
     mparts = session.exec(select(MPart).offset(offset).limit(limit)).all()
     return mparts
 
-"""
 @app.get("/mparts/{mpart_id}", response_model=MPartReadWithMagnet)
 def read_mpart(*, session: Session = Depends(get_session), mpart_id: int):
     mpart = session.get(MPart, mpart_id)
     if not mpart:
         raise HTTPException(status_code=404, detail="MPart not found")
     return mpart
-"""
 
 """
 @app.patch("/mparts/{mpart_id}", response_model=MPartRead)
@@ -137,23 +136,17 @@ def create_magnet(*, session: Session = Depends(get_session), magnet: MagnetCrea
 
 
 @app.get("/magnets/", response_model=List[MagnetRead])
-def read_magnets(
-    *,
-    session: Session = Depends(get_session),
-    offset: int = 0,
-    limit: int = Query(default=100, lte=100),
-):
-    magnets = session.exec(select(Magnet).offset(offset).limit(limit)).all()
+def read_magnets(*, session: Session = Depends(get_session), ):
+    magnets = session.exec(select(Magnet)).all()
     return magnets
 
-"""
-@app.get("/magnets/{mangnet_id}", response_model=MagnetReadWithMSite)
+@app.get("/magnets/{magnet_id}", response_model=MagnetReadWithMSite)
 def read_magnet(*, session: Session = Depends(get_session), magnet_id: int):
     magnet = session.get(Magnet, magnet_id)
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
     return magnet
-"""
+
 
 """
 @app.patch("/magnets/{magnet_id}", response_model=MagnetRead)
@@ -202,15 +195,13 @@ def read_msites(
     msites = session.exec(select(MSite).offset(offset).limit(limit)).all()
     return msites
 
-
-"""
 @app.get("/msites/{msite_id}", response_model=MSiteReadWithMagnets)
 def read_msite(*, msite_id: int, session: Session = Depends(get_session)):
     msite = session.get(MSite, msite_id)
     if not msite:
         raise HTTPException(status_code=404, detail="MSite not found")
     return msite
-"""
+
 
 """
 @app.patch("/msites/{msite_id}", response_model=MSiteRead)

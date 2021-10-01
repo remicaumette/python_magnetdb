@@ -109,7 +109,7 @@ class MSiteUpdate(SQLModel):
     name: str
     conffile: str
     status: str
-    magnets: List["Magnet"] = None # Relationship(back_populates="msites", link_model=MagnetMSiteLink)
+    magnets: List["Magnet"] = [] # Relationship(back_populates="msites", link_model=MagnetMSiteLink)
 
 ##################
 #
@@ -148,8 +148,8 @@ class MagnetUpdate(SQLModel):
     geom: str
     status: str
 
-    msites: List[MSite] = None #Relationship(back_populates="magnets", link_model=MagnetMSiteLink)
-    mparts: List["MPart"] = None #Relationship(back_populates="magnets", link_model=MPartMagnetLink)
+    msites: List[MSite] = [] #Relationship(back_populates="magnets", link_model=MagnetMSiteLink)
+    mparts: List["MPart"] = [] #Relationship(back_populates="magnets", link_model=MPartMagnetLink)
 
 ##################
 #
@@ -197,14 +197,19 @@ class MPartUpdate(SQLModel):
 #
 ##################
 
-class MPartReadWithMagnet(MPartRead):
-    magnet: Optional[MagnetRead] = None
+"""
+class MPartReadWithMaterial(MPartRead):
+    material: Optional[MaterialRead]
+"""
 
-class MagnetReadWithParts(MagnetRead):
+class MPartReadWithMagnet(MPartRead):
+    magnets: List[MagnetRead] = []
+
+class MagnetReadWithMParts(MagnetRead):
     mparts: List[MPartRead] = []
 
 class MagnetReadWithMSite(MagnetRead):
-    msite: Optional[MSiteRead] = None
+    msites: List[MSiteRead] = []
 
 class MSiteReadWithMagnets(MSiteRead):
     magnets: List[MagnetRead] = []
@@ -239,5 +244,5 @@ class MRecordUpdate(SQLModel):
     """
     timestamp: str
     name: str
-    msite_id: Optional[int] = Field(default=None, foreign_key="msite.id")
+    msite_id: Optional[int] = None #Field(default=None, foreign_key="msite.id")
 
