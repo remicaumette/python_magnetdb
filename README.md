@@ -30,6 +30,12 @@ Running the FastAPI Application:
 uvicorn main:app --app-dir $PWD/python_magnetdb/ --reload
 ``` 
 
+To view the API interface
+
+```
+firefox http://localhost:8000/docs
+```
+
 == Requirements
 
 * sqlmodel
