@@ -65,7 +65,6 @@ def delete_material(*, session: Session = Depends(get_session), material_id: int
 #
 ####################
 
-
 @app.post("/mparts/", response_model=MPartRead)
 def create_mpart(*, session: Session = Depends(get_session), mpart: MPartCreate):
     db_mpart = MPart.from_orm(MPart)
@@ -92,7 +91,6 @@ def read_mpart(*, session: Session = Depends(get_session), mpart_id: int):
         raise HTTPException(status_code=404, detail="MPart not found")
     return mpart
 
-"""
 @app.patch("/mparts/{mpart_id}", response_model=MPartRead)
 def update_mpart(
     *, session: Session = Depends(get_session), mpart_id: int, mpart: MPartUpdate):
@@ -106,9 +104,7 @@ def update_mpart(
     session.commit()
     session.refresh(db_mpart)
     return db_mpart
-"""
 
-"""
 @app.delete("/mparts/{mpart_id}")
 def delete_mpart(*, session: Session = Depends(get_session), mpart_id: int):
 
@@ -118,8 +114,6 @@ def delete_mpart(*, session: Session = Depends(get_session), mpart_id: int):
     session.delete(mpart)
     session.commit()
     return {"ok": True}
-"""
-
 
 ####################
 #
@@ -147,8 +141,6 @@ def read_magnet(*, session: Session = Depends(get_session), magnet_id: int):
         raise HTTPException(status_code=404, detail="Magnet not found")
     return magnet
 
-
-"""
 @app.patch("/magnets/{magnet_id}", response_model=MagnetRead)
 def update_magnet(
     *, session: Session = Depends(get_session), magnet_id: int, magnet: MagnetUpdate):
@@ -162,9 +154,8 @@ def update_magnet(
     session.commit()
     session.refresh(db_magnet)
     return db_magnet
-"""
 
-"""
+
 @app.delete("/magnets/{magnet_id}")
 def delete_magnet(*, session: Session = Depends(get_session), magnet_id: int):
 
@@ -174,7 +165,10 @@ def delete_magnet(*, session: Session = Depends(get_session), magnet_id: int):
     session.delete(magnet)
     session.commit()
     return {"ok": True}
-"""
+
+####################
+#
+####################
 
 @app.post("/msites/", response_model=MSiteRead)
 def create_msite(*, session: Session = Depends(get_session), msite: MSiteCreate):
@@ -202,10 +196,8 @@ def read_msite(*, msite_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="MSite not found")
     return msite
 
-
-"""
 @app.patch("/msites/{msite_id}", response_model=MSiteRead)
-def update_team(
+def update_msite(
     *,
     session: Session = Depends(get_session),
     msite_id: int,
@@ -221,9 +213,7 @@ def update_team(
     session.commit()
     session.refresh(db_msite)
     return db_msite
-"""
 
-"""
 @app.delete("/msites/{msite_id}")
 def delete_msite(*, session: Session = Depends(get_session), msite_id: int):
     msite = session.get(MSite, msite_id)
@@ -232,8 +222,6 @@ def delete_msite(*, session: Session = Depends(get_session), msite_id: int):
     session.delete(msite)
     session.commit()
     return {"ok": True}
-
-"""
 
 """ 
 @app.on_event("startup")
