@@ -7,6 +7,13 @@ See `python_magnetrun` for more details
 == Structure
 
 Viewing the database: ``sqlitebrowser`
+
+To generate a diagram:
+
+```
+java -jar schemaspy-6.1.0.jar -debug -t sqlite -o tutut -sso -cat magnets -s magnets -db magnets.db
+```
+
 == Python
 
 Running the app
@@ -29,6 +36,12 @@ uvicorn main:app --app-dir $PWD/python_magnetdb/ --reload
 * fastapi
 * uvicorn
 * sqlitebrowser
+
+```
+python -m pip install sqlmodel
+python -m pip install fastapi "uvicorn[standard]"
+export PATH=$PATH:$HOME/.local/bin
+```
 
 == References
 
