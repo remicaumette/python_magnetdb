@@ -9,25 +9,29 @@ class MaterialBase(SQLModel):
     """
     
     name: str
+    nuance: Optional[str] = None
+    furnisher: Optional[str] = None
 
-    Tref: float
+    Tref: Optional[float] = 20
 
-    VolumicMass: float
-    SpecificHeat: float
+    VolumicMass: Optional[float] = 0
+    SpecificHeat: Optional[float] = 0
 
     alpha: Optional[float] = 0
-    ElectricalConductivity: Optional[float] = 0
-    ThermalConductivity: float
-    MagnetPermeability: float
+    ElectricalConductivity: float
+    ThermalConductivity: Optional[float] = 0
+    MagnetPermeability: Optional[float] = 0
 
-    Young: float
-    Poisson: float
-    CoefDilatation: float
-    
+    Young: Optional[float] = 0
+    Poisson: Optional[float] = 0
+    CoefDilatation: Optional[float] = 0
+    Rpe: float
+
     ref: Optional[str] = None
 
 class Material(MaterialBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    # TODO make name unique
 
 class MaterialCreate(MaterialBase):
     pass
@@ -37,21 +41,24 @@ class MaterialRead(MaterialBase):
 
 class MaterialUpdate(SQLModel):
     name: str
+    nuance: Optional[str] = None
+    furnisher: Optional[str] = None
 
-    Tref: float
+    Tref: Optional[float] = 20
 
-    VolumicMass: float
-    SpecificHeat: float
+    VolumicMass: Optional[float] = 0
+    SpecificHeat: Optional[float] = 0
 
     alpha: Optional[float] = 0
-    ElectricalConductivity: Optional[float] = 0
-    ThermalConductivity: float
-    MagnetPermeability: float
+    ElectricalConductivity: float
+    ThermalConductivity: Optional[float] = 0
+    MagnetPermeability: Optional[float] = 0
 
-    Young: float
-    Poisson: float
-    CoefDilatation: float
-    
+    Young: Optional[float] = 0
+    Poisson: Optional[float] = 0
+    CoefDilatation: Optional[float] = 0
+    Rpe: float
+
     ref: Optional[str] = None
 
 ##################
@@ -109,7 +116,7 @@ class MSiteUpdate(SQLModel):
     name: str
     conffile: str
     status: str
-    magnets: List["Magnet"] = [] # Relationship(back_populates="msites", link_model=MagnetMSiteLink)
+    # magnets: List["Magnet"] = [] # Relationship(back_populates="msites", link_model=MagnetMSiteLink)
 
 ##################
 #
@@ -124,7 +131,6 @@ class MagnetBase(SQLModel):
     be: str
     geom: str
     status: str
-
 
 class Magnet(MagnetBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -149,7 +155,7 @@ class MagnetUpdate(SQLModel):
     status: str
 
     msites: List[MSite] = [] #Relationship(back_populates="magnets", link_model=MagnetMSiteLink)
-    mparts: List["MPart"] = [] #Relationship(back_populates="magnets", link_model=MPartMagnetLink)
+    # mparts: List["MPart"] = [] #Relationship(back_populates="magnets", link_model=MPartMagnetLink)
 
 ##################
 #
@@ -205,11 +211,9 @@ class MPartReadWithMaterial(MPartRead):
 class MPartReadWithMagnet(MPartRead):
     magnets: List[MagnetRead] = []
 
-class MagnetReadWithMParts(MagnetRead):
-    mparts: List[MPartRead] = []
-
 class MagnetReadWithMSite(MagnetRead):
     msites: List[MSiteRead] = []
+    mparts: List[MPartRead] = []
 
 class MSiteReadWithMagnets(MSiteRead):
     magnets: List[MagnetRead] = []

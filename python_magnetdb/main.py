@@ -10,7 +10,7 @@ from models import MSiteBase, MSite, MSiteCreate, MSiteRead, MSiteUpdate
 from models import MRecordBase, MRecord, MRecordCreate, MRecordRead, MRecordUpdate
 from models import MaterialBase, Material, MaterialCreate, MaterialRead, MaterialUpdate
 from models import MagnetReadWithMSite, MSiteReadWithMagnets
-from models import MPartReadWithMagnet, MagnetReadWithMParts
+from models import MPartReadWithMagnet
 
 def get_session():
     with Session(engine) as session:
@@ -28,7 +28,8 @@ def create_material(*, session: Session = Depends(get_session), material: Materi
 
 @app.get("/materials/", response_model=List[MaterialRead])
 def read_materials(*, session: Session = Depends(get_session), ):
-    materials = session.exec(select(Material)).all()
+    statement = select(Material)
+    materials = session.exec(statement).all()
     return materials
 
 
@@ -38,6 +39,16 @@ def read_material(*, session: Session = Depends(get_session), material_id: int):
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
     return material
+
+"""
+# not working 
+@app.get("/materials/{name}", response_model=MaterialRead)
+def read_material_name(*, session: Session = Depends(get_session), name: str):
+    print("read_material_by_name:", name)
+    statement = select(Material).where(Material.name == name)
+    materials = session.exec(statement).all()
+    return materials
+"""
 
 @app.patch("/materials/{material_id}", response_model=MaterialRead)
 def update_material(*, session: Session = Depends(get_session), material_id: int, material: MaterialUpdate):
@@ -119,7 +130,6 @@ def delete_mpart(*, session: Session = Depends(get_session), mpart_id: int):
 #
 ####################
 
-
 @app.post("/magnets/", response_model=MagnetRead)
 def create_magnet(*, session: Session = Depends(get_session), magnet: MagnetCreate):
     db_magnet = Magnet.from_orm(Magnet)
@@ -155,7 +165,6 @@ def update_magnet(
     session.refresh(db_magnet)
     return db_magnet
 
-
 @app.delete("/magnets/{magnet_id}")
 def delete_magnet(*, session: Session = Depends(get_session), magnet_id: int):
 
@@ -169,6 +178,7 @@ def delete_magnet(*, session: Session = Depends(get_session), magnet_id: int):
 ####################
 #
 ####################
+
 
 @app.post("/msites/", response_model=MSiteRead)
 def create_msite(*, session: Session = Depends(get_session), msite: MSiteCreate):
@@ -222,6 +232,7 @@ def delete_msite(*, session: Session = Depends(get_session), msite_id: int):
     session.delete(msite)
     session.commit()
     return {"ok": True}
+
 
 """ 
 @app.on_event("startup")
