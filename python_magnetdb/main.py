@@ -1,9 +1,9 @@
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlmodel import Session, select
 
-from database import create_db_and_tables, engine
+from database import create_db_and_tables, engine, get_session
 from models import MPartBase, MPart, MPartCreate, MPartRead, MPartUpdate
 from models import MagnetBase, Magnet, MagnetCreate, MagnetRead, MagnetUpdate 
 from models import MSiteBase, MSite, MSiteCreate, MSiteRead, MSiteUpdate
@@ -12,9 +12,12 @@ from models import MaterialBase, Material, MaterialCreate, MaterialRead, Materia
 from models import MagnetReadWithMSite, MSiteReadWithMagnets
 from models import MPartReadWithMagnet
 
+
+"""
 def get_session():
     with Session(engine) as session:
         yield session
+"""
 
 app = FastAPI()
 
@@ -33,7 +36,7 @@ def read_materials(*, session: Session = Depends(get_session), ):
     return materials
 
 
-@app.get("/materials/{material_id}", response_model=MaterialRead)
+@app.get("/materials/{material_id}", response_model=MaterialBase)
 def read_material(*, session: Session = Depends(get_session), material_id: int):
     material = session.get(Material, material_id)
     if not material:
@@ -44,7 +47,6 @@ def read_material(*, session: Session = Depends(get_session), material_id: int):
 # not working 
 @app.get("/materials/{name}", response_model=MaterialRead)
 def read_material_name(*, session: Session = Depends(get_session), name: str):
-    print("read_material_by_name:", name)
     statement = select(Material).where(Material.name == name)
     materials = session.exec(statement).all()
     return materials
@@ -83,7 +85,6 @@ def create_mpart(*, session: Session = Depends(get_session), mpart: MPartCreate)
     session.commit()
     session.refresh(db_mpart)
     return db_mpart
-
 
 @app.get("/mparts/", response_model=List[MPartRead])
 def read_mparts(
@@ -150,6 +151,19 @@ def read_magnet(*, session: Session = Depends(get_session), magnet_id: int):
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
     return magnet
+
+
+"""
+# Pb with circular import
+from crud import get_mparts
+
+@app.get("/magnet_parts/{magnet_id}", response_model=MagnetReadWithMSite)
+def read_magnet_parts(*, session: Session = Depends(get_session), magnet_id: int):
+    mparts = crud.get_mparts(session, magnet_id)
+    if not mparts:
+        raise HTTPException(status_code=404, detail="MPart not found")
+    return mparts
+"""
 
 @app.patch("/magnets/{magnet_id}", response_model=MagnetRead)
 def update_magnet(
@@ -233,6 +247,7 @@ def delete_msite(*, session: Session = Depends(get_session), msite_id: int):
     session.commit()
     return {"ok": True}
 
+MSiteUpdate.update_forward_refs()
 
 """ 
 @app.on_event("startup")

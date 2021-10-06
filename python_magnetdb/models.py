@@ -9,9 +9,6 @@ class MaterialBase(SQLModel):
     """
     
     name: str
-    nuance: Optional[str] = None
-    furnisher: Optional[str] = None
-
     Tref: Optional[float] = 20
 
     VolumicMass: Optional[float] = 0
@@ -27,9 +24,12 @@ class MaterialBase(SQLModel):
     CoefDilatation: Optional[float] = 0
     Rpe: float
 
+class MaterialRef(MaterialBase):
+    nuance: Optional[str] = None
+    furnisher: Optional[str] = None
     ref: Optional[str] = None
 
-class Material(MaterialBase, table=True):
+class Material(MaterialRef, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     # TODO make name unique
 
@@ -41,9 +41,6 @@ class MaterialRead(MaterialBase):
 
 class MaterialUpdate(SQLModel):
     name: str
-    nuance: Optional[str] = None
-    furnisher: Optional[str] = None
-
     Tref: Optional[float] = 20
 
     VolumicMass: Optional[float] = 0
@@ -59,6 +56,8 @@ class MaterialUpdate(SQLModel):
     CoefDilatation: Optional[float] = 0
     Rpe: float
 
+    nuance: Optional[str] = None
+    furnisher: Optional[str] = None
     ref: Optional[str] = None
 
 ##################
@@ -95,6 +94,7 @@ class MSiteBase(SQLModel):
     """
     Magnet Site
     """
+    
     name: str
     conffile: str
     status: str
@@ -113,10 +113,11 @@ class MSiteUpdate(SQLModel):
     """
     Magnet Site
     """
+    
     name: str
     conffile: str
     status: str
-    # magnets: List["Magnet"] = [] # Relationship(back_populates="msites", link_model=MagnetMSiteLink)
+    magnets: List["Magnet"] = [] # Relationship(back_populates="msites", link_model=MagnetMSiteLink)
 
 ##################
 #
