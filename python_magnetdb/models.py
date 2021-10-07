@@ -158,7 +158,7 @@ class MagnetUpdate(SQLModel):
     status: str
 
     msites: List[MSite] = [] #Relationship(back_populates="magnets", link_model=MagnetMSiteLink)
-    # mparts: List["MPart"] = [] #Relationship(back_populates="magnets", link_model=MPartMagnetLink)
+    mparts: List["MPart"] = [] #Relationship(back_populates="magnets", link_model=MPartMagnetLink)
 
 ##################
 #

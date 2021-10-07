@@ -76,9 +76,12 @@ def get_mparts(session: Session, magnet_id: int):
     """
     get all parts from a magnet
     """
-    statement = select(MPartMagnetLink).where(MPartMagnetLink.magnet_id == magnet_id)
+    statement = select(MPart, MPartMagnetLink).join(MPart).where(MPartMagnetLink.magnet_id == magnet_id)
     results = session.exec(statement)
-    return results
+    selected = []
+    for part, link in results:
+        selected.append(part)
+    return selected
 
 def get_mparts_type(session: Session, magnet_id: int, type: str):   
     """

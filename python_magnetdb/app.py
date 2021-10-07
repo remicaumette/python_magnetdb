@@ -141,6 +141,9 @@ if __name__ == "__main__":
             else:
                 for magnet in results:
                     print("magnet:", magnet)
+                    # objects = get_mparts(session=session, magnet_id=magnet.id)
+                    # for h in objects:
+                    #    print(session.get(MPart, h.id).dict())
                 
             mdata = magnet.dict()
             for key in ['be', 'name', 'status', 'id']:
