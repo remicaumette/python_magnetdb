@@ -6,6 +6,14 @@ from .models import MPart, Magnet, MSite, MRecord
 from .models import MaterialBase, Material, MaterialCreate, MaterialRead
 from .models import MPartMagnetLink, MagnetMSiteLink
 
+# TODO:
+# so far only Creation, Query 
+# add method to Read/Display data
+# add method to Update and Delete data
+
+# TODO:
+# material: use pint for setting properties with units
+
 def create_msite(session: Session, name: str, conffile: str , status: str):
     m1 = MSite(name=name, conffile=conffile, status=status)
     session.add(m1)
@@ -82,5 +90,28 @@ def get_mparts_type(session: Session, magnet_id: int, type: str):
     for part, link in results:
         selected.append(part)
     return selected
+
+def get_mpart_history(session: Session, mpart_id: id):
+    """
+    get list of magnets in which mpart is present
+    """
+    statement = select(Magnet, MPartMagnetLink).join(Magnet).where(MPartMagnetLink.mpart_id == mpart_id)
+    results = session.exec(statement)
+    selected = []
+    for magnet, link in results:
+        selected.append(magnet)
+    return selected
+
+def get_magnet_history(session: Session, msite_id: id):
+    """
+    get list of sites in which magnet is present
+    """
+    statement = select(MSite, MagnetMSiteLink).join(MSite).where(MagnetMSiteLink.msite_id == msite_id)
+    results = session.exec(statement)
+    selected = []
+    for msite, link in results:
+        selected.append(msite)
+    return selected
+
 
 

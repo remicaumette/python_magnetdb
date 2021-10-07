@@ -1,7 +1,9 @@
 from typing import List, Optional
 
-from fastapi import FastAPI
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
+
+# TODO:
+# make name unique
 
 class MaterialBase(SQLModel):
     """

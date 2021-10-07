@@ -10,16 +10,16 @@ from .models import MPartMagnetLink, MagnetMSiteLink
 from .crud import *
 import json
 
-def get_parts(session: Session, magnet_id: int):   
-    data = {}
-    mparts = get_mparts(session, magnet_id)
-    for part in mparts:
-        mpart = session.get(MPart, part.mpart_id)
-        print(mpart.dict())
-        material = session.get(Material, mpart.material_id)
-        mdata = material.dict()
-        #
-        # discard data from MaterialRef
+# def get_parts(session: Session, magnet_id: int):   
+#     data = {}
+#     mparts = get_mparts(session, magnet_id)
+#     for part in mparts:
+#         mpart = session.get(MPart, part.mpart_id)
+#         print(mpart.dict())
+#         material = session.get(Material, mpart.material_id)
+#         mdata = material.dict()
+#         #
+#         # discard data from MaterialRef
 
 def main():
     create_db_and_tables()
@@ -43,6 +43,7 @@ def main():
 
 # change site status:
 
+# TODO: create a clip.py
 
 if __name__ == "__main__":
     import argparse

@@ -43,14 +43,12 @@ def read_material(*, session: Session = Depends(get_session), material_id: int):
         raise HTTPException(status_code=404, detail="Material not found")
     return material
 
-"""
-# not working 
-@app.get("/materials/{name}", response_model=MaterialRead)
+# name shall be made unique
+@app.get("/materials/name/{name}", response_model=MaterialRead)
 def read_material_name(*, session: Session = Depends(get_session), name: str):
     statement = select(Material).where(Material.name == name)
-    materials = session.exec(statement).all()
+    materials = session.exec(statement).one()
     return materials
-"""
 
 @app.patch("/materials/{material_id}", response_model=MaterialRead)
 def update_material(*, session: Session = Depends(get_session), material_id: int, material: MaterialUpdate):
