@@ -1,11 +1,15 @@
-#from typing import TYPE_CHECKING, List, Optional
-
 from fastapi import FastAPI
-#from fastapi import Depends, FastAPI, HTTPException, Query
-# from sqlmodel import Session, select
+
+from fastapi.middleware.wsgi import WSGIMiddleware
+from flask import Flask, escape, request
+from . import flask_routers
+
+flask_app = Flask(__name__)
+flask_app.register_blueprint(flask_routers.urls_blueprint)
 
 from .routers import itemrouter
 
-
 app = FastAPI()
 app.include_router(itemrouter)
+
+app.mount("/v1", WSGIMiddleware(flask_app))

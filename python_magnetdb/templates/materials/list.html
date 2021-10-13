@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Materials from magnetdb</title>
+    </head>
+    
+    <body>
+        <ul id="materials">
+            {% for item in materials %}
+            <li><a href="material/{{item.id}}">{{item.name}}</a></li>
+            {% endfor %}    
+        </ul>
+    </body>
+</html>

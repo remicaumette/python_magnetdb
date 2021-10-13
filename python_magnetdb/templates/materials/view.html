@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Material Definition: {{material['name']}}.</title>
+</head>
+<body>
+    <h1>Material Definition: {{material['name']}}.</h1>
+    <ul id="material">
+    <table>
+        {% for key, value in material.items() %}
+        <tr>
+            <th>{{key}}</th>
+            <td>{{value}} SI</td>
+        </tr>
+    {% endfor %}
+    </table>
+    </ul>
+</body>
+</html>
