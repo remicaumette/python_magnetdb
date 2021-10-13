@@ -22,7 +22,7 @@ def get_session():
 
 itemrouter = APIRouter()
 
-@itemrouter.post("/materials/", response_model=MaterialRead)
+@itemrouter.post("/api/materials/", response_model=MaterialRead)
 def create_material(*, session: Session = Depends(get_session), material: MaterialCreate):
     db_material = Material.from_orm(material)
     session.add(db_material)
@@ -30,14 +30,14 @@ def create_material(*, session: Session = Depends(get_session), material: Materi
     session.refresh(db_material)
     return db_material
 
-@itemrouter.get("/materials/", response_model=List[MaterialRead])
+@itemrouter.get("/api/materials/", response_model=List[MaterialRead])
 def read_materials(*, session: Session = Depends(get_session), ):
     statement = select(Material)
     materials = session.exec(statement).all()
     return materials
 
 
-@itemrouter.get("/materials/{material_id}", response_model=MaterialBase)
+@itemrouter.get("/api/materials/{material_id}", response_model=MaterialBase)
 def read_material(*, session: Session = Depends(get_session), material_id: int):
     material = session.get(Material, material_id)
     if not material:
@@ -45,13 +45,13 @@ def read_material(*, session: Session = Depends(get_session), material_id: int):
     return material
 
 # name shall be made unique
-@itemrouter.get("/materials/name/{name}", response_model=MaterialRead)
+@itemrouter.get("/api/materials/name/{name}", response_model=MaterialRead)
 def read_material_name(*, session: Session = Depends(get_session), name: str):
     statement = select(Material).where(Material.name == name)
     materials = session.exec(statement).one()
     return materials
 
-@itemrouter.patch("/materials/{material_id}", response_model=MaterialRead)
+@itemrouter.patch("/api/materials/{material_id}", response_model=MaterialRead)
 def update_material(*, session: Session = Depends(get_session), material_id: int, material: MaterialUpdate):
     db_material = session.get(Material, material_id)
     if not db_material:
@@ -64,7 +64,7 @@ def update_material(*, session: Session = Depends(get_session), material_id: int
     session.refresh(db_material)
     return db_material
 
-@itemrouter.delete("/materials/{material_id}")
+@itemrouter.delete("/api/materials/{material_id}")
 def delete_material(*, session: Session = Depends(get_session), material_id: int):
     material = session.get(Material, material_id)
     if not material:
@@ -77,7 +77,7 @@ def delete_material(*, session: Session = Depends(get_session), material_id: int
 #
 ####################
 
-@itemrouter.post("/mparts/", response_model=MPartRead)
+@itemrouter.post("/api/mparts/", response_model=MPartRead)
 def create_mpart(*, session: Session = Depends(get_session), mpart: MPartCreate):
     db_mpart = MPart.from_orm(MPart)
     session.add(db_mpart)
@@ -85,7 +85,7 @@ def create_mpart(*, session: Session = Depends(get_session), mpart: MPartCreate)
     session.refresh(db_mpart)
     return db_mpart
 
-@itemrouter.get("/mparts/", response_model=List[MPartRead])
+@itemrouter.get("/api/mparts/", response_model=List[MPartRead])
 def read_mparts(
     *,
     session: Session = Depends(get_session),
@@ -95,14 +95,14 @@ def read_mparts(
     mparts = session.exec(select(MPart).offset(offset).limit(limit)).all()
     return mparts
 
-@itemrouter.get("/mparts/{mpart_id}", response_model=MPartReadWithMagnet)
+@itemrouter.get("/api/mparts/{mpart_id}", response_model=MPartReadWithMagnet)
 def read_mpart(*, session: Session = Depends(get_session), mpart_id: int):
     mpart = session.get(MPart, mpart_id)
     if not mpart:
         raise HTTPException(status_code=404, detail="MPart not found")
     return mpart
 
-@itemrouter.patch("/mparts/{mpart_id}", response_model=MPartRead)
+@itemrouter.patch("/api/mparts/{mpart_id}", response_model=MPartRead)
 def update_mpart(
     *, session: Session = Depends(get_session), mpart_id: int, mpart: MPartUpdate):
     db_mpart = session.get(MPart, mpart_id)
@@ -116,7 +116,7 @@ def update_mpart(
     session.refresh(db_mpart)
     return db_mpart
 
-@itemrouter.delete("/mparts/{mpart_id}")
+@itemrouter.delete("/api/mparts/{mpart_id}")
 def delete_mpart(*, session: Session = Depends(get_session), mpart_id: int):
     mpart = session.get(MPart, mpart_id)
     if not mpart:
@@ -129,7 +129,7 @@ def delete_mpart(*, session: Session = Depends(get_session), mpart_id: int):
 #
 ####################
 
-@itemrouter.post("/magnets/", response_model=MagnetRead)
+@itemrouter.post("/api/magnets/", response_model=MagnetRead)
 def create_magnet(*, session: Session = Depends(get_session), magnet: MagnetCreate):
     db_magnet = Magnet.from_orm(Magnet)
     session.add(db_magnet)
@@ -138,12 +138,12 @@ def create_magnet(*, session: Session = Depends(get_session), magnet: MagnetCrea
     return db_magnet
 
 
-@itemrouter.get("/magnets/", response_model=List[MagnetRead])
+@itemrouter.get("/api/magnets/", response_model=List[MagnetRead])
 def read_magnets(*, session: Session = Depends(get_session), ):
     magnets = session.exec(select(Magnet)).all()
     return magnets
 
-@itemrouter.get("/magnets/{magnet_id}", response_model=MagnetReadWithMSite)
+@itemrouter.get("/api/magnets/{magnet_id}", response_model=MagnetReadWithMSite)
 def read_magnet(*, session: Session = Depends(get_session), magnet_id: int):
     magnet = session.get(Magnet, magnet_id)
     if not magnet:
@@ -151,14 +151,14 @@ def read_magnet(*, session: Session = Depends(get_session), magnet_id: int):
     return magnet
 
 
-@itemrouter.get("/magnet/parts/{magnet_id}", response_model=List[MPartRead])
+@itemrouter.get("/api/magnet/parts/{magnet_id}", response_model=List[MPartRead])
 def read_magnet_parts(*, session: Session = Depends(get_session), magnet_id: int):
     mparts = crud.get_mparts(session, magnet_id)
     if not mparts:
         raise HTTPException(status_code=404, detail="MPart not found")
     return mparts
 
-@itemrouter.patch("/magnets/{magnet_id}", response_model=MagnetRead)
+@itemrouter.patch("/api/magnets/{magnet_id}", response_model=MagnetRead)
 def update_magnet(
     *, session: Session = Depends(get_session), magnet_id: int, magnet: MagnetUpdate):
     db_magnet = session.get(Magnet, magnet_id)
@@ -172,7 +172,7 @@ def update_magnet(
     session.refresh(db_magnet)
     return db_magnet
 
-@itemrouter.delete("/magnets/{magnet_id}")
+@itemrouter.delete("/api/magnets/{magnet_id}")
 def delete_magnet(*, session: Session = Depends(get_session), magnet_id: int):
 
     magnet = session.get(Magnet, magnet_id)
@@ -187,7 +187,7 @@ def delete_magnet(*, session: Session = Depends(get_session), magnet_id: int):
 ####################
 
 
-@itemrouter.post("/msites/", response_model=MSiteRead)
+@itemrouter.post("/api/msites/", response_model=MSiteRead)
 def create_msite(*, session: Session = Depends(get_session), msite: MSiteCreate):
     db_msite = MSite.from_orm(msite)
     session.add(db_msite)
@@ -196,7 +196,7 @@ def create_msite(*, session: Session = Depends(get_session), msite: MSiteCreate)
     return db_msite
 
 
-@itemrouter.get("/msites/", response_model=List[MSiteRead])
+@itemrouter.get("/api/msites/", response_model=List[MSiteRead])
 def read_msites(
     *,
     session: Session = Depends(get_session),
@@ -206,14 +206,14 @@ def read_msites(
     msites = session.exec(select(MSite).offset(offset).limit(limit)).all()
     return msites
 
-@itemrouter.get("/msites/{msite_id}", response_model=MSiteReadWithMagnets)
+@itemrouter.get("/api/msites/{msite_id}", response_model=MSiteReadWithMagnets)
 def read_msite(*, msite_id: int, session: Session = Depends(get_session)):
     msite = session.get(MSite, msite_id)
     if not msite:
         raise HTTPException(status_code=404, detail="MSite not found")
     return msite
 
-@itemrouter.patch("/msites/{msite_id}", response_model=MSiteRead)
+@itemrouter.patch("/api/msites/{msite_id}", response_model=MSiteRead)
 def update_msite(
     *,
     session: Session = Depends(get_session),
@@ -231,7 +231,7 @@ def update_msite(
     session.refresh(db_msite)
     return db_msite
 
-@itemrouter.delete("/msites/{msite_id}")
+@itemrouter.delete("/api/msites/{msite_id}")
 def delete_msite(*, session: Session = Depends(get_session), msite_id: int):
     msite = session.get(MSite, msite_id)
     if not msite:

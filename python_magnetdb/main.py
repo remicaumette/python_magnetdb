@@ -12,4 +12,4 @@ from .routers import itemrouter
 app = FastAPI()
 app.include_router(itemrouter)
 
-app.mount("/v1", WSGIMiddleware(flask_app))
+app.mount("/", WSGIMiddleware(flask_app))
