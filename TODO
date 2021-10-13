@@ -6,13 +6,12 @@ Material DB:
 - use python3-pint (or other):
 -- to store/get data in proper SI unit
 -- to display units in view
---to perform conversion 
+-- to perform conversion 
 
 SQLMODEL:
 
 * add method to create/read/update/destroy object in database.py or app.py
 - create check if existing object before adding
-
 
 
 Other Magnet python modules:
