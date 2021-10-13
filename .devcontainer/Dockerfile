@@ -41,6 +41,7 @@ RUN apt-get update \
     && apt-get -y install python3-numpy python3-scipy \
     && apt-get -y install python3-ht python3-pyclaw \
     && apt-get -y install python3-pip python-is-python3 sqlitebrowser \
+    && apt-get -y install python3-pint python3-flask \
     #\
     # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.\
     && groupadd --gid $USER_GID $USERNAME \

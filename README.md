@@ -27,7 +27,7 @@ python3 -m python_magnetdb.app
 Running the FastAPI Application:
 
 ```
-uvicorn main:app --app-dir $PWD/python_magnetdb/ --reload
+uvicorn python_magnetdb.main:app --reload
 ``` 
 
 To view the API interface
