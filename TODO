@@ -1,0 +1,29 @@
+Material DB:
+
+* how to deal with physical properties (including dimensions)
+- add a column for units?
+- define a standard to store data (SI for instance)
+- use python3-pint (or other):
+-- to store/get data in proper SI unit
+-- to display units in view
+--to perform conversion 
+
+SQLMODEL:
+
+* add method to create/read/update/destroy object in database.py or app.py
+- create check if existing object before adding
+
+
+
+Other Magnet python modules:
+
+* make data structure more consistant in each modules
+
+
+GUI: app or web app??
+
+* django/flask ?
+- as separate apps?
+- as global app
+-- see https://stackoverflow.com/questions/63726203/is-it-possible-to-use-fastapi-with-django
+-- see Using FastApi with Django
