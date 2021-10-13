@@ -20,7 +20,8 @@ urls_blueprint = Blueprint('urls', __name__,)
 
 @urls_blueprint.route('/')
 def index():
-    return 'urls index route'
+    #return f'Bienvenue dans MagnetDB'
+    return render_template('index.html')
     
 @urls_blueprint.route('/materials')
 def list():
@@ -34,39 +35,74 @@ def view(id: int):
     with Session(engine) as session:
         material = session.get(Material, id)
         data = material.dict()
-        print("blueprint:", data)
+        data.pop('id', None)
         return render_template('materials/view.html', material=data)
 
-    
-"""
-@flask_app.route("/")
-def flask_main():
-    name = request.args.get("name", "World")
-    return f"Hello, {escape(name)} from Flask!"
+@urls_blueprint.route('/magnets')
+def list_magnets():
+    with Session(engine) as session:
+        statement = select(Magnet)
+        magnets = session.exec(statement).all()
+    return render_template('magnets/list.html', magnets=magnets)
 
-@flask_app.route("/tutu")
-def flask_tutu():
-    return f"Tutu from Flask!"
+@urls_blueprint.route('/magnet/<int:id>')
+def view_magnets(id: int):
+    with Session(engine) as session:
+        magnet = session.get(Magnet, id)
+        data = magnet.dict()
+        data.pop('id', None)
+        data["MParts"] = []
+        for magnet in magnet.mparts:
+            data["MParts"].append(magnet.name)
+        return render_template('magnets/view.html', magnet=data)
 
-import pandas as pd
-@flask_app.route("/material", methods=['GET'])
-def read_materials(*, session: Session = Depends(get_session), ):
-    statement = select(Material)
-    materials = session.exec(statement).all()
-    return materials
-"""
+@urls_blueprint.route('/msites')
+def list_msites():
+    with Session(engine) as session:
+        statement = select(MSite)
+        msites = session.exec(statement).all()
+    return render_template('msites/list.html', msites=msites)
 
-"""
-import pandas as pd
-@flask_app.route("/material", methods=['GET'])
-def flask_material():
-    data_dic = {
-        'id': [100, 101, 102],
-        'color': ['red', 'blue', 'red']}
-    columns = ['id', 'color']
-    index = ['a', 'b', 'c']
+@urls_blueprint.route('/msite/<int:id>')
+def view_msites(id: int):
+    with Session(engine) as session:
+        msite = session.get(MSite, id)
+        data = msite.dict()
+        print("blueprint:", data)
+        data.pop('id', None)
+        data["Magnets"] = []
+        for magnet in msite.magnets:
+            data["Magnets"].append(magnet.name)
+        return render_template('msites/view.html', msite=data)
 
-    df = pd.DataFrame(data_dic, columns=columns, index=index)
-    table = df.to_html(index=False)
-    return render_template("at-leaderboard.html", table=table)
-"""
+@urls_blueprint.route('/mparts')
+def list_mparts():
+    with Session(engine) as session:
+        statement = select(MPart)
+        mparts = session.exec(statement).all()
+    return render_template('mparts/list.html', mparts=mparts)
+
+@urls_blueprint.route('/mpart/<int:id>')
+def view_mparts(id: int):
+    with Session(engine) as session:
+        mpart = session.get(MPart, id)
+        data = mpart.dict()
+        data.pop('id', None)
+        data['Material'] = session.get(Material, mpart.material_id).name
+        data.pop('material_id', None)
+        return render_template('mparts/view.html', mpart=data)
+
+@urls_blueprint.route('/mrecords')
+def list_mrecords():
+    with Session(engine) as session:
+        statement = select(MRecord)
+        mrecords = session.exec(statement).all()
+    return render_template('mrecords/list.html', mrecords=mrecords)
+
+@urls_blueprint.route('/mrecord/<int:id>')
+def view_mrecords(id: int):
+    with Session(engine) as session:
+        mrecord = session.get(MRecord, id)
+        data = mrecord.dict()
+        data.pop('id', None)
+        return render_template('mrecords/view.html', mrecord=data)

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>MRecord Definition: {{mrecord['name']}}.</title>
+</head>
+<body>
+    <h1>MRecord Definition: {{mrecord['name']}}.</h1>
+    <ul id="mrecord">
+    <table>
+        {% for key, value in mrecord.items() %}
+        <tr>
+            <th>{{key}}</th>
+            <td>{{value}}</td>
+        </tr>
+    {% endfor %}
+    </table>
+    </ul>
+</body>
+</html>

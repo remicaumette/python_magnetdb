@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>MSite Definition: {{msite['name']}}.</title>
+</head>
+<body>
+    <h1>MSite Definition: {{msite['name']}}.</h1>
+    <ul id="msite">
+    <table>
+        {% for key, value in msite.items() %}
+        <tr>
+            <th>{{key}}</th>
+            <td>{{value}}</td>
+        </tr>
+    {% endfor %}
+    </table>
+    </ul>
+</body>
+</html>

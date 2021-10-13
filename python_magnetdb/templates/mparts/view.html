@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>MPart Definition: {{mpart['name']}}.</title>
+</head>
+<body>
+    <h1>MPart Definition: {{mpart['name']}}.</h1>
+    <ul id="mpart">
+    <table>
+        {% for key, value in mpart.items() %}
+        <tr>
+            <th>{{key}}</th>
+            <td>{{value}}</td>
+        </tr>
+    {% endfor %}
+    </table>
+    </ul>
+</body>
+</html>

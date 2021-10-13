@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>MSites from magnetdb</title>
+    </head>
+    
+    <body>
+        <ul id="msites">
+            {% for item in msites %}
+            <li><a href="msite/{{item.id}}">{{item.name}}</a></li>
+            {% endfor %}    
+        </ul>
+    </body>
+</html>

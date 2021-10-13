@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>MParts from magnetdb</title>
+    </head>
+    
+    <body>
+        <ul id="mparts">
+            {% for item in mparts %}
+            <li><a href="mpart/{{item.id}}">{{item.name}}</a></li>
+            {% endfor %}    
+        </ul>
+    </body>
+</html>
