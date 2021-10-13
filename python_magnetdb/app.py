@@ -82,7 +82,7 @@ if __name__ == "__main__":
             create_mpart(session=session, name='H15101601', type='Helix', be='HL-34-001-A', geom='HL-31_H1.yaml', status='On', magnets=[Helices], material=H1)
             create_mpart(session=session, name='H15061703', type='Helix', be='HL-34-003-A', geom='HL-31_H2.yaml', status='On', magnets=[Helices], material=H2)
             create_mpart(session=session, name='H15061801', type='Helix', be='HL-34-005-A', geom='HL-31_H3.yaml', status='On', magnets=[Helices], material=H3)
-            create_mpart(session=session, name='H15101501', type='Helix', be='HL-34-007-A', geom='HL-31_H4.yaml', status='On', magnets=[Helices], material=H4)
+            create_mpart(session=session, name='H15100501', type='Helix', be='HL-34-007-A', geom='HL-31_H4.yaml', status='On', magnets=[Helices], material=H4)
             create_mpart(session=session, name="H15101501", type='Helix', be='HL-34-009-A', geom='HL-31_H5.yaml', status='On', magnets=[Helices], material=H5)
             create_mpart(session=session, name="H18060101", type='Helix', be='HL-34-011-A', geom='HL-31_H6.yaml', status='On', magnets=[Helices], material=H6)
             create_mpart(session=session, name="H18012501", type='Helix', be='HL-34-013-A', geom='HL-31_H7.yaml', status='On', magnets=[Helices], material=H7)
@@ -92,7 +92,7 @@ if __name__ == "__main__":
             create_mpart(session=session, name="H19012101", type='Helix', be='HL-34-021', geom='HL-31_H11.yaml', status='On', magnets=[Helices], material=H11)
             create_mpart(session=session, name="H19011601", type='Helix', be='HL-34-023', geom='HL-31_H12.yaml', status='On', magnets=[Helices], material=H12)
             create_mpart(session=session, name="H10061702", type='Helix', be='HR-21-125-A', geom='HL-31_H13.yaml', status='On', magnets=[Helices], material=H13)
-            create_mpart(session=session, name="H10061703", type='Helix', be='HR-21-127-A', geom='HL-31_H14.yaml', status='On', magnets=[Helices], material=H4)
+            create_mpart(session=session, name="H10061703", type='Helix', be='HR-21-127-A', geom='HL-31_H14.yaml', status='On', magnets=[Helices], material=H14)
 
             # Rings
             R1 = create_material(session=session, name="MA20072301", nuance="CuNiBe", Rpe=568e+6, ElectricalConductivity=0)
@@ -124,8 +124,15 @@ if __name__ == "__main__":
             L1 = create_material(session=session, name="MALINNER", nuance="Cu", Rpe=0, ElectricalConductivity=58.0e+6)
             L2 = create_material(session=session, name="MALOUTER", nuance="Cu", Rpe=0, ElectricalConductivity=58.0e+6)
             
-            m2 = create_msite(session=session, name="M20022001", conffile="MAGFILEM20022001b.conf", status="On")
+            m2 = create_msite(session=session, name="HM20022001", conffile="MAGFILEM20022001b.conf", status="On")
+            Helices = duplicate_magnet(session=session, iname="HL-34", oname="HM20022001")
             # meme chose que Helices de m1 sauf pour la derniere
+
+            # create new mpart
+            H14 = create_material(session=session, name="MA19022701", nuance="CuAg5.5", Rpe=500e+6, ElectricalConductivity=52.e+6)
+            create_mpart(session=session, name="H20020501", type='Helix', be='HR-21-127-A', geom='HL-31_H14.yaml', status='On', magnets=[], material=H4)
+            magnet_replace_mpart(session=session, name="HM20022001", impart="H10061703", ompart='H20020501')
+            magnet_add_msite(session=session, name="HM20022001", msite=m2)
             # add Bitters to m2
 
             m3 = create_msite(session=session, name="M21071901", conffile="MAGFILE2021.07.19.conf", status="On")
@@ -163,3 +170,11 @@ if __name__ == "__main__":
         
         out = open(magnet.name + "-data.json", "x")
         out.write(json.dumps(mdata, indent = 4))
+
+    with Session(engine) as session:
+        statement = select(Material)
+        materials = session.exec(statement).all()
+        for material in materials:
+            undef_set = check_material(session, material.id)
+            if undef_set:
+                print(material.name, ":", check_material(session, material.id))
