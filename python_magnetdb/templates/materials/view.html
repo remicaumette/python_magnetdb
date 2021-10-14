@@ -21,7 +21,7 @@
     <title>Material Definition: {{material['name']}}.</title>
 </head>
 <body>
-    <h1>Material Definition: {{material['name']}}.</h1>
+    <h1>Material Definition: {{material['name']}} id={{material_id}}.</h1>
     <ul id="material">
     <table>
         {% for key, value in material.items() %}
@@ -40,7 +40,7 @@
       </form>
     -->
 
-    <button type="button" onclick="window.location.href='{{ url_for( 'urls.submit' ) }}';">Update</button>
+    <button type="button" onclick="window.location.href='{{ url_for( 'urls.submit' , id=material_id ) }}';">Update</button>
     
 </body>
 </html>

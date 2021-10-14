@@ -59,16 +59,28 @@ def update():
         return render_template('materials/update.html', material=data)
     """
 
-@urls_blueprint.route('/submit', methods=['GET', 'POST'])
-def submit():
-    form = forms.MaterialForm(request.form)
-    if form.validate_on_submit():
-        print("Material update validated")
-        flash('Material has been updated')
-        return redirect(url_for('urls.index'))
-    else:
-        print("Material update not validated")
-    return render_template('submit.html', form=form)
+@urls_blueprint.route('/submit/<int:id>', methods=['GET', 'POST'])
+def submit(id: int):
+    with Session(engine) as session:
+        material = session.get(Material, id)
+        print("update: input", material)
+    
+        form = forms.MaterialForm(obj=material)
+        if form.validate_on_submit():
+            print("Material update validated")
+            flash('Material has been updated')
+
+            # shall get MaterialBaseForm from form
+            form.populate_obj(material)
+            print("update output:", material)
+            session.commit()
+            session.refresh(material)
+            return redirect(url_for('urls.index'))
+        else:
+            print("Material update not validated")
+            print("errors:", form.errors)
+        
+    return render_template('submit.html', form=form, id=id)
 
 @urls_blueprint.route('/magnets')
 def list_magnets():
