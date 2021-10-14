@@ -5,18 +5,25 @@
       <h2 class="title">Material Update</h2>
 
       <form method="POST" action="{{ url_for('urls.submit', id=id) }}">
-
+        <!-- {{ form.name(readonly=true) }} -->
         {{ form.csrf_token }}
         {% for field in form %}
-        {% if field.type == "FloatField" or field.type == "StringField" %}
+        {% if field.label.text == "Name" %}
         <fieldset class="form-field">
+            {{ field.label }}
+            {{ field(readonly=true) }}
+        </fieldset>
+        {% else %}
+            {% if field.type == "FloatField" or field.type == "StringField" %}
+            <fieldset class="form-field">
               {{ field.label }}
               {{ field }}
-        </fieldset>
+            </fieldset>
+            {% endif %}
         {% endif %}
         {% endfor %}
         <!-- <button type="button" onclick="window.location.href='{{ url_for( 'urls.index' ) }}';">Submit</button> -->
-        <input type="submit" value="Sign In">
+        <input type="submit" value="Submit">
       </form>
     </div>
 {% endblock %}

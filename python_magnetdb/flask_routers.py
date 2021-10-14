@@ -66,6 +66,7 @@ def submit(id: int):
         print("update: input", material)
     
         form = forms.MaterialForm(obj=material)
+        form.name(disabled=True)
         if form.validate_on_submit():
             print("Material update validated")
             flash('Material has been updated')
