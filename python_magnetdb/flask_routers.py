@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, List, Optional
 
 from flask import Blueprint
-from flask import Flask, escape, request, render_template
+from flask import Flask, flash, url_for, escape, request, redirect, render_template
 
 from sqlmodel import Session, select
 
@@ -15,8 +15,10 @@ from .models import MagnetReadWithMSite, MSiteReadWithMagnets
 from .models import MPartReadWithMagnet
 from . import crud
 
-urls_blueprint = Blueprint('urls', __name__,)
+from . import forms
 
+
+urls_blueprint = Blueprint('urls', __name__,)
 
 @urls_blueprint.route('/')
 def index():
@@ -35,8 +37,38 @@ def view(id: int):
     with Session(engine) as session:
         material = session.get(Material, id)
         data = material.dict()
-        data.pop('id', None)
-        return render_template('materials/view.html', material=data)
+        data.pop('id', None)        
+        
+        return render_template('materials/view.html', material=data, material_id=material.id)
+
+@urls_blueprint.route('/material/update', methods=["GET", "POST"])
+def update():
+    return f"Update Material"
+    """
+    print("update:", id)
+    with Session(engine) as session:
+        material = session.get(Material, id)
+        data = material.dict()
+        data.pop('id', None)        
+        
+        print(request.method)
+        if request.method == "POST":
+            req = request.form
+            return redirect(request.url)
+        
+        return render_template('materials/update.html', material=data)
+    """
+
+@urls_blueprint.route('/submit', methods=['GET', 'POST'])
+def submit():
+    form = forms.MaterialForm(request.form)
+    if form.validate_on_submit():
+        print("Material update validated")
+        flash('Material has been updated')
+        return redirect(url_for('urls.index'))
+    else:
+        print("Material update not validated")
+    return render_template('submit.html', form=form)
 
 @urls_blueprint.route('/magnets')
 def list_magnets():
@@ -82,7 +114,7 @@ def list_mparts():
         mparts = session.exec(statement).all()
     return render_template('mparts/list.html', mparts=mparts)
 
-@urls_blueprint.route('/mpart/<int:id>')
+@urls_blueprint.route('/mpart/<int:id>', methods=['GET', 'POST'])
 def view_mparts(id: int):
     with Session(engine) as session:
         mpart = session.get(MPart, id)

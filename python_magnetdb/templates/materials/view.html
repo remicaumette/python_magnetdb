@@ -32,5 +32,15 @@
     {% endfor %}
     </table>
     </ul>
+    
+    <!--
+      <form method="post" action="/">
+         <input type="submit" value="Update" name="Update"/>
+         <input type="submit" value="Delete" name="Delete" />
+      </form>
+    -->
+
+    <button type="button" onclick="window.location.href='{{ url_for( 'urls.submit' ) }}';">Update</button>
+    
 </body>
 </html>
