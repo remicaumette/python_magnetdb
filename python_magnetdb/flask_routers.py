@@ -22,9 +22,36 @@ urls_blueprint = Blueprint('urls', __name__,)
 
 @urls_blueprint.route('/')
 def index():
-    #return f'Bienvenue dans MagnetDB'
     return render_template('index.html')
+
+@urls_blueprint.route('/msites.html')
+def msites_menu():
+    return render_template('msites.html')
     
+@urls_blueprint.route('/magnets.html')
+def magnets_menu():
+    return render_template('magnets.html')
+
+@urls_blueprint.route('/mparts.html')
+def mparts_menu():
+    return render_template('mparts.html')
+    
+@urls_blueprint.route('/materials.html')
+def materials_menu():
+    return render_template('materials.html')
+    
+@urls_blueprint.route('/mrecords.html')
+def mrecords_menu():
+    return render_template('mrecords.html')
+
+@urls_blueprint.route('/api.html')
+def api_menu():
+    return render_template('api.html')
+
+@urls_blueprint.route('/dev.html')
+def dev_menu():
+    return render_template('dev.html')
+
 @urls_blueprint.route('/materials')
 def list():
     with Session(engine) as session:
@@ -63,12 +90,12 @@ def update():
 def submit(id: int):
     with Session(engine) as session:
         material = session.get(Material, id)
-        print("update: input", material)
+        # print("update: input", material)
     
         form = forms.MaterialForm(obj=material)
         form.name(disabled=True)
         if form.validate_on_submit():
-            print("Material update validated")
+            # print("Material update validated")
             flash('Material has been updated')
 
             # shall get MaterialBaseForm from form
@@ -78,8 +105,9 @@ def submit(id: int):
             session.refresh(material)
             return redirect(url_for('urls.index'))
         else:
-            print("Material update not validated")
-            print("errors:", form.errors)
+            # print("Material update not validated")
+            flash('Material has been not updated:\n%s\n' %str(form.errors))
+            #print("errors:", form.errors)
         
     return render_template('submit.html', form=form, id=id)
 

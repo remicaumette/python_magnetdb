@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="en" data-lt-installed="true"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <head>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style1.css') }}">
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style2.css') }}">
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style3.css') }}">
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style4.css') }}">
-  <script type="text/javascript" src="{{ url_for('static',filename='js/styles.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style1.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style2.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style3.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style4.css') }}">
+    <script type="text/javascript" src="{{ url_for('static',filename='js/styles.js') }}"></script>
 </head>
 <body>
 
@@ -17,7 +17,7 @@
   <div class="wrapper">
    <div id="menubar">
      <ul id="menulist">
-       <li class="menuitem" >Main</li>
+       <li class="menuitem" onclick="location.href='index.html';">Main</li>
        <li class="menuitem" onclick="location.href='msites.html';" >MSites</li>
        <li class="menuitem" onclick="location.href='magnets.html';" >Magnets</li>
        <li class="menuitem" onclick="location.href='mparts.html';" >MParts</li>
@@ -38,13 +38,18 @@
 </li>
        </ul>
     </div>
-    <div id="main">
-      <h1>Introduction</h1>
-      <p>This is a demonstrator for MagnetDB. You can list, view, update and create objects by selecting appropriate object in the menu.</p>
-      <p>An API also exists. To view the API docs and eventually test it, select the <a href="https://www.w3schools.com/css/demo_default.htm#">following link</a>.
-      </p>
+    <div id="magnet">
+      <h1>Magnets</h1>
+      <p>This is a demonstrator for Magnets</p>
        <h2>Workflows</h2>
-      <p>Note on workflows.</p>
+      <p>
+	<ul id="magnets_operations">
+	  <li><a href="magnets">List magnets</a></li>
+	  <li>Create a new magnet</li>
+	  <li>Duplicate a magnet</li>
+	  <li>Update a magnet</li>    
+      <li>Attach magnet to a part</li>
+      </p>
    </div>
     <div id="sidebar">
       <h3>Side-Bar</h3>

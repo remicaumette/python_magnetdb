@@ -17,7 +17,7 @@
   <div class="wrapper">
    <div id="menubar">
      <ul id="menulist">
-       <li class="menuitem" >Main</li>
+       <li class="menuitem" onclick="location.href='index.html';">Main</li>
        <li class="menuitem" onclick="location.href='msites.html';" >MSites</li>
        <li class="menuitem" onclick="location.href='magnets.html';" >Magnets</li>
        <li class="menuitem" onclick="location.href='mparts.html';" >MParts</li>
@@ -38,13 +38,18 @@
 </li>
        </ul>
     </div>
-    <div id="main">
-      <h1>Introduction</h1>
-      <p>This is a demonstrator for MagnetDB. You can list, view, update and create objects by selecting appropriate object in the menu.</p>
-      <p>An API also exists. To view the API docs and eventually test it, select the <a href="https://www.w3schools.com/css/demo_default.htm#">following link</a>.
-      </p>
+    <div id="mpart">
+      <h1>MParts</h1>
+      <p>This is a demonstrator for MParts</p>
        <h2>Workflows</h2>
-      <p>Note on workflows.</p>
+      <p>
+	<ul id="mparts_operations">
+	  <li><a href="mparts">List mparts</a></li>
+	  <li>Create a new part</li>
+	  <li>Duplicate a part</li>
+	  <li>Update a part</li>
+    <li>Attach part to a magnet</li>
+      </p>
    </div>
     <div id="sidebar">
       <h3>Side-Bar</h3>
