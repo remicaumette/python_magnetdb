@@ -66,7 +66,22 @@ def view(id: int):
         data = material.dict()
         data.pop('id', None)        
         
-        return render_template('materials/view.html', material=data, material_id=material.id)
+        unit = {
+            'Tref': "[C]",
+            'VolumicMass': "[kg/m3]",
+            'SpecificHeat': "[SI]",
+            'alpha': "[SI]",
+            'ElectricalConductivity': "[SI]",
+            'ThermalConductivity': "[SI]",
+            'MagnetPermeability': "[SI]",
+            'Young': "[SI]",
+            'Poisson': "[SI]",
+            'CoefDilatation': "[SI]",
+            'Rpe': "[SI]",
+            'Nuance': "",
+            'Furnisher': "",
+            'Ref':""}
+        return render_template('materials/view.html', material=data, material_id=material.id, unit=unit)
 
 @urls_blueprint.route('/material/update', methods=["GET", "POST"])
 def update():
