@@ -42,7 +42,11 @@ RUN apt-get update \
     && apt-get -y install python3-ht python3-pyclaw \
     && apt-get -y install python3-pip python-is-python3 sqlitebrowser \
     && apt-get -y install python3-pint \
-    && apt-get -y python3-flask python3-flaskext.wtf \
+    && apt-get -y install python3-flask python3-flaskext.wtf \
+    && python -m pip install sqlmodel
+    && python -m pip install fastapi "uvicorn[standard]"
+    && export PATH=$PATH:$HOME/.local/bin
+    #&& apt install curl
     #\
     # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.\
     && groupadd --gid $USER_GID $USERNAME \
