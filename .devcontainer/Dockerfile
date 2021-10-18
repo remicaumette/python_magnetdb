@@ -46,7 +46,7 @@ RUN apt-get update \
     && python -m pip install sqlmodel
     && python -m pip install fastapi "uvicorn[standard]"
     && export PATH=$PATH:$HOME/.local/bin
-    #&& apt install curl
+    && apt install curl
     #\
     # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.\
     && groupadd --gid $USER_GID $USERNAME \
