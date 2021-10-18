@@ -79,7 +79,7 @@ def delete_material(*, session: Session = Depends(get_session), material_id: int
 
 @itemrouter.post("/api/mparts/", response_model=MPartRead)
 def create_mpart(*, session: Session = Depends(get_session), mpart: MPartCreate):
-    db_mpart = MPart.from_orm(MPart)
+    db_mpart = MPart.from_orm(mpart)
     session.add(db_mpart)
     session.commit()
     session.refresh(db_mpart)
@@ -131,7 +131,7 @@ def delete_mpart(*, session: Session = Depends(get_session), mpart_id: int):
 
 @itemrouter.post("/api/magnets/", response_model=MagnetRead)
 def create_magnet(*, session: Session = Depends(get_session), magnet: MagnetCreate):
-    db_magnet = Magnet.from_orm(Magnet)
+    db_magnet = Magnet.from_orm(magnet)
     session.add(db_magnet)
     session.commit()
     session.refresh(db_magnet)
@@ -248,4 +248,6 @@ def on_startup():
 
 MSiteUpdate.update_forward_refs()
 MagnetUpdate.update_forward_refs()
+MPartUpdate.update_forward_refs()
+
 
