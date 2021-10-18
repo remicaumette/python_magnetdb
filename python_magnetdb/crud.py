@@ -122,9 +122,9 @@ def duplicate_site(session: Session, iname: str, oname: str ):
     """
     return site
 
-def create_mpart(session: Session, name: str, type: str, be: str, geom: str, status: str, magnets: List[Magnet], material: Material):
+def create_mpart(session: Session, name: str, mtype: str, be: str, geom: str, status: str, magnets: List[Magnet], material: Optional[Material]):
     # TODO get material_id from material name
-    part = MPart(name=name, type=type, be=be, geom=geom, status=status, material_id=material.id, magnets=magnets)
+    part = MPart(name=name, mtype=mtype, be=be, geom=geom, status=status, material_id=material.id, magnets=magnets)
     session.add(part)
     session.commit()
     session.refresh(part)
@@ -186,11 +186,11 @@ def get_mparts(session: Session, magnet_id: int):
         selected.append(part)
     return selected
 
-def get_mparts_type(session: Session, magnet_id: int, type: str):   
+def get_mparts_mtype(session: Session, magnet_id: int, mtype: str):   
     """
     get all parts from a magnet
     """
-    statement = select(MPart, MPartMagnetLink).join(MPart).where(MPartMagnetLink.magnet_id == magnet_id).where(MPart.type == type)
+    statement = select(MPart, MPartMagnetLink).join(MPart).where(MPartMagnetLink.magnet_id == magnet_id).where(MPart.mtype == mtype)
     results = session.exec(statement)
     selected = []
     for part, link in results:
