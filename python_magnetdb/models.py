@@ -1,6 +1,9 @@
 from typing import List, Optional
 
+#from sqlalchemy import String
+#from sqlalchemy.sql.schema import Column
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
+from sqlmodel import Column, String
 
 # TODO:
 # make name unique
@@ -10,7 +13,7 @@ class MaterialBase(SQLModel):
     Material Physical Properties in SI for isotropic material
     """
     
-    name: str
+    name: str = Field(sa_column=Column("name", String, unique=True))
     Tref: Optional[float] = 20
 
     VolumicMass: Optional[float] = 0
@@ -170,7 +173,7 @@ class MPartBase(SQLModel):
     """
     name: str
 
-    type: str
+    mtype: str
     be: str
     geom: str
     status: str
@@ -194,7 +197,7 @@ class MPartUpdate(SQLModel):
     """
     name: str
 
-    type: str
+    mtype: str
     be: str
     geom: str
     status: str
