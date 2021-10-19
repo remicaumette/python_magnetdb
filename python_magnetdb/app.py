@@ -43,6 +43,8 @@ def main():
 
 # change site status:
 
+IACS = 58.e+6
+
 # TODO: create a clip.py
 
 if __name__ == "__main__":
@@ -97,8 +99,8 @@ if __name__ == "__main__":
             # Rings
             R1 = create_material(session=session, name="MA20072301", nuance="CuNiBe", Rpe=568e+6, ElectricalConductivity=0)
             R2 = create_material(session=session, name="MA20072304", nuance="CuCrZr", Rpe=324e+6, ElectricalConductivity=0)
-            R3 = create_material(session=session, name="MA20072302", nuance="CuCrZr", Rpe=343e+6, ElectricalConductivity=80) # !! % IACS
-            R4 = create_material(session=session, name="MA20072303", nuance="CuCrZr", Rpe=357e+6, ElectricalConductivity=81.7) # !! % IACS
+            R3 = create_material(session=session, name="MA20072302", nuance="CuCrZr", Rpe=343e+6, ElectricalConductivity=80*IACS/100.) # !! % IACS
+            R4 = create_material(session=session, name="MA20072303", nuance="CuCrZr", Rpe=357e+6, ElectricalConductivity=81.7*IACS/100.) # !! % IACS
             R5 = create_material(session=session, name="MA21040901", nuance="CuCrZr", Rpe=0, ElectricalConductivity=0)
             R6 = create_material(session=session, name="MARING", nuance="CuCrZr", Rpe=0, ElectricalConductivity=0)
 
