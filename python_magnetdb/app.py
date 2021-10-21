@@ -134,7 +134,7 @@ if __name__ == "__main__":
             H14 = create_material(session=session, name="MA19022701", nuance="CuAg5.5", Rpe=500e+6, ElectricalConductivity=52.e+6)
             create_mpart(session=session, name="H20020501", mtype='Helix', be='HR-21-127-A', geom='HL-31_H14.yaml', status='On', magnets=[], material=H4)
             magnet_replace_mpart(session=session, name="HM20022001", impart="H10061703", ompart='H20020501')
-            magnet_add_msite(session=session, magnet=HM20022001, msite=m2)
+            magnet_add_msite(session=session, magnet=Helices, msite=m2)
             # add Bitters to m2
 
             m3 = create_msite(session=session, name="M21071901", conffile="MAGFILE2021.07.19.conf", status="On")
