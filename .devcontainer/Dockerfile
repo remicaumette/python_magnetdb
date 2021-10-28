@@ -47,6 +47,9 @@ RUN apt-get update \
     && python -m pip install fastapi "uvicorn[standard]" \
     && export PATH=$PATH:$HOME/.local/bin \
     && apt-get -y install curl \
+    && apt-get -y install python3-requests \
+    && pip install chevron \
+    #&& apt-get install python3-python-magnetgeo \
     #\
     # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.\
     && groupadd --gid $USER_GID $USERNAME \
