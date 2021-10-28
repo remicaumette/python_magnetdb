@@ -59,6 +59,8 @@ if __name__ == "__main__":
 
     if args.createsite:
         with Session(engine) as session:
+
+            '''
             m1 = create_msite(session=session, name="M19061901", conffile="MAGFILE2019.06.20.35T.conf", status="Off")
         
             Helices = create_magnet(session=session, name="HL-34", be="HL-34-001-A", geom="HL-31.yaml", status="On", msites=[m1])
@@ -124,19 +126,40 @@ if __name__ == "__main__":
             L1 = create_material(session=session, name="MALINNER", nuance="Cu", Rpe=0, ElectricalConductivity=58.0e+6)
             L2 = create_material(session=session, name="MALOUTER", nuance="Cu", Rpe=0, ElectricalConductivity=58.0e+6)
             
-            m2 = create_msite(session=session, name="HM20022001", conffile="MAGFILEM20022001b.conf", status="On")
-            Helices = duplicate_magnet(session=session, iname="HL-34", oname="HM20022001")
+            #m2 = create_msite(session=session, name="HM20022001", conffile="MAGFILEM20022001b.conf", status="On")
+            #Helices = duplicate_magnet(session=session, iname="HL-34", oname="HM20022001")
             # meme chose que Helices de m1 sauf pour la derniere
 
             # create new mpart
-            H14 = create_material(session=session, name="MA19022701", nuance="CuAg5.5", Rpe=500e+6, ElectricalConductivity=52.e+6)
-            create_mpart(session=session, name="H20020501", mtype='Helix', be='HR-21-127-A', geom='HL-31_H14.yaml', status='On', magnets=[], material=H4)
-            magnet_replace_mpart(session=session, name="HM20022001", impart="H10061703", ompart='H20020501')
-            magnet_add_msite(session=session, magnet=HM20022001, msite=m2)
+            #H14 = create_material(session=session, name="MA19022701", nuance="CuAg5.5", Rpe=500e+6, ElectricalConductivity=52.e+6)
+            #create_mpart(session=session, name="H20020501", mtype='Helix', be='HR-21-127-A', geom='HL-31_H14.yaml', status='On', magnets=[], material=H4)
+            #magnet_replace_mpart(session=session, name="HM20022001", impart="H10061703", ompart='H20020501')
+            #magnet_add_msite(session=session, magnet=HM20022001, msite=m2)
             # add Bitters to m2
 
-            m3 = create_msite(session=session, name="M21071901", conffile="MAGFILE2021.07.19.conf", status="On")
+            #m1 = create_msite(session=session, name="TestSite", conffile="MAGFILE2021.07.19.conf", status="On")
             # add Bitters to m2
+            '''
+
+            # Insert Two Helices
+            m1 = create_msite(session=session, name="M19061901", conffile="MAGFILE2019.06.20.35T.conf", status="Off")
+        
+            Helices = create_magnet(session=session, name="HL-34", be="HL-34-001-A", geom="test.yaml", status="On", msites=[m1])
+
+            MAT1 = create_material(session=session, name="MA15101601", nuance="Cu5Ag5,08",
+                                    Tref=293, VolumicMass=9e+3, SpecificHeat=380, alpha=3.3e-3, ElectricalConductivity=50.1e+6,
+                                    ThermalConductivity=360, MagnetPermeability=1, Young=127e+9, Poisson=0.335,  CoefDilatation=18e-6,
+                                    Rpe=481000000.0)
+
+            create_mpart(session=session, name='HL-31_H1', mtype='Helix', be='HL-34-001-A', geom='HL-31_H1.yaml', status='On', magnets=[Helices], material=MAT1)
+            create_mpart(session=session, name='HL-31_H2', mtype='Helix', be='HL-34-001-A', geom='HL-31_H2.yaml', status='On', magnets=[Helices], material=MAT1)
+            
+            MAT2 = create_material(session=session, name="MA15101603", nuance="Cu5Ag5,08",
+                                    Tref=293, VolumicMass=9e+3, SpecificHeat=380, alpha=3.3e-3, ElectricalConductivity=50.1e+6,
+                                    ThermalConductivity=360, MagnetPermeability=1, Young=127e+9, Poisson=0.335,  CoefDilatation=18e-6,
+                                    Rpe=481000000.0)
+            create_mpart(session=session, name="Ring-H1H2", mtype='Ring', be="HL-34-001-A", geom='Ring-H1H2.yaml', status='On', magnets=[Helices], material=MAT2)
+            
 
     if args.displaymagnet:
         with Session(engine) as session:
