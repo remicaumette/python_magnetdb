@@ -100,7 +100,7 @@ class MSiteBase(SQLModel):
     Magnet Site
     """
     
-    name: str
+    name: str = Field(sa_column=Column("name", String, unique=True))
     conffile: str
     status: str
 
@@ -132,7 +132,8 @@ class MagnetBase(SQLModel):
     """
     Magnet
     """
-    name: str
+    
+    name: str = Field(sa_column=Column("name", String, unique=True))
 
     be: str
     geom: str
@@ -171,7 +172,7 @@ class MPartBase(SQLModel):
     """
     Magnet Part
     """
-    name: str
+    name: str = Field(sa_column=Column("name", String, unique=True))
 
     mtype: str
     be: str
