@@ -130,11 +130,18 @@ def create_mpart(session: Session, name: str, mtype: str, be: str, geom: str, st
     session.refresh(part)
     return part
 
-def create_material(session: Session, name: str, ElectricalConductivity: float, Rpe: float, nuance: Optional[str] = None):
+def create_material(session: Session, name: str, ElectricalConductivity: float, Rpe: float,
+                    Tref: Optional[float], VolumicMass: Optional[float], SpecificHeat: Optional[float], alpha: Optional[float],
+                    ThermalConductivity: Optional[float], MagnetPermeability: Optional[float], Young: Optional[float],
+                    Poisson: Optional[float], CoefDilatation: Optional[float], nuance: Optional[str] = None):
     """
     TODO: use pint to get values in SI
     """
-    material = Material(name=name, ElectricalConductivity=ElectricalConductivity, Rpe=Rpe, nuance=nuance)
+    
+    material = Material(name=name, ElectricalConductivity=ElectricalConductivity, Rpe=Rpe, Tref=Tref, VolumicMass=VolumicMass,
+                    SpecificHeat=SpecificHeat, alpha=alpha, ThermalConductivity=ThermalConductivity, MagnetPermeability=MagnetPermeability,
+                    Young=Young, Poisson=Poisson, CoefDilatation=CoefDilatation, nuance=nuance)
+    
     session.add(material)
     session.commit()
     session.refresh(material)
