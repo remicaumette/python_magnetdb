@@ -24,6 +24,10 @@ urls_blueprint = Blueprint('urls', __name__,)
 def index():
     return render_template('index.html')
 
+@urls_blueprint.route('/index.html')
+def mainmenu():
+    return render_template('index.html')
+
 @urls_blueprint.route('/msites.html')
 def msites_menu():
     return render_template('msites.html')
