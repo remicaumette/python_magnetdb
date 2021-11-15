@@ -45,7 +45,9 @@ def main():
 
 # change site status:
 
-# TODO: create a cli.py
+IACS = 58.e+6
+
+# TODO: create a clip.py
 
 if __name__ == "__main__":
     import argparse
@@ -101,8 +103,8 @@ if __name__ == "__main__":
             # Rings
             R1 = create_material(session=session, name="MA20072301", nuance="CuNiBe", Rpe=568e+6, ElectricalConductivity=0)
             R2 = create_material(session=session, name="MA20072304", nuance="CuCrZr", Rpe=324e+6, ElectricalConductivity=0)
-            R3 = create_material(session=session, name="MA20072302", nuance="CuCrZr", Rpe=343e+6, ElectricalConductivity=80) # !! % IACS
-            R4 = create_material(session=session, name="MA20072303", nuance="CuCrZr", Rpe=357e+6, ElectricalConductivity=81.7) # !! % IACS
+            R3 = create_material(session=session, name="MA20072302", nuance="CuCrZr", Rpe=343e+6, ElectricalConductivity=80*IACS/100.) # !! % IACS
+            R4 = create_material(session=session, name="MA20072303", nuance="CuCrZr", Rpe=357e+6, ElectricalConductivity=81.7*IACS/100.) # !! % IACS
             R5 = create_material(session=session, name="MA21040901", nuance="CuCrZr", Rpe=0, ElectricalConductivity=0)
             R6 = create_material(session=session, name="MARING", nuance="CuCrZr", Rpe=0, ElectricalConductivity=0)
 
@@ -133,10 +135,10 @@ if __name__ == "__main__":
             # meme chose que Helices de m1 sauf pour la derniere
 
             # create new mpart
-            #H14 = create_material(session=session, name="MA19022701", nuance="CuAg5.5", Rpe=500e+6, ElectricalConductivity=52.e+6)
-            #create_mpart(session=session, name="H20020501", mtype='Helix', be='HR-21-127-A', geom='HL-31_H14.yaml', status='On', magnets=[], material=H4)
-            #magnet_replace_mpart(session=session, name="HM20022001", impart="H10061703", ompart='H20020501')
-            #magnet_add_msite(session=session, magnet=HM20022001, msite=m2)
+            H14 = create_material(session=session, name="MA19022701", nuance="CuAg5.5", Rpe=500e+6, ElectricalConductivity=52.e+6)
+            create_mpart(session=session, name="H20020501", mtype='Helix', be='HR-21-127-A', geom='HL-31_H14.yaml', status='On', magnets=[], material=H4)
+            magnet_replace_mpart(session=session, name="HM20022001", impart="H10061703", ompart='H20020501')
+            magnet_add_msite(session=session, magnet=Helices, msite=m2)
             # add Bitters to m2
 
             #m1 = create_msite(session=session, name="TestSite", conffile="MAGFILE2021.07.19.conf", status="On")
@@ -327,5 +329,6 @@ if __name__ == "__main__":
         materials = session.exec(statement).all()
         for material in materials:
             undef_set = check_material(session, material.id)
-            #if undef_set:
-            #    print(material.name, ":", check_material(session, material.id))
+            if undef_set:
+                print(material.name, ":", check_material(session, material.id))
+

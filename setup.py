@@ -10,7 +10,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ 'python_magnetgeo', 'sqlmodel' ]
+requirements = [ 'python_magnetgeo', 'sqlmodel', 'flask', 'flask-wtf' ]
 
 setup_requirements = ['pytest-runner', ]
 
@@ -41,13 +41,13 @@ setup(
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='python_magnetgeo',
-    name='python_magnetgeo',
-    packages=find_packages(include=['python_magnetgeo', 'python_magnetgeo.*']),
+    keywords='python_magnetdb',
+    name='python_magnetdb',
+    packages=find_packages(include=['python_magnetdb', 'python_magnetdb.*']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/Trophime/python_magnetgeo',
+    url='https://github.com/Trophime/python_magnetdb',
     version='0.1.0',
     zip_safe=False,
 )
