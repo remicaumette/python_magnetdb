@@ -158,6 +158,13 @@ def read_magnet_parts(*, session: Session = Depends(get_session), magnet_id: int
         raise HTTPException(status_code=404, detail="MPart not found")
     return mparts
 
+@itemrouter.get("/api/magnet/mdata/{name}")
+def read_magnet_data(*, session: Session = Depends(get_session), name: str):
+    mdata = crud.get_magnet_data(session, name)
+    if not mdata:
+        raise HTTPException(status_code=404, detail="cannot get magnet data for %s" % name)
+    return mdata
+
 @itemrouter.patch("/api/magnets/{magnet_id}", response_model=MagnetRead)
 def update_magnet(
     *, session: Session = Depends(get_session), magnet_id: int, magnet: MagnetUpdate):

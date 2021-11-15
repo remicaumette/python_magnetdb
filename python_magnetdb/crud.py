@@ -226,5 +226,33 @@ def get_magnet_history(session: Session, msite_id: id):
         selected.append(msite)
     return selected
 
+def get_magnet_data(session: Session, magnet_name: str ):
+    results = query_magnet(session, magnet_name)
+    if not results:
+        print("cannot find magnet %s" % magnet_name)
+        exit(1)
+    else:
+        for magnet in results:
+            print("magnet:", magnet)
+            # objects = get_mparts(session=session, magnet_id=magnet.id)
+            # for h in objects:
+            #    print(session.get(MPart, h.id).dict())
+                
+    mdata = magnet.dict()
+    for key in ['be', 'name', 'status', 'id']:
+        mdata.pop(key, None)
+    for mtype in ["Helix", "Ring", "Lead"]:
+        mdata[mtype]=[]
+        objects = get_mparts_mtype(session=session, magnet_id=magnet.id, mtype=mtype)
+        for h in objects:
+            # get material from material_id
+            material = session.get(Material, h.material_id)
+            material_data = material.dict()
+            # remove uneeded stuff
+            for key in ['furnisher', 'ref', 'name', 'id']:
+                material_data.pop(key, None)
+            mdata[mtype].append({"geo": h.geom, "material": material_data})
+
+    return mdata
 
 

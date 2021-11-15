@@ -148,9 +148,9 @@ if __name__ == "__main__":
             ####################
             # Test
             # Insert Two Helices
-            m1 = create_msite(session=session, name="M19061901", conffile="MAGFILE2019.06.20.35T.conf", status="Off")
+            m1 = create_msite(session=session, name="MTest", conffile="MAGFILE2019.06.20.35T.conf", status="Off")
         
-            Helices = create_magnet(session=session, name="HL-34", be="HL-34-001-A", geom="test.yaml", status="On", msites=[m1])
+            Helices = create_magnet(session=session, name="HL-test", be="HL-34-001-A", geom="test.yaml", status="On", msites=[m1])
 
             MAT_TEST1 = create_material(session=session, name="MAT_TEST1", nuance="Cu5Ag5,08",
                                     Tref=293, VolumicMass=9e+3, SpecificHeat=380, alpha=3.6e-3, ElectricalConductivity=50.1e+6,
@@ -172,10 +172,17 @@ if __name__ == "__main__":
             ####################
 
             # Definition of Site
-            m2 = create_msite(session=session, name="M10", conffile="unknow", status="On")
+            m2 = create_msite(session=session, name="M10", conffile="MAGFILE2019.06.20.35T.conf", status="On")
 
             # Definition of M19061901 magnet
             M19061901 = create_magnet(session=session, name="M19061901", be="unknow", geom="HL-31.yaml", status="On", msites=[m2])
+            Bitters = create_magnet(session=session, name="M9Bitters", be="B_XYZ", geom="Bitters.yaml", status="On", msites=[m2])
+            CuAg01 = create_material(session=session, name="B_CuAg01", nuance="CuAg01",
+                                    Tref=293, VolumicMass=9e+3, SpecificHeat=380, alpha=3.6e-3, ElectricalConductivity=50.1e+6,
+                                    ThermalConductivity=360, MagnetPermeability=1, Young=127e+9, Poisson=0.335,  CoefDilatation=18e-6,
+                                    Rpe=481000000.0)
+            create_mpart(session=session, name='M9Bi', mtype='Bitter', be='BI-03-002-A', geom='M9Bitters_Bi.yaml', status='On', magnets=[Bitters], material=CuAg01)
+            create_mpart(session=session, name='M9Be', mtype='Bitter', be='BE-03-002-A', geom='M9Bitters_Be.yaml', status='On', magnets=[Bitters], material=CuAg01)
 
             # TODO : SpecificHeat, Rpe, nan for sigma_isolant
 
@@ -293,36 +300,9 @@ if __name__ == "__main__":
 
     if args.displaymagnet:
         with Session(engine) as session:
-            # TODO get magnet_id by name
-            results = query_magnet(session, args.displaymagnet)
-            if not results:
-                print("cannot find magnet %s" % args.displaymagnet)
-                exit(1)
-            else:
-                for magnet in results:
-                    print("magnet:", magnet)
-                    # objects = get_mparts(session=session, magnet_id=magnet.id)
-                    # for h in objects:
-                    #    print(session.get(MPart, h.id).dict())
-                
-            mdata = magnet.dict()
-            for key in ['be', 'name', 'status', 'id']:
-                mdata.pop(key, None)
-            for mtype in ["Helix", "Ring", "Lead"]:
-                mdata[mtype]=[]
-                objects = get_mparts_mtype(session=session, magnet_id=magnet.id, mtype=mtype)
-                for h in objects:
-                    # get material from material_id
-                    material = session.get(Material, h.material_id)
-                    material_data = material.dict()
-                    # remove uneeded stuff
-                    for key in ['furnisher', 'ref', 'name', 'id']:
-                        material_data.pop(key, None)
-                    mdata[mtype].append({"geo": h.geom, "material": material_data})
-            # print(mdata)
-        
-        out = open(magnet.name + "-data.json", "x")
-        out.write(json.dumps(mdata, indent = 4))
+            mdata = get_magnet_data(session, args.displaymagnet)
+            out = open(args.displaymagnet + "-data.json", "x")
+            out.write(json.dumps(mdata, indent = 4))
 
     with Session(engine) as session:
         statement = select(Material)
