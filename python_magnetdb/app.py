@@ -56,6 +56,8 @@ if __name__ == "__main__":
     parser.add_argument("--createdb", help="createdb", action='store_true')
     parser.add_argument("--createsite", help="createsite", action='store_true')
     parser.add_argument("--displaymagnet", help="display magnet", type=str, default=None)
+    parser.add_argument("--displaymsite", help="display msite", type=str, default=None)
+    parser.add_argument("--checkmaterial", help="check material data", action='store_true')
     args = parser.parse_args()
 
     if args.createdb:
@@ -176,7 +178,7 @@ if __name__ == "__main__":
 
             # Definition of M19061901 magnet
             M19061901 = create_magnet(session=session, name="M19061901", be="unknow", geom="HL-31.yaml", status="On", msites=[m2])
-            Bitters = create_magnet(session=session, name="M9Bitters", be="B_XYZ", geom="Bitters.yaml", status="On", msites=[m2])
+            Bitters = create_magnet(session=session, name="M9Bitters", be="B_XYZ", geom="M9Bitters.yaml", status="On", msites=[m2])
             CuAg01 = create_material(session=session, name="B_CuAg01", nuance="CuAg01",
                                     Tref=293, VolumicMass=9e+3, SpecificHeat=380, alpha=3.6e-3, ElectricalConductivity=50.1e+6,
                                     ThermalConductivity=360, MagnetPermeability=1, Young=127e+9, Poisson=0.335,  CoefDilatation=18e-6,
@@ -301,14 +303,26 @@ if __name__ == "__main__":
     if args.displaymagnet:
         with Session(engine) as session:
             mdata = get_magnet_data(session, args.displaymagnet)
-            out = open(args.displaymagnet + "-data.json", "x")
-            out.write(json.dumps(mdata, indent = 4))
+            with open(args.displaymagnet + "-data.json", "x") as out:
+                out.write(json.dumps(mdata, indent = 4))
+            
+    if args.displaymsite:
+        import yaml
+        with Session(engine) as session:
+            mdata = get_msite_data(session, args.displaymsite)
+            with open(args.displaymsite + "-data.yaml", "x") as out:
+                out.write("!<MSite>\n")
+                yaml.dump(mdata, out)
+            
+            
 
-    with Session(engine) as session:
-        statement = select(Material)
-        materials = session.exec(statement).all()
-        for material in materials:
-            undef_set = check_material(session, material.id)
-            if undef_set:
-                print(material.name, ":", check_material(session, material.id))
+    if args.checkmaterial:
+        with Session(engine) as session:
+            statement = select(Material)
+            materials = session.exec(statement).all()
+            print("\n=== Checking material data consistency ===")
+            for material in materials:
+                undef_set = check_material(session, material.id)
+                if undef_set:
+                    print(material.name, ":", check_material(session, material.id))
 

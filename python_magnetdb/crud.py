@@ -152,16 +152,6 @@ def query_msite(session: Session, name: str):
     results = session.exec(statement)
     return results
 
-def check_material(session: Session, id: int):
-    """
-    Check if properties are defined for Material with id
-    """
-    material = session.get(Material, id)
-    data = material.dict()
-    defined =  material.dict(exclude_defaults=True)
-    undef_set = set(data.keys()) - set(defined.keys())
-    return undef_set
-    
 def query_material(session: Session, name: str):
     statement = select(Material).where(Material.name == name)
     results = session.exec(statement)
@@ -174,6 +164,11 @@ def query_mpart(session: Session, name: str):
 
 def query_magnet(session: Session, name: str):
     statement = select(Magnet).where(Magnet.name == name)
+    results = session.exec(statement)
+    return results
+
+def query_msite(session: Session, name: str):
+    statement = select(MSite).where(MSite.name == name)
     results = session.exec(statement)
     return results
 
@@ -227,6 +222,9 @@ def get_magnet_history(session: Session, msite_id: id):
     return selected
 
 def get_magnet_data(session: Session, magnet_name: str ):
+    """
+    Get magnet data  
+    """
     results = query_magnet(session, magnet_name)
     if not results:
         print("cannot find magnet %s" % magnet_name)
@@ -255,4 +253,64 @@ def get_magnet_data(session: Session, magnet_name: str ):
 
     return mdata
 
+def get_magnet_type(session: Session, magnet_id: int ):
+    """
+    Returns magnet type and the list of mparts attached to this magnet  
+    """
+    objects = get_mparts_mtype(session=session, magnet_id=magnet_id, mtype="Helix")
+    if len(objects):
+        return ("Insert", objects)
+    objects = get_mparts_mtype(session=session, magnet_id=magnet_id, mtype="Bitter")
+    if len(objects):
+        return ("Bitter", objects)
+    objects = get_mparts_mtype(session=session, magnet_id=magnet_id, mtype="Supra")
+    if len(objects):
+        return ("Supra", objects)
 
+def get_msite_data(session: Session, name: str ):
+    """
+    Generate data for MSite
+    """
+    results = query_msite(session, name)
+    if not results:
+        print("cannot find msite %s" % name)
+        exit(1)
+    else:
+        for msite in results:
+            print("msite:", msite)
+
+    mdata = msite.dict()
+
+    # hack to export magnets to dict
+    mdata['magnets'] = {}
+    for magnet in msite.magnets:
+        (mtype, objects) = get_magnet_type(session, magnet.id)
+        if mtype == "Bitter" or mtype == "Supra":
+            mdata['magnets'][magnet.name] = []
+            for mpart in objects:
+                # TODO remove extension from mpart.geom
+                mname = mpart.geom
+                yamlfile = mname.rsplit(".yaml", 1)[0]
+                mdata['magnets'][magnet.name].append(yamlfile)
+        else:
+            # TODO remove extension from mpart.geom
+            mname = magnet.geom
+            yamlfile = mname.rsplit(".yaml", 1)[0]
+            mdata['magnets'][magnet.name] = yamlfile
+            
+    for key in ['be', 'conffile', 'status', 'id']:
+        mdata.pop(key, None)
+
+    return mdata
+
+
+def check_material(session: Session, id: int):
+    """
+    Check if properties are defined for Material with id
+    """
+    material = session.get(Material, id)
+    data = material.dict()
+    defined =  material.dict(exclude_defaults=True)
+    undef_set = set(data.keys()) - set(defined.keys())
+    return undef_set
+    
