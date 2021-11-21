@@ -1,7 +1,5 @@
-pip
 sqlmodel
 fastapi
-flask
 wtforms
 sqlalchemy
 starlette-wtf
