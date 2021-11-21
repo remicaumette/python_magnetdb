@@ -28,25 +28,24 @@
             <li class="menuitem">
               <label for="style-select">Stylesheet:</label>
 
-              <select name="styles" id="style-select"
-              <option value="">-Select-</option>
-              <option value="0" onclick="reStyle(0)">Style0</option>
-              <option value="1" onclick="reStyle(1)">Style1</option>
-              <option value="2" onclick="reStyle(2)">Style2</option>
-              <option value="3" onclick="reStyle(3)">Style3</option>
-              <option value="no" onclick="noStyles()">No Style</option>
+              <select name="styles" id="style-select">
+                <option value="">-Select-</option>
+                <option value="0" onclick="reStyle(0)">Style0</option>
+                <option value="1" onclick="reStyle(1)">Style1</option>
+                <option value="2" onclick="reStyle(2)">Style2</option>
+                <option value="3" onclick="reStyle(3)">Style3</option>
+                <option value="no" onclick="noStyles()">No Style</option>
               </select>
             </li>
           </ul>
         </div>
         <div id="main">
-          <h1>Magnets from magnetdb</h1>
+          <h1>MParts from magnetdb</h1>
           <p>
-          <ul id="magnet_list">
-            {% for item in magnets %}
-              <li><a href="magnet/{{ item.id }}">{{ item.name }}</a></li>
+          <ul id="mpart_list">
+            {% for item in mparts %}
+              <li><a href="parts/{{ item.id }}">{{ item.name }}</a></li>
             {% endfor %}
-          </ul>
           </ul>
           </p>
         </div>

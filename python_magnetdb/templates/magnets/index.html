@@ -1,4 +1,3 @@
-<!doctype html>
 <html lang="en" data-lt-installed="true">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
@@ -23,7 +22,7 @@
             <li class="menuitem" onclick="location.href='msites.html';">MSites</li>
             <li class="menuitem" onclick="location.href='magnets.html';">Magnets</li>
             <li class="menuitem" onclick="location.href='mparts.html';">MParts</li>
-            <li class="menuitem" onclick="location.href='materials.html';">Materials</li>
+            <li class="menuitem">Materials</li>
             <li class="menuitem" onclick="location.href='mrecords.html';">MRecords</li>
             <li class="menuitem" onclick="location.href='api.html';">API docs</li>
             <li class="menuitem">
@@ -41,18 +40,15 @@
           </ul>
         </div>
         <div id="main">
-          <h1>MRecords</h1>
-          <p>This is a demonstrator for MRecords</p>
-          <h2>Workflows</h2>
+          <h1>Magnets from magnetdb</h1>
           <p>
-          <ul id="mrecords_operations">
-            <li><a href="records">List mrecords</a></li>
-            <li>List mrecords attached to a msite</li>
-            <li>List mrecords attached to a msite</li>
-            <li>List mrecords attached to a mpart</li>
-            <li>Add a new mrecord</li>
-            </p>
+          <ul id="magnet_list">
+            {% for item in magnets %}
+              <li><a href="magnets/{{ item.id }}">{{ item.name }}</a></li>
+            {% endfor %}
           </ul>
+          </ul>
+          </p>
         </div>
         <div id="sidebar">
           <h3>Side-Bar</h3>
@@ -68,3 +64,4 @@
 
   </body>
 </html>
+
