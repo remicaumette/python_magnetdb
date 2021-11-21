@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="en" data-lt-installed="true"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style1.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style2.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style3.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style4.css') }}">
-    <script type="text/javascript" src="{{ url_for('static',filename='js/styles.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='styles/style1.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='styles/style2.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='styles/style3.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='styles/style4.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', path='js/styles.js') }}"></script>
 </head>
 <body>
 
@@ -47,7 +47,7 @@
 	  <li><a href="magnets">List magnets</a></li>
 	  <li>Create a new magnet</li>
 	  <li>Duplicate a magnet</li>
-	  <li>Update a magnet</li>    
+	  <li>Update a magnet</li>
       <li>Attach magnet to a part</li>
       </p>
    </div>
@@ -55,9 +55,9 @@
       <h3>Side-Bar</h3>
       <p>This is a prototype designed with Flask and SQLModel.</p>
     </div>
-  </div>  
-  
-  
+  </div>
+
+
   <div id="bottom">
     Bottom note. Use github to report issues or pbs
   </div>

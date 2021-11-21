@@ -2,15 +2,16 @@
 from typing import List, Optional
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, FloatField, TextField, SubmitField
+from starlette_wtf import StarletteForm
+from wtforms import StringField, FloatField, SubmitField
 from wtforms.validators import DataRequired, Length
 
 
-class MaterialForm(FlaskForm):
+class MaterialForm(StarletteForm):
     """
     Material Physical Properties in SI for isotropic material
     """
-    
+
     name =  StringField('Name', validators=[DataRequired()])
     Tref = FloatField('Tref', validators=[DataRequired()])
 
@@ -36,6 +37,5 @@ class MaterialForm(FlaskForm):
     ##submit = SubmitField('Submit')
 
 # class MaterialForm(MaterialBaseForm):
-    
 
-    
+

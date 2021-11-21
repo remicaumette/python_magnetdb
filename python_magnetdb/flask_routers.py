@@ -7,7 +7,7 @@ from sqlmodel import Session, select
 
 from .database import create_db_and_tables, engine, get_session
 from .models import MPartBase, MPart, MPartCreate, MPartRead, MPartUpdate
-from .models import MagnetBase, Magnet, MagnetCreate, MagnetRead, MagnetUpdate 
+from .models import MagnetBase, Magnet, MagnetCreate, MagnetRead, MagnetUpdate
 from .models import MSiteBase, MSite, MSiteCreate, MSiteRead, MSiteUpdate
 from .models import MRecordBase, MRecord, MRecordCreate, MRecordRead, MRecordUpdate
 from .models import MaterialBase, Material, MaterialCreate, MaterialRead, MaterialUpdate
@@ -20,115 +20,19 @@ from . import forms
 
 urls_blueprint = Blueprint('urls', __name__,)
 
-@urls_blueprint.route('/')
-def index():
-    return render_template('index.html')
-
-@urls_blueprint.route('/index.html')
-def mainmenu():
-    return render_template('index.html')
-
 @urls_blueprint.route('/msites.html')
 def msites_menu():
     return render_template('msites.html')
-    
-@urls_blueprint.route('/magnets.html')
-def magnets_menu():
-    return render_template('magnets.html')
 
 @urls_blueprint.route('/mparts.html')
 def mparts_menu():
     return render_template('mparts.html')
-    
-@urls_blueprint.route('/materials.html')
-def materials_menu():
-    return render_template('materials.html')
-    
+
 @urls_blueprint.route('/mrecords.html')
 def mrecords_menu():
     return render_template('mrecords.html')
 
-@urls_blueprint.route('/api.html')
-def api_menu():
-    return render_template('api.html')
 
-@urls_blueprint.route('/dev.html')
-def dev_menu():
-    return render_template('dev.html')
-
-@urls_blueprint.route('/materials')
-def list():
-    with Session(engine) as session:
-        statement = select(Material)
-        materials = session.exec(statement).all()
-    return render_template('materials/list.html', materials=materials)
-
-@urls_blueprint.route('/material/<int:id>')
-def view(id: int):
-    with Session(engine) as session:
-        material = session.get(Material, id)
-        data = material.dict()
-        data.pop('id', None)        
-        
-        unit = {
-            'Tref': "[C]",
-            'VolumicMass': "[kg/m3]",
-            'SpecificHeat': "[SI]",
-            'alpha': "[SI]",
-            'ElectricalConductivity': "[SI]",
-            'ThermalConductivity': "[SI]",
-            'MagnetPermeability': "[SI]",
-            'Young': "[SI]",
-            'Poisson': "[SI]",
-            'CoefDilatation': "[SI]",
-            'Rpe': "[SI]",
-            'Nuance': "",
-            'Furnisher': "",
-            'Ref':""}
-        return render_template('materials/view.html', material=data, material_id=material.id, unit=unit)
-
-@urls_blueprint.route('/material/update', methods=["GET", "POST"])
-def update():
-    return f"Update Material"
-    """
-    print("update:", id)
-    with Session(engine) as session:
-        material = session.get(Material, id)
-        data = material.dict()
-        data.pop('id', None)        
-        
-        print(request.method)
-        if request.method == "POST":
-            req = request.form
-            return redirect(request.url)
-        
-        return render_template('materials/update.html', material=data)
-    """
-
-@urls_blueprint.route('/submit/<int:id>', methods=['GET', 'POST'])
-def submit(id: int):
-    with Session(engine) as session:
-        material = session.get(Material, id)
-        # print("update: input", material)
-    
-        form = forms.MaterialForm(obj=material)
-        form.name(disabled=True)
-        if form.validate_on_submit():
-            # print("Material update validated")
-            flash('Material has been updated')
-
-            # shall get MaterialBaseForm from form
-            form.populate_obj(material)
-            print("update output:", material)
-            session.commit()
-            session.refresh(material)
-            return redirect(url_for('urls.index'))
-        else:
-            # print("Material update not validated")
-            flash('Material has been not updated:\n%s\n' %str(form.errors))
-            #print("errors:", form.errors)
-        
-    return render_template('submit.html', form=form, id=id)
 
 @urls_blueprint.route('/magnets')
 def list_magnets():

@@ -1,3 +1,4 @@
+<!doctype html>
 <html lang="en" data-lt-installed="true">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
@@ -6,11 +7,9 @@
       <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='styles/style2.css') }}">
       <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='styles/style3.css') }}">
       <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='styles/style4.css') }}">
-      <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='styles/table.css') }}">
       <script type="text/javascript" src="{{ url_for('static', path='js/styles.js') }}"></script>
     </head>
   <body>
-
     <div class="container wrapper">
       <div id="top">
         <h1>Welcome to MagnetDb</h1>
@@ -23,37 +22,48 @@
             <li class="menuitem" onclick="location.href='../msites.html';">MSites</li>
             <li class="menuitem" onclick="location.href='../magnets.html';">Magnets</li>
             <li class="menuitem" onclick="location.href='../mparts.html';">MParts</li>
-            <li class="menuitem">Materials</li>
+            <li class="menuitem" onclick="location.href='../materials.html';">Materials</li>
             <li class="menuitem" onclick="location.href='../mrecords.html';">MRecords</li>
             <li class="menuitem" onclick="location.href='../api.html';">API docs</li>
             <li class="menuitem">
               <label for="style-select">Stylesheet:</label>
 
-              <select name="styles" id="style-select"
-              <option value="">-Select-</option>
-              <option value="0" onclick="reStyle(0)">Style0</option>
-              <option value="1" onclick="reStyle(1)">Style1</option>
-              <option value="2" onclick="reStyle(2)">Style2</option>
-              <option value="3" onclick="reStyle(3)">Style3</option>
-              <option value="no" onclick="noStyles()">No Style</option>
+              <select name="styles" id="style-select">
+                <option value="">-Select-</option>
+                <option value="0" onclick="reStyle(0)">Style0</option>
+                <option value="1" onclick="reStyle(1)">Style1</option>
+                <option value="2" onclick="reStyle(2)">Style2</option>
+                <option value="3" onclick="reStyle(3)">Style3</option>
+                <option value="no" onclick="noStyles()">No Style</option>
               </select>
             </li>
           </ul>
         </div>
         <div id="main">
-          <h1>Magnet Definition: {{ magnet['name'] }}.</h1>
-          <p>
-          <ul id="magnet_props">
-            <table>
-              {% for key, value in magnet.items() %}
-                <tr>
-                  <th>{{ key }}</th>
-                  <td>{{ value }}</td>
-                </tr>
-              {% endfor %}
-            </table>
-          </ul>
-          </p>
+            <div class="form-wrapper">
+              <h2 class="title">Material Update</h2>
+
+              <form method="POST" action="{{ url_for('update_material', id=id) }}">
+                <!-- {{ form.name(readonly=true) }} -->
+                {{ form.csrf_token }}
+                {% for field in form %}
+                  {% if field.label.text == "Name" %}
+                    <fieldset class="form-field">
+                      {{ field.label }}
+                      {{ field(readonly=true) }}
+                    </fieldset>
+                  {% else %}
+                    {% if field.type == "FloatField" or field.type == "StringField" %}
+                      <fieldset class="form-field">
+                        {{ field.label }}
+                        {{ field }}
+                      </fieldset>
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+                <input type="submit" value="Submit">
+              </form>
+            </div>
         </div>
         <div id="sidebar">
           <h3>Side-Bar</h3>
@@ -69,4 +79,3 @@
 
   </body>
 </html>
-
