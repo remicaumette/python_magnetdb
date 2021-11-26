@@ -1,0 +1,17 @@
+{% extends "layout/default.html" %}
+
+{% block content %}
+  <h1>MPart Definition: {{ mpart['name'] }}.</h1>
+  <p>
+  <ul id="magnet_props">
+    <table>
+      {% for key, value in mpart.items() %}
+        <tr>
+          <th>{{ key }}</th>
+          <td>{{ value }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </ul>
+  </p>
+{% endblock %}

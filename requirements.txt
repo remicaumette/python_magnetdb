@@ -1,0 +1,5 @@
+sqlmodel
+fastapi
+wtforms
+sqlalchemy
+starlette-wtf

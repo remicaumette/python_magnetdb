@@ -1,0 +1,14 @@
+{% extends "layout/default.html" %}
+
+{% block content %}
+  <h1>Magnets from magnetdb</h1>
+  <p>
+  <ul id="magnet_list">
+    {% for item in magnets %}
+      <li>
+        <a href="magnets/{{ item.id }}">{{ item.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+  </p>
+{% endblock %}

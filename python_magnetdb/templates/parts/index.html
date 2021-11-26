@@ -1,0 +1,12 @@
+{% extends "layout/default.html" %}
+
+{% block content %}
+  <h1>MParts from magnetdb</h1>
+  <p>
+  <ul id="mpart_list">
+    {% for item in mparts %}
+      <li><a href="parts/{{ item.id }}">{{ item.name }}</a></li>
+    {% endfor %}
+  </ul>
+  </p>
+{% endblock %}

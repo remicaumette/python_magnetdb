@@ -1,0 +1,12 @@
+{% extends "layout/default.html" %}
+
+{% block content %}
+  <h1>List of Materials</h1>
+  <p>
+  <ul id="material_list">
+    {% for item in materials %}
+      <li><a href="materials/{{ item.id }}">{{ item.name }}</a></li>
+    {% endfor %}
+  </ul>
+  </p>
+{% endblock %}

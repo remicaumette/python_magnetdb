@@ -1,0 +1,12 @@
+{% extends "layout/default.html" %}
+
+{% block content %}
+  <h1>MSites from magnetdb</h1>
+  <p>
+  <ul id="msite_list">
+    {% for item in msites %}
+      <li><a href="sites/{{ item.id }}">{{ item.name }}</a></li>
+    {% endfor %}
+  </ul>
+  </p>
+{% endblock %}
