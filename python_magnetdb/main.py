@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 
 from .config import static_files
 from .routes.api.magnets import router as api_magnets_router
@@ -24,5 +25,23 @@ app.include_router(parts_router)
 app.include_router(records_router)
 app.include_router(api_materials_router)
 app.include_router(api_parts_router)
-app.include_router(api_sites_router)
 app.include_router(api_magnets_router)
+app.include_router(api_sites_router)
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="MagnetDB API",
+        version="2.5.0",
+        description="OpenAPI schema for MagnetDB",
+        routes=app.routes,
+    )
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi

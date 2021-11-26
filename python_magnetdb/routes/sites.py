@@ -5,7 +5,8 @@ from sqlmodel import Session, select
 
 from ..config import templates
 from ..database import engine
-from ..models import MSite
+from ..models import Magnet, MagnetUpdate 
+from ..models import MSite, MSiteUpdate 
 
 router = APIRouter()
 
@@ -34,3 +35,5 @@ def show(request: Request, id: int):
         for magnet in msite.magnets:
             data["Magnets"].append(magnet.name)
         return templates.TemplateResponse('sites/show.html', {"request": request, "msite": data})
+        
+MSiteUpdate.update_forward_refs()

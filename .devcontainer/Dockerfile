@@ -48,7 +48,7 @@ RUN apt-get update \
     #&& apt-get install python3-python-magnetgeo python3-gmsh \
     && python -m pip install sqlmodel \
     && python -m pip install fastapi "uvicorn[standard]" \
-    && python -m pip install fastapi-pagination \
+    && python -m pip install fastapi-pagination starlette_wtf \
     && export PATH=$PATH:$HOME/.local/bin \
     #\
     # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.\
