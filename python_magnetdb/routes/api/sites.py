@@ -65,3 +65,12 @@ def delete_msite(*, session: Session = Depends(get_session), msite_id: int):
     session.delete(msite)
     session.commit()
     return {"ok": True}
+
+@router.get("/api/msite/mdata/{name}")
+def read_msite_data(*, session: Session = Depends(get_session), name: str):
+    mdata = crud.get_msite_data(session, name)
+    if not mdata:
+        raise HTTPException(status_code=404, detail="cannot get msite data for %s" % name)
+    return mdata
+
+

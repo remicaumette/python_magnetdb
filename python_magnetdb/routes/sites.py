@@ -7,6 +7,7 @@ from ..config import templates
 from ..database import engine
 from ..models import Magnet, MagnetUpdate 
 from ..models import MSite, MSiteUpdate 
+from ..forms import MSiteForm
 
 router = APIRouter()
 
@@ -34,6 +35,35 @@ def show(request: Request, id: int):
         data["Magnets"] = []
         for magnet in msite.magnets:
             data["Magnets"].append(magnet.name)
-        return templates.TemplateResponse('sites/show.html', {"request": request, "msite": data})
+        return templates.TemplateResponse('sites/show.html', {"request": request, "msite": data, "msite_id": id})
+
+@router.get("/sites/{id}/edit", response_class=HTMLResponse, name='edit_site')
+async def edit(request: Request, id: int):
+    with Session(engine) as session:
+        msite = session.get(MSite, id)
+        print("sites/edit:", msite)
+        form = MSiteForm(obj=msite, request=request)
+        return templates.TemplateResponse('sites/edit.html', {
+            "id": id,
+            "request": request,
+            "form": form,
+        })
+@router.post("/sites/{id}/edit", response_class=HTMLResponse, name='update_site')
+async def update(request: Request, id: int):
+    with Session(engine) as session:
+        msite = session.get(MSite, id)
+        form = await MSiteForm.from_formdata(request)
+        if form.validate_on_submit():
+            form.populate_obj(msite)
+            session.commit()
+            session.refresh(msite)
+            return RedirectResponse(router.url_path_for('site', id=id), status_code=303)
+        else:
+            return templates.TemplateResponse('sites/edit.html', {
+                "id": id,
+                "status": MStatus,
+                "request": request,
+                "form": form,
+            })
         
 MSiteUpdate.update_forward_refs()

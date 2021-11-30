@@ -7,6 +7,8 @@ from ...database import get_session
 from ...models import MPartRead
 from ...models import Magnet, MagnetCreate, MagnetRead, MagnetUpdate
 from ...models import MagnetReadWithMSite
+from ...models import MPart, MPartUpdate
+from ...models import MSite, MSiteUpdate 
 
 router = APIRouter()
 
@@ -73,3 +75,14 @@ def delete_magnet(*, session: Session = Depends(get_session), magnet_id: int):
     session.delete(magnet)
     session.commit()
     return {"ok": True}
+
+@router.get("/api/magnet/mdata/{name}")
+def read_magnet_data(*, session: Session = Depends(get_session), name: str):
+    mdata = crud.get_magnet_data(session, name)
+    if not mdata:
+        raise HTTPException(status_code=404, detail="cannot get magnet data for %s" % name)
+    return mdata
+
+MSiteUpdate.update_forward_refs()
+MagnetUpdate.update_forward_refs()
+MPartUpdate.update_forward_refs()

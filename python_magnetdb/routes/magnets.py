@@ -1,4 +1,4 @@
-from fastapi import Request
+from fastapi import Request, Depends, HTTPException
 from fastapi.routing import APIRouter
 from fastapi.responses import HTMLResponse
 from sqlmodel import Session, select
@@ -8,6 +8,7 @@ from ..database import engine
 from ..models import Magnet, MagnetUpdate 
 from ..models import MPart, MPartUpdate
 from ..models import MSite, MSiteUpdate 
+from ..forms import MagnetForm
 
 router = APIRouter()
 
@@ -34,7 +35,36 @@ def show(request: Request, id: int):
         data["MParts"] = []
         for magnet in magnet.mparts:
             data["MParts"].append(magnet.name)
-        return templates.TemplateResponse('magnets/show.html', {"request": request, "magnet": data})
+        return templates.TemplateResponse('magnets/show.html', {"request": request, "magnet": data, "magnet_id": id})
+
+@router.get("/magnets/{id}/edit", response_class=HTMLResponse, name='edit_magnet')
+async def edit(request: Request, id: int):
+    with Session(engine) as session:
+        magnet = session.get(Magnet, id)
+        print("magnets/edit:", magnet)
+        form = MagnetForm(obj=magnet, request=request)
+        return templates.TemplateResponse('magnets/edit.html', {
+            "id": id,
+            "request": request,
+            "form": form,
+        })
+@router.post("/magnets/{id}/edit", response_class=HTMLResponse, name='update_magnet')
+async def update(request: Request, id: int):
+    with Session(engine) as session:
+        magnet = session.get(Magnet, id)
+        form = await MagnetForm.from_formdata(request)
+        if form.validate_on_submit():
+            form.populate_obj(magnet)
+            session.commit()
+            session.refresh(magnet)
+            return RedirectResponse(router.url_path_for('magnet', id=id), status_code=303)
+        else:
+            return templates.TemplateResponse('magnets/edit.html', {
+                "id": id,
+                "status": MStatus,
+                "request": request,
+                "form": form,
+            })
 
 MSiteUpdate.update_forward_refs()
 MagnetUpdate.update_forward_refs()
