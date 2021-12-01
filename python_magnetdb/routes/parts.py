@@ -35,20 +35,17 @@ def index(request: Request):
 def show(request: Request, id: int):
     with Session(engine) as session:
         mpart = session.get(MPart, id)
-        print("parts/show:", mpart)
         data = mpart.dict()
         data.pop('id', None)
         data['Material'] = session.get(Material, mpart.material_id).name
-        data.pop('material_id', None)
+        # data.pop('material_id', None)
         return templates.TemplateResponse('parts/show.html', {"request": request, "mpart": data, "mpart_id": id})
 
 @router.get("/parts/{id}/edit", response_class=HTMLResponse, name='edit_part')
 async def edit(request: Request, id: int):
     with Session(engine) as session:
         mpart = session.get(MPart, id)
-        print("parts/edit:", mpart)
         form = MPartForm(obj=mpart, request=request)
-        print("parts/edit: form")
         return templates.TemplateResponse('parts/edit.html', {
             "id": id,
             "request": request,
@@ -59,9 +56,7 @@ async def edit(request: Request, id: int):
 async def update(request: Request, id: int):
     with Session(engine) as session:
         mpart = session.get(MPart, id)
-        print("parts/update:", mpart)
         form = await MPartForm.from_formdata(request)
-        print("parts/update form:", form)
         if form.validate_on_submit():
             form.populate_obj(mpart)
             session.commit()

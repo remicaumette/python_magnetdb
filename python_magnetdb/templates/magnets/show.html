@@ -8,7 +8,16 @@
       {% for key, value in magnet.items() %}
         <tr>
           <th>{{ key }}</th>
+          {% if key != 'MParts' %}
           <td>{{ value }}</td>
+          {% else %}
+          {% for part in value %}
+          <tr>
+            <th></th>
+            <td><a href="/parts/{{part.id}}">{{ part.name }}</a></td>
+          </tr>
+          {% endfor %}
+          {% endif %}
         </tr>
       {% endfor %}
     </table>

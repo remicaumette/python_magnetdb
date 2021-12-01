@@ -43,8 +43,8 @@ def show(request: Request, id: int):
         data = magnet.dict()
         data.pop('id', None)
         data["MParts"] = []
-        for magnet in magnet.mparts:
-            data["MParts"].append(magnet.name)
+        for part in magnet.mparts:
+            data["MParts"].append({"name": part.name, "id": part.id})
         return templates.TemplateResponse('magnets/show.html', {"request": request, "magnet": data, "magnet_id": id})
 
 @router.get("/magnets/{id}/edit", response_class=HTMLResponse, name='edit_magnet')

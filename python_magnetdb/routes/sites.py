@@ -42,7 +42,7 @@ def show(request: Request, id: int):
         data.pop('id', None)
         data["Magnets"] = []
         for magnet in msite.magnets:
-            data["Magnets"].append(magnet.name)
+            data["Magnets"].append({"name": magnet.name, "id": magnet.id})
         return templates.TemplateResponse('sites/show.html', {"request": request, "msite": data, "msite_id": id})
 
 @router.get("/sites/{id}/edit", response_class=HTMLResponse, name='edit_site')

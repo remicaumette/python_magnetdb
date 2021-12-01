@@ -8,7 +8,16 @@
       {% for key, value in msite.items() %}
         <tr>
           <th>{{ key }}</th>
+          {% if key != 'Magnets' %}
           <td>{{ value }}</td>
+          {% else %}
+          {% for part in value %}
+          <tr>
+            <th></th>
+            <td><a href="/magnets/{{part.id}}">{{ part.name }}</a></td>
+          </tr>
+          {% endfor %}
+          {% endif %}
         </tr>
       {% endfor %}
     </table>

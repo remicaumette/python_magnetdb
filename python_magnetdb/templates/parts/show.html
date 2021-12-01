@@ -6,10 +6,16 @@
   <ul id="magnet_props">
     <table>
       {% for key, value in mpart.items() %}
+        {% if key != 'material_id' %}
         <tr>
           <th>{{ key }}</th>
+          {% if key == "Material" %}
+          <td><a href="/materials/{{mpart.material_id}}">{{ value }}</a></td>
+          {% else %}
           <td>{{ value }}</td>
+          {% endif %}
         </tr>
+        {% endif %}
       {% endfor %}
     </table>
   </ul>
