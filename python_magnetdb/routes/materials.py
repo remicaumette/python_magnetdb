@@ -8,6 +8,8 @@ from ..database import engine
 from ..models import Material
 from ..forms import MaterialForm
 
+from ..units import units
+
 router = APIRouter()
 
 
@@ -21,9 +23,14 @@ def index(request: Request):
     with Session(engine) as session:
         statement = select(Material)
         materials = session.exec(statement).all()
+        desc = {}
+        for mat in materials:
+            desc[mat.id] = {"Nuance": mat.nuance, "Rpe": str(mat.Rpe) + " " + units['Rpe']}
+
     return templates.TemplateResponse('materials/index.html', {
         "request": request,
-        "materials": materials
+        "materials": materials,
+        "descriptions": desc
     })
 
 
@@ -33,26 +40,10 @@ def show(request: Request, id: int):
         material = session.get(Material, id)
         data = material.dict()
         data.pop('id', None)
-        unit = {
-            'Tref': "[C]",
-            'VolumicMass': "[kg/m3]",
-            'SpecificHeat': "[SI]",
-            'alpha': "[SI]",
-            'ElectricalConductivity': "[SI]",
-            'ThermalConductivity': "[SI]",
-            'MagnetPermeability': "[SI]",
-            'Young': "[SI]",
-            'Poisson': "[SI]",
-            'CoefDilatation': "[SI]",
-            'Rpe': "[SI]",
-            'Nuance': "",
-            'Furnisher': "",
-            'Ref': ""
-        }
         return templates.TemplateResponse('materials/show.html', {
             "request": request,
             "material": data,
-            "unit": unit,
+            "unit": units,
             "material_id": id,
         })
 

@@ -1,6 +1,6 @@
 from fastapi import Request, Depends, HTTPException
 from fastapi.routing import APIRouter
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlmodel import Session, select
 
 from ..config import templates
@@ -8,7 +8,9 @@ from ..database import engine
 from ..models import Magnet, MagnetUpdate 
 from ..models import MPart, MPartUpdate
 from ..models import MSite, MSiteUpdate 
+from ..models import MStatus 
 from ..forms import MagnetForm
+from ..crud import get_magnet_type
 
 router = APIRouter()
 
@@ -23,7 +25,15 @@ def index(request: Request):
     with Session(engine) as session:
         statement = select(Magnet)
         magnets = session.exec(statement).all()
-    return templates.TemplateResponse('magnets/index.html', {"request": request, "magnets": magnets})
+        desc = {}
+        for part in magnets:
+            result = get_magnet_type(session, part.id)
+            desc[part.id] = {"Type": result[0], "Status:": part.status}
+    return templates.TemplateResponse('magnets/index.html', {
+        "request": request, 
+        "magnets": magnets,
+        "descriptions": desc
+        })
 
 
 @router.get("/magnets/{id}", response_class=HTMLResponse)

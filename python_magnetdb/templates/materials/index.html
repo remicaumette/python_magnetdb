@@ -3,10 +3,22 @@
 {% block content %}
   <h1>List of Materials</h1>
   <p>
-  <ul id="material_list">
-    {% for item in materials %}
-      <li><a href="materials/{{ item.id }}">{{ item.name }}</a></li>
+  <ul id="magnet_props">
+    <table>
+      <tr>
+        <th></th>
+        <td><b>Nuance</b></td>
+        <td><b>Rpe</b></td>
+      </tr>
+      {% for item in materials %}
+      <tr>
+        <th><a href="materials/{{ item.id }}">{{ item.name }}</a></th>
+        {% for key, value in descriptions[item.id].items() %}
+           <td>{{value}}</td>
+        {% endfor %}
+      </tr>
     {% endfor %}
+    </table>
   </ul>
   </p>
 {% endblock %}

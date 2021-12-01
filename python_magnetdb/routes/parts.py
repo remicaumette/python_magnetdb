@@ -1,6 +1,6 @@
 from fastapi import Request
 from fastapi.routing import APIRouter
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlmodel import Session, select
 
 from ..config import templates
@@ -21,7 +21,14 @@ def index(request: Request):
     with Session(engine) as session:
         statement = select(MPart)
         mparts = session.exec(statement).all()
-    return templates.TemplateResponse('parts/index.html', {"request": request, "mparts": mparts})
+        desc = {}
+        for part in mparts:
+            desc[part.id] = {"Type": part.mtype, "Status:": part.status}
+    return templates.TemplateResponse('parts/index.html', {
+        "request": request, 
+        "mparts": mparts,
+        "descriptions": desc
+        })
 
 
 @router.get("/parts/{id}", response_class=HTMLResponse)

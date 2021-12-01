@@ -6,10 +6,12 @@
   <ul id="material_props">
     <table>
       {% for key, value in material.items() %}
-        <tr>
+      {% if key != "name" %}
+      <tr>
           <th>{{ key }} {{ unit[key] }}</th>
           <td>{{ value }}</td>
         </tr>
+      {% endif %}
       {% endfor %}
     </table>
   </ul>

@@ -7,6 +7,7 @@ from wtforms import StringField, FloatField, SelectField, SubmitField
 from wtforms.validators import DataRequired, Length
 
 from .models import MStatus
+from .units import units
 
 class MaterialForm(StarletteForm):
     """
@@ -14,20 +15,20 @@ class MaterialForm(StarletteForm):
     """
 
     name =  StringField('Name', validators=[DataRequired()])
-    Tref = FloatField('Tref', validators=[DataRequired()])
+    Tref = FloatField('Tref ' + units['Tref'], validators=[DataRequired()])
 
-    VolumicMass = FloatField('VolumicMass', validators=[DataRequired()])
-    SpecificHeat = FloatField('SpecificHeat', validators=[DataRequired()])
+    VolumicMass = FloatField('VolumicMass ' + units['VolumicMass'], validators=[DataRequired()])
+    SpecificHeat = FloatField('SpecificHeat ' + units['SpecificHeat'], validators=[DataRequired()])
 
-    alpha = FloatField('alpha', validators=[DataRequired()])
-    ElectricalConductivity = FloatField('ElectricalConductivity', validators=[DataRequired()])
-    ThermalConductivity = FloatField('ThermalConductivity', validators=[DataRequired()])
+    alpha = FloatField('alpha ' + units['alpha'], validators=[DataRequired()])
+    ElectricalConductivity = FloatField('ElectricalConductivity ' + units['ElectricalConductivity'], validators=[DataRequired()])
+    ThermalConductivity = FloatField('ThermalConductivity ' + units['ThermalConductivity'], validators=[DataRequired()])
     MagnetPermeability = FloatField('MagnetPermeability', validators=[DataRequired()])
 
-    Young = FloatField('Young', validators=[DataRequired()])
+    Young = FloatField('Young ' + units['Young'], validators=[DataRequired()])
     Poisson = FloatField('Poisson', validators=[DataRequired()])
-    CoefDilatation = FloatField('CoefDilatation', validators=[DataRequired()])
-    Rpe = FloatField('Rpe', validators=[DataRequired()])
+    CoefDilatation = FloatField('CoefDilatation ' + units['CoefDilatation'], validators=[DataRequired()])
+    Rpe = FloatField('Rpe ' + units['Rpe'], validators=[DataRequired()])
 
     nuance = StringField('Nuance', validators=[DataRequired()])
     furnisher = StringField('Furnisher', validators=[DataRequired()])

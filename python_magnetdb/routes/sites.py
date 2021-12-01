@@ -1,5 +1,5 @@
 from fastapi import Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.routing import APIRouter
 from sqlmodel import Session, select
 
@@ -7,6 +7,7 @@ from ..config import templates
 from ..database import engine
 from ..models import Magnet, MagnetUpdate 
 from ..models import MSite, MSiteUpdate 
+from ..models import MStatus
 from ..forms import MSiteForm
 
 router = APIRouter()
@@ -22,7 +23,14 @@ def index(request: Request):
     with Session(engine) as session:
         statement = select(MSite)
         msites = session.exec(statement).all()
-    return templates.TemplateResponse('sites/index.html', {"request": request, "msites": msites})
+        desc = {}
+        for site in msites:
+           desc[site.id] = {"Status:": site.status} 
+    return templates.TemplateResponse('sites/index.html', {
+        "request": request, 
+        "msites": msites,
+        "descriptions": desc
+        })
 
 
 @router.get("/sites/{id}", response_class=HTMLResponse)

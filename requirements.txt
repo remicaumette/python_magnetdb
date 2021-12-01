@@ -3,3 +3,4 @@ fastapi
 wtforms
 sqlalchemy
 starlette-wtf
+pint
