@@ -7,6 +7,8 @@ from .models import MaterialBase, Material, MaterialCreate, MaterialRead
 from .models import MPartMagnetLink, MagnetMSiteLink
 from .models import MStatus
 
+from .queries import query_mpart, query_magnet, query_msite
+
 # TODO:
 # so far only Creation, Query 
 # add method to Read/Display data
@@ -34,94 +36,6 @@ def create_magnet(session: Session, name: str, be: str, geom: str, status: MStat
     session.refresh(magnet)
     return magnet
 
-def duplicate_magnet(session: Session, iname: str, oname: str ):
-    msites : List[MSite] = []
-    results = query_magnet(session, iname)
-    for imagnet in results:
-        print(imagnet)
-        mparts = get_mparts(session, imagnet.id)
-
-        magnet = Magnet(name=oname, be=imagnet.be, geom=imagnet.geom, status=imagnet.status, msites=msites)
-        magnet.mparts = imagnet.mparts
-        session.add(magnet)
-        session.commit()
-        session.refresh(magnet)
-
-    # ??is this needed??
-    # get mpart from imagnet and update mpart
-    """
-    for part in mparts:
-        if not magnet in part.magnets:
-            part.magnets.append(magnet)
-        session.refresh(part)
-    """
-    return magnet
-
-def magnet_add_mpart(session: Session, magnet: Magnet, mpart: MPart ):
-    mpart.magnets.append(magnet)
-    # magnet.mparts.append(MPart)
-    session.commit()
-    # session.refresh(magnet)
-    session.refresh(mpart)
-    pass 
-
-def magnet_delete_mpart(session: Session, magnet: Magnet, mpart: MPart ):
-    mpart.magnets.remove(magnet)
-    # magnet.mparts.remove(MPart)
-    session.commit()
-    # session.refresh(magnet)
-    session.refresh(mpart)
-    pass 
-
-def magnet_replace_mpart(session: Session, name: str, impart: str, ompart: str ):
-    results = query_magnet(session, name)
-    for magnet in results:
-        print(magnet)
-        
-        # remove impart from magnet
-        res_parts = query_mpart(session, impart)
-        for part in res_parts:
-            magnet_delete_mpart(session, magnet, part)
-        
-        # add ompart to magnet
-        res_parts = query_mpart(session, ompart)
-        for part in res_parts:
-            magnet_add_mpart(session, magnet, part)
-    pass 
-
-def magnet_add_msite(session: Session, magnet: Magnet, msite: MSite ):
-    msite.magnets.append(magnet)
-    session.commit()
-    session.refresh(msite)
-    pass 
-
-def magnet_delete_msite(session: Session, magnet: Magnet, msite: MSite ):
-    msite.magnets.remove(magnet)
-    session.commit()
-    session.refresh(msite)
-    pass 
-
-def duplicate_site(session: Session, iname: str, oname: str ):
-    results = query_msite(session, iname)
-    for isite in results:
-        print(isite)
-        magnets = get_magnets(session, isite.id)
-
-        site = MSite(name=oname, conffile="", status=MStatus.study)
-        site.magnets = isite.magnets
-        session.add(site)
-        session.commit()
-        session.refresh(site)
-
-    # ??is this needed??
-    # get mpart from imagnet and update mpart
-    """
-    for part in mparts:
-        if not magnet in part.magnets:
-            part.magnets.append(magnet)
-        session.refresh(part)
-    """
-    return site
 
 def create_mpart(session: Session, name: str, mtype: str, be: str, geom: str, status: MStatus, magnets: List[Magnet], material: Optional[Material]):
     # TODO get material_id from material name
@@ -148,31 +62,6 @@ def create_material(session: Session, name: str, ElectricalConductivity: float, 
     session.refresh(material)
     return material
     
-def query_msite(session: Session, name: str):
-    statement = select(MSite).where(MSite.name == name)
-    results = session.exec(statement)
-    return results
-
-def query_material(session: Session, name: str):
-    statement = select(Material).where(Material.name == name)
-    results = session.exec(statement)
-    return results
-
-def query_mpart(session: Session, name: str):
-    statement = select(MPart).where(MPart.name == name)
-    results = session.exec(statement)
-    return results
-
-def query_magnet(session: Session, name: str):
-    statement = select(Magnet).where(Magnet.name == name)
-    results = session.exec(statement)
-    return results
-
-def query_msite(session: Session, name: str):
-    statement = select(MSite).where(MSite.name == name)
-    results = session.exec(statement)
-    return results
-
 def get_magnets(session: Session, site_id: int):   
     statement = select(MagnetMSiteLink).where(MagnetMSiteLink.msite_id == site_id)
     results = session.exec(statement)
@@ -319,13 +208,3 @@ def get_msite_data(session: Session, name: str ):
     return mdata
 
 
-def check_material(session: Session, id: int):
-    """
-    Check if properties are defined for Material with id
-    """
-    material = session.get(Material, id)
-    data = material.dict()
-    defined =  material.dict(exclude_defaults=True)
-    undef_set = set(data.keys()) - set(defined.keys())
-    return undef_set
-    
