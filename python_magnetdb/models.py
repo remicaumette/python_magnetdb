@@ -1,6 +1,7 @@
 from typing import List, Optional
 
-import enum
+from .status import MStatus
+
 from sqlmodel import Field, Enum, Relationship, Session, SQLModel, create_engine
 from sqlmodel import Column, String
 
@@ -90,12 +91,6 @@ class MagnetMSiteLink(SQLModel, table=True):
 ##################
 #
 ##################
-
-class MStatus(str, enum.Enum):
-    study = "in_study"
-    operation = "in_operation"
-    stock = "in_stock"
-    defunct = "defunct"
 
 class MSiteBase(SQLModel):
     """

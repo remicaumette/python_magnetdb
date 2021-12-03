@@ -8,9 +8,12 @@ from .database import create_db_and_tables, engine
 from .models import MPart, Magnet, MSite, MRecord
 from .models import MaterialBase, Material, MaterialCreate, MaterialRead
 from .models import MPartMagnetLink, MagnetMSiteLink
-from .models import MStatus
+from .status import MStatus
 
 from .crud import *
+from .operations import *
+from .checks import *
+
 import json
 
 # def get_parts(session: Session, magnet_id: int):   
@@ -187,6 +190,10 @@ if __name__ == "__main__":
             create_mpart(session=session, name='M9Bi', mtype='Bitter', be='BI-03-002-A', geom='M9Bitters_Bi.yaml', status=MStatus.operation, magnets=[Bitters], material=CuAg01)
             create_mpart(session=session, name='M9Be', mtype='Bitter', be='BE-03-002-A', geom='M9Bitters_Be.yaml', status=MStatus.operation, magnets=[Bitters], material=CuAg01)
 
+            m1 = create_msite(session=session, name="MTest2", conffile="MAGFILE2019.06.20.35T.conf", status=MStatus.defunct)
+            msite_add_magnet(session=session, msite=m1, magnet=Helices)
+            msite_add_magnet(session=session, msite=m1, magnet=Bitters)
+            
             # TODO : SpecificHeat, Rpe, nan for sigma_isolant
 
             # Definition of Materials

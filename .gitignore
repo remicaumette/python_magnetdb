@@ -70,3 +70,6 @@ flask/*
 /.idea
 *.iml
 *.db
+
+data
+core

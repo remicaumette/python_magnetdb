@@ -33,7 +33,7 @@ def index(request: Request):
         })
 
 
-@router.get("/sites/{id}", response_class=HTMLResponse)
+@router.get("/sites/{id}", response_class=HTMLResponse, name='site')
 def show(request: Request, id: int):
     with Session(engine) as session:
         msite = session.get(MSite, id)

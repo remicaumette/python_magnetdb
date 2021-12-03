@@ -8,6 +8,7 @@ from .models import MPartMagnetLink, MagnetMSiteLink
 from .models import MStatus
 
 from .queries import query_mpart, query_magnet, query_msite
+from .crud import get_mparts, get_magnets 
 
 def magnet_add_mpart(session: Session, magnet: Magnet, mpart: MPart ):
     mpart.magnets.append(magnet)
@@ -57,12 +58,12 @@ def msite_replace_magnet(session: Session, name: str, impart: str, ompart: str):
         # remove impart from magnet
         res = query_magnet(session, impart)
         for part in res:
-            msite_delete_magnet(session, msite, magnet)
+            msite_delete_magnet(session, msite, res)
         
         # add ompart to magnet
         res = query_magnet(session, ompart)
         for part in res:
-            msite_add_magnet(session, msite, magnet)
+            msite_add_magnet(session, msite, res)
     pass 
 
 def duplicate_magnet(session: Session, iname: str, oname: str ):

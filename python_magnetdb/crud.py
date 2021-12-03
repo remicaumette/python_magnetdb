@@ -7,7 +7,7 @@ from .models import MaterialBase, Material, MaterialCreate, MaterialRead
 from .models import MPartMagnetLink, MagnetMSiteLink
 from .models import MStatus
 
-from .queries import query_mpart, query_magnet, query_msite
+from .queries import query_mpart, query_magnet, query_msite, query_material
 
 # TODO:
 # so far only Creation, Query 

@@ -12,6 +12,7 @@ from .routes.materials import router as materials_router
 from .routes.parts import router as parts_router
 from .routes.records import router as records_router
 from .routes.sites import router as sites_router
+from .routes.geom import router as geoms_router
 
 app = FastAPI()
 
@@ -23,6 +24,7 @@ app.include_router(materials_router)
 app.include_router(sites_router)
 app.include_router(parts_router)
 app.include_router(records_router)
+app.include_router(geoms_router)
 app.include_router(api_materials_router)
 app.include_router(api_parts_router)
 app.include_router(api_magnets_router)

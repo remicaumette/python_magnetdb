@@ -4,8 +4,10 @@ from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query
 from sqlmodel import Session, select
 
 from ...database import get_session
+from ...models import MagnetUpdate
 from ...models import MSite, MSiteCreate, MSiteRead, MSiteUpdate
 from ...models import MSiteReadWithMagnets
+from ...crud import get_msite_data, get_magnet_data
 
 router = APIRouter()
 
@@ -68,9 +70,10 @@ def delete_msite(*, session: Session = Depends(get_session), msite_id: int):
 
 @router.get("/api/msite/mdata/{name}")
 def read_msite_data(*, session: Session = Depends(get_session), name: str):
-    mdata = crud.get_msite_data(session, name)
+    mdata = get_msite_data(session, name)
     if not mdata:
         raise HTTPException(status_code=404, detail="cannot get msite data for %s" % name)
     return mdata
 
-
+MSiteUpdate.update_forward_refs()
+MagnetUpdate.update_forward_refs()

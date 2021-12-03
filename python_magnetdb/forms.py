@@ -3,11 +3,26 @@ from typing import List, Optional
 
 from flask_wtf import FlaskForm
 from starlette_wtf import StarletteForm
-from wtforms import StringField, FloatField, SelectField, SubmitField
+from wtforms import StringField, FloatField, SelectField, SubmitField, FieldList, FormField
 from wtforms.validators import DataRequired, Length
 
-from .models import MStatus
+
 from .units import units
+from .status import MStatus, status_choices
+from .choices import material_choices
+
+def coerce_for_enum(enum):
+    def coerce(name):
+        print("coerce_for_enum:", name, type(name))
+        if isinstance(name, enum):
+            return name
+        try:
+            return enum[name]
+        except KeyError:
+            print("fuckup", name, type(name))
+            raise ValueError(name)
+    return coerce
+
 
 class MaterialForm(StarletteForm):
     """
@@ -34,26 +49,7 @@ class MaterialForm(StarletteForm):
     furnisher = StringField('Furnisher', validators=[DataRequired()])
     ref = StringField('Ref', validators=[DataRequired()])
 
-    # from flask_wtf import FlaskForm, RecaptchaField
-    # recaptcha = RecaptchaField()
-    ##submit = SubmitField('Submit')
-
-# class MaterialForm(MaterialBaseForm):
-
-status_choices = [
-    (MStatus.study, "Study"),
-    (MStatus.operation, "Operation"),
-    (MStatus.stock, "Stock"),
-    (MStatus.defunct, "Defunct")
-]
-
-mtype_choices = [
-    ("Helix", "Helix"),
-    ("Ring", "Ring"),
-    ("Lead", "Lead"),
-    ("Bitter", "Bitter"),
-    ("Supra", "Supra")
-]
+from .magnetfield import MPartListField, BetterMagnetListField
 
 class MPartForm(StarletteForm):
     """
@@ -64,22 +60,28 @@ class MPartForm(StarletteForm):
     mtype = StringField('Type', validators=[DataRequired()])
     be = StringField('Be Ref', validators=[DataRequired()])
     geom = StringField('Geom', validators=[DataRequired()])
-    status = SelectField('Status', choices=status_choices)
+    status = SelectField('Status', choices=status_choices, validators=[DataRequired()])
 
     # TODO mtype part shall not be a choice, it shall be infered by loading geom
-    mtype = SelectField('Type', choices=mtype_choices)
+    mtype = StringField('Type', validators=[DataRequired()]) # SelectField('Type', choices=mtype_choices)
+
     # TODO create liste of materials choice
-    # material = SelectField('Material', choices=[MStatus.study, MStatus.operation, MStatus.stock, MStatus.defunct])
+    material_id = SelectField('Material', choices=material_choices(), validators=[DataRequired()])
+    magnets = BetterMagnetListField('Magnets') # FieldList(FormField(MPartForm)) not working
+
 
 class MagnetForm(StarletteForm):
     """
     Magnet 
     """
+    print("MagnetForm")
     name =  StringField('Name', validators=[DataRequired()])
 
     be = StringField('Be Ref', validators=[DataRequired()])
     geom = StringField('Geom', validators=[DataRequired()])
     status = SelectField('Status', choices=status_choices)
+    mparts = MPartListField('Parts') # FieldList(FormField(MPartForm)) not working
+    # msites = FieldList(StringField('Sites'))
 
 class MSiteForm(StarletteForm):
     """
@@ -90,4 +92,10 @@ class MSiteForm(StarletteForm):
     conffile: StringField('Conffile', validators=[DataRequired()]) # FileField?? or MultipleFileField??
     status = SelectField('Status', choices=status_choices)
 
+class GeomForm(StarletteForm):
+    """
+    Yaml geom configuration
+    """
 
+    name =  StringField('Name', validators=[DataRequired()])
+    

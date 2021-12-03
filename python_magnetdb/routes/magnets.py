@@ -36,7 +36,7 @@ def index(request: Request):
         })
 
 
-@router.get("/magnets/{id}", response_class=HTMLResponse)
+@router.get("/magnets/{id}", response_class=HTMLResponse, name='magnet')
 def show(request: Request, id: int):
     with Session(engine) as session:
         magnet = session.get(Magnet, id)
@@ -51,17 +51,20 @@ def show(request: Request, id: int):
 async def edit(request: Request, id: int):
     with Session(engine) as session:
         magnet = session.get(Magnet, id)
-        print("magnets/edit:", magnet)
+        print("magnets/edit: magnet", magnet)
         form = MagnetForm(obj=magnet, request=request)
+        print("magnets/edit: form:", form)
         return templates.TemplateResponse('magnets/edit.html', {
             "id": id,
             "request": request,
             "form": form,
         })
+
 @router.post("/magnets/{id}/edit", response_class=HTMLResponse, name='update_magnet')
 async def update(request: Request, id: int):
     with Session(engine) as session:
         magnet = session.get(Magnet, id)
+        print("magnets/update:", magnet)
         form = await MagnetForm.from_formdata(request)
         if form.validate_on_submit():
             form.populate_obj(magnet)

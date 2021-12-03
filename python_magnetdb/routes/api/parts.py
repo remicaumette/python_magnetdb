@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query
 from sqlmodel import Session, select
 
 from ...database import create_db_and_tables, engine, get_session
+from ...models import MagnetUpdate
 from ...models import MPartBase, MPart, MPartCreate, MPartRead, MPartUpdate
 from ...models import MPartReadWithMagnet
 
@@ -59,3 +60,5 @@ def delete_mpart(*, session: Session = Depends(get_session), mpart_id: int):
     return {"ok": True}
 
 
+MagnetUpdate.update_forward_refs()
+MPartUpdate.update_forward_refs()
