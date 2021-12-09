@@ -5,9 +5,9 @@ from sqlmodel import Session, select
 
 from ..config import templates
 from ..database import engine
-from ..models import Magnet, MagnetUpdate 
-from ..models import MSite, MSiteUpdate 
-from ..models import MStatus
+from ..old_models import Magnet, MagnetUpdate
+from ..old_models import MSite, MSiteUpdate
+from ..old_models import MStatus
 from ..forms import MSiteForm
 
 router = APIRouter()
@@ -25,9 +25,9 @@ def index(request: Request):
         msites = session.exec(statement).all()
         desc = {}
         for site in msites:
-           desc[site.id] = {"Status:": site.status} 
+           desc[site.id] = {"Status:": site.status}
     return templates.TemplateResponse('sites/index.html', {
-        "request": request, 
+        "request": request,
         "msites": msites,
         "descriptions": desc
         })
@@ -73,5 +73,5 @@ async def update(request: Request, id: int):
                 "request": request,
                 "form": form,
             })
-        
+
 MSiteUpdate.update_forward_refs()

@@ -3,14 +3,9 @@ from fastapi.routing import APIRouter
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from ..config import templates
-from ..database import engine
-from ..models import Material
 from ..forms import GeomForm
-from ..units import units
 
 import yaml
-
-from python_magnetgeo import Insert, MSite, Bitter, Supra
 
 router = APIRouter()
 
@@ -25,7 +20,7 @@ def index(request: Request):
     geoms = {}
     desc = {}
     return templates.TemplateResponse('geoms/index.html', {
-        "request": request, 
+        "request": request,
         "geoms": geoms,
         "descriptions": desc
         })
@@ -45,7 +40,7 @@ def show(request: Request, gname: str):
     print("geom:", geom)
     data = json.loads(geom.to_json())
     print("data:", data, type(data))
-    
+
     # re-organize data
     data.pop('__classname__')
     if 'materials' in data: data.pop('materials')
@@ -53,7 +48,7 @@ def show(request: Request, gname: str):
         if isinstance(data[key], dict):
             if '__classname__' in data[key]:
                 data[key].pop('__classname__')
-    
+
     # TODO for Helices discard pitch, replace turns by actual number of turns
     return templates.TemplateResponse('geoms/show.html', {"request": request, "geom": data, "gname": gname})
 

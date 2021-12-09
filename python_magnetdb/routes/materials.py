@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 
 from ..config import templates
 from ..database import engine
-from ..models import Material
+from ..old_models import Material
 from ..forms import MaterialForm
 
 from ..units import units

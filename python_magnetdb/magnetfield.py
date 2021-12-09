@@ -1,19 +1,16 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import List
 
 from sqlmodel import Session, select
+from wtforms import Field
+from wtforms.widgets import TextInput
+
 from .database import engine
-from .queries import query_mpart
+from .old_models import MPart
+from .old_models import Magnet
 
-from .models import Magnet
-from .models import MSite
-from .models import MPart
-
-from wtforms import Field, FieldList
-from wtforms.widgets import TextInput, ListWidget, TableWidget
-from wtforms.validators import DataRequired, Length
 
 class MPartListField(Field):
-    widget = TextInput() # ListWidget() # TableWidget() 
+    widget = TextInput() # ListWidget() # TableWidget()
 
     def _value(self):
         print("_value:", self.data)
@@ -34,7 +31,7 @@ class MPartListField(Field):
             self.data = []
 
 class MagnetListField(Field):
-    widget = TextInput() # ListWidget() # TableWidget() 
+    widget = TextInput() # ListWidget() # TableWidget()
 
     def _value(self):
         # print("MagnetListField: _value:", self.data)

@@ -5,9 +5,9 @@ from sqlmodel import Session, select
 
 from ..config import templates
 from ..database import engine
-from ..models import MPart, Material
-from ..models import MagnetUpdate
-from ..models import MPartUpdate
+from ..old_models import MPart, Material
+from ..old_models import MagnetUpdate
+from ..old_models import MPartUpdate
 from ..forms import MPartForm
 
 router = APIRouter()
@@ -28,7 +28,7 @@ def index(request: Request):
         for part in mparts:
             desc[part.id] = {"Type": part.mtype, "Status:": part.status}
     return templates.TemplateResponse('parts/index.html', {
-        "request": request, 
+        "request": request,
         "mparts": mparts,
         "descriptions": desc
         })
@@ -73,7 +73,7 @@ async def update(request: Request, id: int):
         print("form.status=", form.status)
         print("form.magnets=", form.magnets)
         print("type(form.magnets)=", type(form.magnets))
-        
+
         if form.validate_on_submit():
             form.populate_obj(mpart)
             session.commit()

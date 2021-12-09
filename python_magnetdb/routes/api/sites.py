@@ -1,79 +1,68 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import List
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from ...database import get_session
-from ...models import MagnetUpdate
-from ...models import MSite, MSiteCreate, MSiteRead, MSiteUpdate
-from ...models import MSiteReadWithMagnets
-from ...crud import get_msite_data, get_magnet_data
+from ...old_models import MSite, MSiteRead
+from ...old_models import MSiteReadWithMagnets
 
 router = APIRouter()
 
 
-@router.post("/api/msites/", response_model=MSiteRead)
-def create_msite(*, session: Session = Depends(get_session), msite: MSiteCreate):
-    db_msite = MSite.from_orm(msite)
-    session.add(db_msite)
+class CreateSite(BaseModel):
+    name: str
+    status: str
+    conffile: str
+
+
+class UpdateSite(BaseModel):
+    name: str
+    status: str
+
+
+@router.get("/api/sites", response_model=List[MSiteRead])
+def index(session: Session = Depends(get_session), offset: int = 0, limit: int = Query(default=100, lte=100)):
+    sites = session.exec(select(MSite).offset(offset).limit(limit)).all()
+    return sites
+
+
+@router.post("/api/sites", response_model=MSiteRead)
+def create(payload: CreateSite, session: Session = Depends(get_session)):
+    site = MSite.from_orm(payload)
+    session.add(site)
     session.commit()
-    session.refresh(db_msite)
-    return db_msite
+    session.refresh(site)
+    return site
 
 
-@router.get("/api/msites/", response_model=List[MSiteRead])
-def read_msites(
-        *,
-        session: Session = Depends(get_session),
-        offset: int = 0,
-        limit: int = Query(default=100, lte=100),
-):
-    msites = session.exec(select(MSite).offset(offset).limit(limit)).all()
-    return msites
+@router.get("/api/sites/{id}", response_model=MSiteReadWithMagnets)
+def show(id: int, session: Session = Depends(get_session)):
+    site = session.get(MSite, id)
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
+    return site
 
 
-@router.get("/api/msites/{msite_id}", response_model=MSiteReadWithMagnets)
-def read_msite(*, msite_id: int, session: Session = Depends(get_session)):
-    msite = session.get(MSite, msite_id)
-    if not msite:
+@router.patch("/api/sites/{id}", response_model=MSiteRead)
+def update(id: int, payload: UpdateSite, session: Session = Depends(get_session)):
+    site = session.get(MSite, id)
+    if not site:
         raise HTTPException(status_code=404, detail="MSite not found")
-    return msite
-
-
-@router.patch("/api/msites/{msite_id}", response_model=MSiteRead)
-def update_msite(
-        *,
-        session: Session = Depends(get_session),
-        msite_id: int,
-        msite: MSiteUpdate,
-):
-    db_msite = session.get(MSite, msite_id)
-    if not db_msite:
-        raise HTTPException(status_code=404, detail="MSite not found")
-    msite_data = msite.dict(exclude_unset=True)
-    for key, value in msite_data.items():
-        setattr(db_msite, key, value)
-    session.add(db_msite)
+    for key, value in payload.dict(exclude_unset=True).items():
+        setattr(site, key, value)
+    session.add(site)
     session.commit()
-    session.refresh(db_msite)
-    return db_msite
+    session.refresh(site)
+    return site
 
 
-@router.delete("/api/msites/{msite_id}")
-def delete_msite(*, session: Session = Depends(get_session), msite_id: int):
-    msite = session.get(MSite, msite_id)
-    if not msite:
-        raise HTTPException(status_code=404, detail="MSite not found")
-    session.delete(msite)
+@router.delete("/api/sites/{id}")
+def destroy(id: int, session: Session = Depends(get_session)):
+    site = session.get(MSite, id)
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
+    session.delete(site)
     session.commit()
     return {"ok": True}
-
-@router.get("/api/msite/mdata/{name}")
-def read_msite_data(*, session: Session = Depends(get_session), name: str):
-    mdata = get_msite_data(session, name)
-    if not mdata:
-        raise HTTPException(status_code=404, detail="cannot get msite data for %s" % name)
-    return mdata
-
-MSiteUpdate.update_forward_refs()
-MagnetUpdate.update_forward_refs()

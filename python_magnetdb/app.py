@@ -5,9 +5,9 @@ from math import nan
 from sqlmodel import Session, select
 
 from .database import create_db_and_tables, engine
-from .models import MPart, Magnet, MSite, MRecord
-from .models import MaterialBase, Material, MaterialCreate, MaterialRead
-from .models import MPartMagnetLink, MagnetMSiteLink
+from .old_models import MPart, Magnet, MSite, MRecord
+from .old_models import MaterialBase, Material, MaterialCreate, MaterialRead
+from .old_models import MPartMagnetLink, MagnetMSiteLink
 from .status import MStatus
 
 from .crud import *
@@ -16,7 +16,7 @@ from .checks import *
 
 import json
 
-# def get_parts(session: Session, magnet_id: int):   
+# def get_parts(session: Session, magnet_id: int):
 #     data = {}
 #     mparts = get_mparts(session, magnet_id)
 #     for part in mparts:
@@ -155,7 +155,7 @@ if __name__ == "__main__":
             # Test
             # Insert Two Helices
             m1 = create_msite(session=session, name="MTest", conffile="MAGFILE2019.06.20.35T.conf", status=MStatus.defunct)
-        
+
             Helices = create_magnet(session=session, name="HL-test", be="HL-34-001-A", geom="test.yaml", status=MStatus.operation, msites=[m1])
 
             MAT_TEST1 = create_material(session=session, name="MAT_TEST1", nuance="Cu5Ag5,08",
@@ -165,7 +165,7 @@ if __name__ == "__main__":
 
             create_mpart(session=session, name='HL-34_H1', mtype='Helix', be='HL-34-001-A', geom='HL-31_H1.yaml', status=MStatus.operation, magnets=[Helices], material=MAT_TEST1)
             create_mpart(session=session, name='HL-34_H2', mtype='Helix', be='HL-34-001-A', geom='HL-31_H2.yaml', status=MStatus.operation, magnets=[Helices], material=MAT_TEST1)
-            
+
             MAT_TEST2 = create_material(session=session, name="MAT_TEST2", nuance="Cu5Ag5,08",
                                     Tref=293, VolumicMass=9e+3, SpecificHeat=380, alpha=3.6e-3, ElectricalConductivity=50.1e+6,
                                     ThermalConductivity=360, MagnetPermeability=1, Young=127e+9, Poisson=0.335,  CoefDilatation=18e-6,
@@ -193,7 +193,7 @@ if __name__ == "__main__":
             m1 = create_msite(session=session, name="MTest2", conffile="MAGFILE2019.06.20.35T.conf", status=MStatus.defunct)
             msite_add_magnet(session=session, msite=m1, magnet=Helices)
             msite_add_magnet(session=session, msite=m1, magnet=Bitters)
-            
+
             # TODO : SpecificHeat, Rpe, nan for sigma_isolant
 
             # Definition of Materials
@@ -313,7 +313,7 @@ if __name__ == "__main__":
             mdata = get_magnet_data(session, args.displaymagnet)
             with open(args.displaymagnet + "-data.json", "x") as out:
                 out.write(json.dumps(mdata, indent = 4))
-            
+
     if args.displaymsite:
         import yaml
         with Session(engine) as session:
@@ -321,8 +321,8 @@ if __name__ == "__main__":
             with open(args.displaymsite + "-data.yaml", "x") as out:
                 out.write("!<MSite>\n")
                 yaml.dump(mdata, out)
-            
-            
+
+
 
     if args.checkmaterial:
         with Session(engine) as session:

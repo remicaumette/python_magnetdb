@@ -4,3 +4,7 @@ wtforms
 sqlalchemy
 starlette-wtf
 pint
+aiosqlite
+pint
+pyyaml
+pydantic

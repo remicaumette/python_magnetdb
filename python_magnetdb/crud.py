@@ -2,15 +2,15 @@ from typing import TYPE_CHECKING, List, Optional
 
 from sqlmodel import Session, select
 
-from .models import MPart, Magnet, MSite, MRecord
-from .models import MaterialBase, Material, MaterialCreate, MaterialRead
-from .models import MPartMagnetLink, MagnetMSiteLink
-from .models import MStatus
+from .old_models import MPart, Magnet, MSite, MRecord
+from .old_models import MaterialBase, Material, MaterialCreate, MaterialRead
+from .old_models import MPartMagnetLink, MagnetMSiteLink
+from .old_models import MStatus
 
 from .queries import query_mpart, query_magnet, query_msite, query_material
 
 # TODO:
-# so far only Creation, Query 
+# so far only Creation, Query
 # add method to Read/Display data
 # add method to Update and Delete data
 
@@ -52,22 +52,22 @@ def create_material(session: Session, name: str, ElectricalConductivity: float, 
     """
     TODO: use pint to get values in SI
     """
-    
+
     material = Material(name=name, ElectricalConductivity=ElectricalConductivity, Rpe=Rpe, Tref=Tref, VolumicMass=VolumicMass,
                     SpecificHeat=SpecificHeat, alpha=alpha, ThermalConductivity=ThermalConductivity, MagnetPermeability=MagnetPermeability,
                     Young=Young, Poisson=Poisson, CoefDilatation=CoefDilatation, nuance=nuance)
-    
+
     session.add(material)
     session.commit()
     session.refresh(material)
     return material
-    
-def get_magnets(session: Session, site_id: int):   
+
+def get_magnets(session: Session, site_id: int):
     statement = select(MagnetMSiteLink).where(MagnetMSiteLink.msite_id == site_id)
     results = session.exec(statement)
     return results
 
-def get_mparts(session: Session, magnet_id: int):   
+def get_mparts(session: Session, magnet_id: int):
     """
     get all parts from a magnet
     """
@@ -78,7 +78,7 @@ def get_mparts(session: Session, magnet_id: int):
         selected.append(part)
     return selected
 
-def get_mparts_mtype(session: Session, magnet_id: int, mtype: str):   
+def get_mparts_mtype(session: Session, magnet_id: int, mtype: str):
     """
     get all parts from a magnet
     """
@@ -113,7 +113,7 @@ def get_magnet_history(session: Session, msite_id: id):
 
 def get_magnet_type(session: Session, magnet_id: int ):
     """
-    Returns magnet type and the list of mparts attached to this magnet  
+    Returns magnet type and the list of mparts attached to this magnet
     """
     objects = get_mparts_mtype(session=session, magnet_id=magnet_id, mtype="Helix")
     if len(objects):
@@ -127,7 +127,7 @@ def get_magnet_type(session: Session, magnet_id: int ):
 
 def get_magnet_data(session: Session, magnet_name: str ):
     """
-    Get magnet data  
+    Get magnet data
     """
     magnet = None
     results = query_magnet(session, magnet_name)
@@ -163,7 +163,7 @@ def get_magnet_data(session: Session, magnet_name: str ):
             # remove uneeded stuff
             for key in ['furnisher', 'ref', 'name', 'id']:
                 material_data.pop(key, None)
-            
+
             if not mtype in mdata:
                 mdata[mtype]=[]
 
@@ -201,7 +201,7 @@ def get_msite_data(session: Session, name: str ):
             mname = magnet.geom
             yamlfile = mname.rsplit(".yaml", 1)[0]
             mdata['magnets'][magnet.name] = yamlfile
-            
+
     for key in ['be', 'conffile', 'status', 'id']:
         mdata.pop(key, None)
 

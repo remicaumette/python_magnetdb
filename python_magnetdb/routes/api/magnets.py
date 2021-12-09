@@ -4,11 +4,11 @@ from typing import List
 
 from ... import crud
 from ...database import get_session
-from ...models import MPartRead
-from ...models import Magnet, MagnetCreate, MagnetRead, MagnetUpdate
-from ...models import MagnetReadWithMSite
-from ...models import MPart, MPartUpdate
-from ...models import MSite, MSiteUpdate 
+from ...old_models import MPartRead
+from ...old_models import Magnet, MagnetCreate, MagnetRead, MagnetUpdate
+from ...old_models import MagnetReadWithMSite
+from ...old_models import MPart, MPartUpdate
+from ...old_models import MSite, MSiteUpdate
 
 router = APIRouter()
 

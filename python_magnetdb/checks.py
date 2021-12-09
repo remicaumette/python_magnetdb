@@ -2,10 +2,10 @@ from typing import TYPE_CHECKING, List, Optional
 
 from sqlmodel import Session, select
 
-from .models import MPart, Magnet, MSite, MRecord
-from .models import MaterialBase, Material, MaterialCreate, MaterialRead
-from .models import MPartMagnetLink, MagnetMSiteLink
-from .models import MStatus
+from .old_models import MPart, Magnet, MSite, MRecord
+from .old_models import MaterialBase, Material, MaterialCreate, MaterialRead
+from .old_models import MPartMagnetLink, MagnetMSiteLink
+from .old_models import MStatus
 
 def check_material(session: Session, id: int):
     """
@@ -16,4 +16,4 @@ def check_material(session: Session, id: int):
     defined =  material.dict(exclude_defaults=True)
     undef_set = set(data.keys()) - set(defined.keys())
     return undef_set
-    
+

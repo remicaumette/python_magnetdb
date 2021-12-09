@@ -2,10 +2,10 @@ from typing import TYPE_CHECKING, List, Optional
 
 from sqlmodel import Session, select
 
-from .models import MPart, Magnet, MSite, MRecord
-from .models import MaterialBase, Material, MaterialCreate, MaterialRead
-from .models import MPartMagnetLink, MagnetMSiteLink
-from .models import MStatus
+from .old_models import MPart, Magnet, MSite, MRecord
+from .old_models import MaterialBase, Material, MaterialCreate, MaterialRead
+from .old_models import MPartMagnetLink, MagnetMSiteLink
+from .old_models import MStatus
 
 def query_material(session: Session, name: str):
     statement = select(Material).where(Material.name == name)

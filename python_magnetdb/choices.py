@@ -1,39 +1,32 @@
-from typing import TYPE_CHECKING, List, Optional
+from sqlmodel import Session, select
 
 from sqlmodel import Session, select
 
-from .database import engine
-from .models import Material
-
-from .models import MPart, Magnet, MSite, MRecord
-from .models import MaterialBase, Material, MaterialCreate, MaterialRead
-from .models import MPartMagnetLink, MagnetMSiteLink
-from .models import MStatus
-from .units import units
-
-from .queries import query_mpart, query_magnet, query_msite, query_material
 from .crud import get_magnet_type
-
-import yaml
+from .database import engine
+from .old_models import MPart, Magnet, MSite
+from .old_models import MStatus
+from .old_models import Material
+from .units import units
 
 
 def material_choices():
     with Session(engine) as session:
         statement = select(Material)
         results = session.exec(statement).all()
-    
+
     choices = []
     for obj in results:
         desc = obj.name + " (" + obj.nuance + "," + "Rpe:" + str(obj.Rpe) + units['Rpe'] + ")"
         choices.append( (obj.id, desc))
-    
+
     return choices
 
 def mpart_choices(mtype: str, status: MStatus):
     with Session(engine) as session:
         statement = select(MPart).where(MPart.mtype == mtype).where(MPart.status == status)
         results = session.exec(statement).all()
-    
+
     choices = []
     for obj in results:
         desc = obj.name
@@ -41,19 +34,19 @@ def mpart_choices(mtype: str, status: MStatus):
         # Get Material
         material = select(Material).where(Material.id == obj.material_id)
         desc += " (" + material.name + ":" + obj.nuance + "," + "Rpe:" + obj.rpe + units['Rpe'] + ")"
-        
+
         # TODO load obj.geom to get basic geom infos
         # geom = yaml.load(open(obj.name, 'r'))
 
         choices.append( (obj, desc))
-    
+
     return choices
 
 def magnet_choices(status: MStatus):
     with Session(engine) as session:
         statement = select(Magnet).where(Magnet.status == status)
         results = session.exec(statement).all()
-    
+
     choices = []
     for obj in results:
         desc = obj.name
@@ -66,14 +59,14 @@ def magnet_choices(status: MStatus):
         # geom = yaml.load(open(obj.name, 'r'))
 
         choices.append( (obj, desc))
-    
+
     return choices
 
 def msite_choices(status: MStatus):
     with Session(engine) as session:
         statement = select(MSite).where(MSite.status == status)
         results = session.exec(statement).all()
-    
+
     choices = []
     for obj in results:
         desc = obj.name
@@ -87,7 +80,7 @@ def msite_choices(status: MStatus):
         last_char_index = desc.rfind(',')
         desc = desc[:last_char_index] + "," + desc[last_char_index+1:]
         desc += ")"
-        
+
         choices.append( (obj, desc))
-    
+
     return choices

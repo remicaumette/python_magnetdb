@@ -5,10 +5,10 @@ from sqlmodel import Session, select
 
 from ..config import templates
 from ..database import engine
-from ..models import Magnet, MagnetUpdate 
-from ..models import MPart, MPartUpdate
-from ..models import MSite, MSiteUpdate 
-from ..models import MStatus 
+from ..old_models import Magnet, MagnetUpdate
+from ..old_models import MPart, MPartUpdate
+from ..old_models import MSite, MSiteUpdate
+from ..old_models import MStatus
 from ..forms import MagnetForm
 from ..crud import get_magnet_type
 
@@ -30,7 +30,7 @@ def index(request: Request):
             result = get_magnet_type(session, part.id)
             desc[part.id] = {"Type": result[0], "Status:": part.status}
     return templates.TemplateResponse('magnets/index.html', {
-        "request": request, 
+        "request": request,
         "magnets": magnets,
         "descriptions": desc
         })

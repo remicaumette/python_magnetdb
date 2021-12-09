@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query
 from sqlmodel import Session, select
 
 from ...database import get_session
-from ...models import MaterialBase, Material, MaterialCreate, MaterialRead, MaterialUpdate
+from ...old_models import MaterialBase, Material, MaterialCreate, MaterialRead, MaterialUpdate
 
 router = APIRouter()
 

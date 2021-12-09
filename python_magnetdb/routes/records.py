@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 
 from ..config import templates
 from ..database import engine
-from ..models import MRecord
+from ..old_models import MRecord
 
 router = APIRouter()
 
