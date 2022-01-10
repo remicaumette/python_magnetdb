@@ -2,14 +2,24 @@
   <input
     class="form-input"
     :class="{ 'form-input-error': hasError }"
-    @input="$emit('input', $event)"
+    @input="onInput"
+    :type="type"
   />
 </template>
 
 <script>
 export default {
   name: 'FormInput',
-  props: ['hasError'],
+  props: ['hasError', 'type'],
+  methods: {
+    onInput(event) {
+      if (this.type === 'file') {
+        this.$emit('value', event.target.files)
+      } else {
+        this.$emit('value', event.target.value)
+      }
+    }
+  }
 }
 </script>
 

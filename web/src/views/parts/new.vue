@@ -1,7 +1,7 @@
 <template>
   <div class="mx-auto w-full max-w-lg">
     <div class="display-1 text-center mb-6">
-      New site
+      New part
     </div>
 
     <Card>
@@ -20,13 +20,6 @@
             :component="FormInput"
         />
         <FormField
-            label="Config file"
-            name="config"
-            type="file"
-            :component="FormUpload"
-            :required="true"
-        />
-        <FormField
             label="Status"
             name="status"
             :component="FormSelect"
@@ -38,6 +31,34 @@
               { name: 'Defunct', value: 'defunct' },
             ]"
         />
+        <FormField
+            label="Type"
+            name="type"
+            type="text"
+            :component="FormInput"
+            :required="true"
+        />
+        <FormField
+            label="Material"
+            name="material"
+            :component="FormSelect"
+            :required="true"
+            :options="materialOptions"
+        />
+        <FormField
+            label="CAO"
+            name="cao"
+            type="file"
+            :component="FormUpload"
+            :required="true"
+        />
+        <FormField
+            label="Geometry"
+            name="geometry"
+            type="file"
+            :component="FormUpload"
+            :required="true"
+        />
         <Button type="submit" class="btn btn-primary">
           Save
         </Button>
@@ -48,14 +69,15 @@
 
 <script>
 import * as Yup from 'yup'
-import * as siteService from '@/services/siteService'
+import * as partService from '@/services/partService'
+import * as materialService from '@/services/materialService'
 import Card from '@/components/Card'
 import Form from "@/components/Form";
 import FormField from "@/components/FormField";
 import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
-import FormUpload from "@/components/FormUpload";
 import Button from "@/components/Button";
+import FormUpload from "@/components/FormUpload";
 
 export default {
   name: 'SiteNew',
@@ -72,16 +94,18 @@ export default {
       FormUpload,
       error: null,
       site: null,
+      materialOptions: [],
     }
   },
   methods: {
     submit(values, {setRootError}) {
-      return siteService.create({
+      return partService.create({
         ...values,
+        material_id: values.material.value,
         status: values.status.value,
       })
-          .then((site) => {
-            this.$router.push({ name: 'site', params: { id: site.id } })
+          .then((part) => {
+            this.$router.push({ name: 'part', params: { id: part.id } })
           })
           .catch(setRootError)
     },
@@ -89,9 +113,19 @@ export default {
       return Yup.object().shape({
         name: Yup.string().required(),
         status: Yup.object().required(),
-        config: Yup.mixed().required(),
+        type: Yup.string().required(),
+        material: Yup.object().required(),
+        cao: Yup.mixed().required(),
+        geometry: Yup.mixed().required(),
       })
     },
+  },
+  async mounted() {
+    const materialsRes = await materialService.list()
+    this.materialOptions = materialsRes.items.map(material => ({
+      name: material.name,
+      value: material.id,
+    }))
   },
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <button class="root" :class="{ loading: currentlyLoading, disabled: currentlyDisabled }" @click="onClick">
+  <button class="root" :class="{ loading: currentlyLoading, disabled: currentlyDisabled }" @click.prevent="onClick">
     <div v-if="currentlyLoading" class="loader">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="animate-spin">
         <circle
@@ -25,12 +25,15 @@
 export default {
   name: 'Button',
   props: ['loading', 'disabled'],
+  data() {
+    return { internalLoading: false }
+  },
   inject: {
     form: { default: null },
   },
   computed: {
     currentlyLoading() {
-      return this.loading || this.form?.loading
+      return this.loading || this.form?.loading || this.internalLoading
     },
     currentlyDisabled() {
       return this.disabled || this.currentlyLoading || (this.form && !this.form.dirty)
@@ -38,11 +41,15 @@ export default {
   },
   methods: {
     async onClick() {
-      this.loading = true
+      this.internalLoading = true
       try {
-        await this.$listeners.click()
+        if (this.$listeners.click) {
+          await this.$listeners.click()
+        } else if (this.form) {
+          await this.form.submit()
+        }
       } finally {
-        this.loading = false
+        this.internalLoading = false
       }
     }
   },

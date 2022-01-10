@@ -26,7 +26,7 @@ export default {
   },
   reactiveProvide: {
     name: 'form',
-    include: ['values', 'errors', 'loading', 'dirty'],
+    include: ['values', 'errors', 'loading', 'dirty', 'submit'],
   },
   watch: {
     values: {
@@ -57,12 +57,12 @@ export default {
       this.loading = true
       try {
         await this.$listeners.submit(this.values, {
-          setErrors(errors) {
+          setErrors: ((errors) => {
             this.errors = errors
-          },
-          setRootError(rootError) {
+          }).bind(this),
+          setRootError: ((rootError) => {
             this.rootError = rootError
-          },
+          }).bind(this),
         })
       } catch (e) {
         // this.errors = errors

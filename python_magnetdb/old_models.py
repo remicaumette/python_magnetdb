@@ -1,16 +1,18 @@
 from typing import List, Optional
 
+from sqlmodel import Column, String
+from sqlmodel import Field, Enum, Relationship
+
+from .models.application_model import ApplicationModel
 from .status import MStatus
 
-from sqlmodel import Field, Enum, Relationship, Session, SQLModel, create_engine
-from sqlmodel import Column, String
 
-class MaterialBase(SQLModel):
+class MaterialBase(ApplicationModel):
     """
     Material Physical Properties in SI for isotropic material
     ?? Make Physical props pint object ??
     """
-    
+
     name: str = Field(sa_column=Column("name", String, unique=True))
     Tref: Optional[float] = 20
 
@@ -41,7 +43,7 @@ class MaterialCreate(MaterialBase):
 class MaterialRead(MaterialBase):
     id: int
 
-class MaterialUpdate(SQLModel):
+class MaterialUpdate(ApplicationModel):
     name: str
     Tref: Optional[float] = 20
 
@@ -66,7 +68,7 @@ class MaterialUpdate(SQLModel):
 #
 ##################
 
-class MPartMagnetLink(SQLModel, table=True):
+class MPartMagnetLink(ApplicationModel, table=True):
     """
     MPart/Magnet many to many link table
     """
@@ -77,7 +79,7 @@ class MPartMagnetLink(SQLModel, table=True):
         default=None, foreign_key="mpart.id", primary_key=True
     )
 
-class MagnetMSiteLink(SQLModel, table=True):
+class MagnetMSiteLink(ApplicationModel, table=True):
     """
     Magnet/Site many to many link table
     """
@@ -92,11 +94,11 @@ class MagnetMSiteLink(SQLModel, table=True):
 #
 ##################
 
-class MSiteBase(SQLModel):
+class MSiteBase(ApplicationModel):
     """
     Magnet Site
     """
-    
+
     name: str = Field(sa_column=Column("name", String, unique=True))
     conffile: str
     status: MStatus = Field(sa_column=Column(Enum(MStatus)))
@@ -111,11 +113,11 @@ class MSiteRead(MSiteBase):
 class MSiteCreate(MSiteBase):
     pass
 
-class MSiteUpdate(SQLModel):
+class MSiteUpdate(ApplicationModel):
     """
     Magnet Site
     """
-    
+
     name: str
     conffile: str
     status: MStatus = Field(sa_column=Column(Enum(MStatus)))
@@ -125,11 +127,11 @@ class MSiteUpdate(SQLModel):
 #
 ##################
 
-class MagnetBase(SQLModel):
+class MagnetBase(ApplicationModel):
     """
     Magnet
     """
-    
+
     name: str = Field(sa_column=Column("name", String, unique=True))
 
     be: str
@@ -148,7 +150,7 @@ class MagnetRead(MagnetBase):
 class MagnetCreate(MagnetBase):
     pass
 
-class MagnetUpdate(SQLModel):
+class MagnetUpdate(ApplicationModel):
     """
     Magnet
     """
@@ -167,7 +169,7 @@ class MagnetUpdate(SQLModel):
 # migration script.
 ##################
 
-class MPartBase(SQLModel):
+class MPartBase(ApplicationModel):
     """
     Magnet Part
     """
@@ -190,7 +192,7 @@ class MPartRead(MPartBase):
 class MPartCreate(MPartBase):
     pass
 
-class MPartUpdate(SQLModel):
+class MPartUpdate(ApplicationModel):
     """
     Magnet Part
     """
@@ -231,7 +233,7 @@ class MSiteReadWithMagnets(MSiteRead):
 # from datetime import datetime
 # see magnetrun/MREcord to merge
 
-class MRecordBase(SQLModel):
+class MRecordBase(ApplicationModel):
     """
     Magnet Record
     """
@@ -249,7 +251,7 @@ class MRecordRead(MRecordBase):
 class MRecordCreate(MRecordBase):
     pass
 
-class MRecordUpdate(SQLModel):
+class MRecordUpdate(ApplicationModel):
     """
     Magnet Record
     """

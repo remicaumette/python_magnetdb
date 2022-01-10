@@ -1,68 +1,59 @@
-from typing import List
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
-from sqlmodel import Session, select
-
-from ...database import get_session
-from ...old_models import MSite, MSiteRead
-from ...old_models import MSiteReadWithMagnets
+from ...models.attachment import Attachment
+from ...models.site import Site
 
 router = APIRouter()
 
 
-class CreateSite(BaseModel):
-    name: str
-    status: str
-    conffile: str
+@router.get("/api/sites")
+def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
+    sites = Site.paginate(per_page, page)
+    return {
+        "current_page": sites.current_page,
+        "last_page": sites.last_page,
+        "total": sites.total,
+        "items": sites.serialize(),
+    }
 
 
-class UpdateSite(BaseModel):
-    name: str
-    status: str
+@router.post("/api/sites")
+def create(name: str = Form(...), description: str = Form(None), status: str = Form(...),
+           config: UploadFile = File(...)):
+    site = Site(name=name, description=description, status=status)
+    site.config().associate(Attachment.upload(config))
+    site.save()
+    return site.serialize()
 
 
-@router.get("/api/sites", response_model=List[MSiteRead])
-def index(session: Session = Depends(get_session), offset: int = 0, limit: int = Query(default=100, lte=100)):
-    sites = session.exec(select(MSite).offset(offset).limit(limit)).all()
-    return sites
-
-
-@router.post("/api/sites", response_model=MSiteRead)
-def create(payload: CreateSite, session: Session = Depends(get_session)):
-    site = MSite.from_orm(payload)
-    session.add(site)
-    session.commit()
-    session.refresh(site)
-    return site
-
-
-@router.get("/api/sites/{id}", response_model=MSiteReadWithMagnets)
-def show(id: int, session: Session = Depends(get_session)):
-    site = session.get(MSite, id)
+@router.get("/api/sites/{id}")
+def show(id: int):
+    site = Site.with_('config', 'magnets').find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
-    return site
+    return site.serialize()
 
 
-@router.patch("/api/sites/{id}", response_model=MSiteRead)
-def update(id: int, payload: UpdateSite, session: Session = Depends(get_session)):
-    site = session.get(MSite, id)
+@router.patch("/api/sites/{id}")
+def update(id: int, name: str = Form(...), description: str = Form(None), status: str = Form(...),
+           config: UploadFile = File(None)):
+    site = Site.find(id)
     if not site:
-        raise HTTPException(status_code=404, detail="MSite not found")
-    for key, value in payload.dict(exclude_unset=True).items():
-        setattr(site, key, value)
-    session.add(site)
-    session.commit()
-    session.refresh(site)
-    return site
+        raise HTTPException(status_code=404, detail="Site not found")
+
+    site.name = name
+    site.description = description
+    site.status = status
+    if config:
+        site.config().associate(Attachment.upload(config))
+    site.save()
+    return site.serialize()
 
 
 @router.delete("/api/sites/{id}")
-def destroy(id: int, session: Session = Depends(get_session)):
-    site = session.get(MSite, id)
+def destroy(id: int):
+    site = Site.find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
-    session.delete(site)
-    session.commit()
-    return {"ok": True}
+    site.delete()
+    return site.serialize()

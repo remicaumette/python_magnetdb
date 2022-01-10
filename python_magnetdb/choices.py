@@ -12,8 +12,7 @@ from .units import units
 
 def material_choices():
     with Session(engine) as session:
-        statement = select(Material)
-        results = session.exec(statement).all()
+        results = []
 
     choices = []
     for obj in results:

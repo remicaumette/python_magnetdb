@@ -1,8 +1,8 @@
 <template>
-  <div v-if="site">
+  <div v-if="magnet">
     <div class="flex items-center justify-between mb-6">
       <div class="display-1">
-        Site Definition: {{ site.name }}
+        Magnet Definition: {{ magnet.name }}
       </div>
       <Button class="btn btn-danger" type="button" @click="destroy">
         Supprimer
@@ -16,7 +16,7 @@
         Details
       </template>
 
-      <Form :initial-values="site" @submit="submit" @validate="validate">
+      <Form :initial-values="magnet" @submit="submit" @validate="validate">
         <FormField
             label="Name"
             name="name"
@@ -25,18 +25,19 @@
             :required="true"
         />
         <FormField
-            label="Description"
-            name="description"
+            label="Be Ref"
+            name="be"
             type="text"
             :component="FormInput"
+            :required="true"
         />
         <FormField
-            label="Config file"
-            name="config"
+            label="Geometry file"
+            name="geom"
             type="text"
-            :component="FormUpload"
+            :component="FormInput"
             :required="true"
-            :default-value="site.config"
+            :disabled="true"
         />
         <FormField
             label="Status"
@@ -49,7 +50,6 @@
               { name: 'Stock', value: 'in_stock' },
               { name: 'Defunct', value: 'defunct' },
             ]"
-            :default-value="site.status"
         />
         <Button type="submit" class="btn btn-primary">
           Save
@@ -57,52 +57,47 @@
       </Form>
     </Card>
 
-    <Card>
-      <template #header>
-        Related Magnets
-      </template>
+<!--    <Card>-->
+<!--      <template #header>-->
+<!--        Related Magnets-->
+<!--      </template>-->
 
-      <div class="table-responsive">
-        <table>
-          <thead class="bg-white">
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-                v-for="magnet in site.magnets" :key="magnet.id"
-                @click="$router.push({ name: 'magnet', params: { id: magnet.id } })"
-                class="cursor-pointer"
-            >
-              <td>{{ magnet.id }}</td>
-              <td>{{ magnet.name }}</td>
-              <td>{{ magnet.status }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </Card>
+<!--      <div class="table-responsive">-->
+<!--        <table>-->
+<!--          <thead class="bg-white">-->
+<!--            <tr>-->
+<!--              <th>#</th>-->
+<!--              <th>Name</th>-->
+<!--              <th>Status</th>-->
+<!--            </tr>-->
+<!--          </thead>-->
+<!--          <tbody>-->
+<!--            <tr v-for="magnet in site.magnets" :key="magnet.id">-->
+<!--              <td>{{ magnet.id }}</td>-->
+<!--              <td>{{ magnet.name }}</td>-->
+<!--              <td>{{ magnet.status }}</td>-->
+<!--            </tr>-->
+<!--          </tbody>-->
+<!--        </table>-->
+<!--      </div>-->
+<!--    </Card>-->
   </div>
   <Alert v-else-if="error" class="alert alert-danger" :error="error"/>
 </template>
 
 <script>
 import * as Yup from 'yup'
-import * as siteService from '@/services/siteService'
+import * as magnetService from '@/services/magnetService'
 import Card from '@/components/Card'
 import Form from "@/components/Form";
 import FormField from "@/components/FormField";
 import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
-import FormUpload from "@/components/FormUpload";
 import Button from "@/components/Button";
 import Alert from "@/components/Alert";
 
 export default {
-  name: 'SiteShow',
+  name: 'MagnetShow',
   components: {
     Alert,
     Button,
@@ -114,47 +109,41 @@ export default {
     return {
       FormInput,
       FormSelect,
-      FormUpload,
       error: null,
-      site: null,
+      magnet: null,
     }
   },
   methods: {
     submit(values, {setRootError}) {
       const payload = {
-        id: this.site.id,
+        id: this.magnet.id,
         name: values.name,
-        description: values.description,
-        status: values.status.value,
-      }
-      if (values.config instanceof File) {
-        payload.config = values.config
+        status: values.status,
       }
 
-      return siteService.update(payload)
+      return magnetService.update(payload)
           .then(this.fetch)
           .catch(setRootError)
     },
     validate() {
       return Yup.object().shape({
         name: Yup.string().required(),
-        status: Yup.object().required(),
-        config: Yup.mixed().required(),
+        status: Yup.string().required(),
       })
     },
     fetch() {
-      return siteService.find({id: this.$route.params.id})
-          .then((site) => {
-            this.site = site
+      return magnetService.find({id: this.$route.params.id})
+          .then((magnet) => {
+            this.magnet = magnet
           })
           .catch((error) => {
             this.error = error
           })
     },
     destroy() {
-      return siteService.destroy({id: this.$route.params.id})
+      return magnetService.destroy({id: this.$route.params.id})
           .then(() => {
-            this.$router.push({ name: 'sites' })
+            this.$router.push({name: 'magnets'})
           })
           .catch((error) => {
             this.error = error

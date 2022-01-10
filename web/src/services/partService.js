@@ -1,12 +1,12 @@
 import client from "./client";
 
 export function list() {
-  return client.get('/api/sites')
+  return client.get('/api/parts')
     .then((res) => res.data)
 }
 
 export function find({ id }) {
-  return client.get(`/api/sites/${id}`)
+  return client.get(`/api/parts/${id}`)
     .then((res) => res.data)
 }
 
@@ -15,7 +15,7 @@ export function create(values) {
   for (const [key, value] of Object.entries(values)) {
     form.append(key, value)
   }
-  return client.post(`/api/sites`, form)
+  return client.post(`/api/parts`, form)
     .then((res) => res.data)
 }
 
@@ -24,11 +24,11 @@ export function update({ id, ...values }) {
   for (const [key, value] of Object.entries(values)) {
     form.append(key, value)
   }
-  return client.patch(`/api/sites/${id}`, form)
+  return client.patch(`/api/parts/${id}`, form)
     .then((res) => res.data)
 }
 
 export function destroy({ id }) {
-  return client.delete(`/api/sites/${id}`)
+  return client.delete(`/api/parts/${id}`)
     .then((res) => res.data)
 }

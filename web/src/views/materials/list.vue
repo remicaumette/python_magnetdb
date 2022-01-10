@@ -2,10 +2,10 @@
   <div v-if="!error">
     <div class="flex items-center justify-between mb-6">
       <div class="display-1">
-        Sites from MagnetDB
+        Materials from MagnetDB
       </div>
-      <router-link class="btn btn-success" :to="{ name: 'new_site' }">
-        New site
+      <router-link class="btn btn-success" :to="{ name: 'new_material' }">
+        New material
       </router-link>
     </div>
 
@@ -16,17 +16,15 @@
             <tr>
               <th>Name</th>
               <th>Description</th>
-              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             <tr
-              v-for="site in sites.items" :key="site.id" class="cursor-pointer"
-              @click="$router.push({ name: 'site', params: { id: site.id } })"
+                v-for="material in materials" :key="material.id" class="cursor-pointer"
+                @click="$router.push({ name: 'material', params: { id: material.id } })"
             >
-              <td>{{ site.name }}</td>
-              <td>{{ site.description }}</td>
-              <td>{{ site.status }}</td>
+              <td>{{ material.name }}</td>
+              <td>{{ material.description }}</td>
             </tr>
           </tbody>
         </table>
@@ -36,28 +34,28 @@
 </template>
 
 <script>
-import * as siteService from '@/services/siteService'
+import * as materialService from '@/services/materialService'
 import Card from '@/components/Card'
 
 export default {
-  name: 'SiteList',
+  name: 'MaterialList',
   components: {
     Card,
   },
   data() {
     return {
       error: null,
-      sites: [],
+      materials: [],
     }
   },
   async mounted() {
-    siteService.list()
-      .then((sites) => {
-        this.sites = sites
-      })
-      .catch((error) => {
-        this.error = error
-      })
+    materialService.list()
+        .then((res) => {
+          this.materials = res.items
+        })
+        .catch((error) => {
+          this.error = error
+        })
   },
 }
 </script>

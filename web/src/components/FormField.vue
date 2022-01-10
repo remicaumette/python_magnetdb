@@ -16,6 +16,7 @@
         :value="value"
         :inline="inline"
         @input="onInput"
+        @value="setValue(fieldName, $event)"
       >
         <slot />
       </component>

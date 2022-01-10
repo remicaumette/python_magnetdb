@@ -17,9 +17,6 @@
             <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'materials' }">
               Materials
             </router-link>
-            <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'records' }">
-              Records
-            </router-link>
           </div>
         </div>
         <div class="topbar-right">

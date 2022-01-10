@@ -9,12 +9,15 @@
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.3.4",
+    "@vue-hero-icons/outline": "^1.7.2",
+    "@vue-hero-icons/solid": "^1.7.2",
     "axios": "^0.24.0",
     "core-js": "^3.6.5",
     "lodash": "^4.17.21",
     "vue": "^2.6.11",
     "vue-reactive-provide": "^0.3.0",
     "vue-router": "^3.5.3",
+    "vue-select": "^3.16.0",
     "vuex": "^3.6.2",
     "yup": "^0.32.11"
   },

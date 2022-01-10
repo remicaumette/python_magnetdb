@@ -1,64 +1,76 @@
-from typing import TYPE_CHECKING, List, Optional
+from fastapi import APIRouter, Query, HTTPException, UploadFile
+from fastapi.params import File, Form
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query
-from sqlmodel import Session, select
-
-from ...database import create_db_and_tables, engine, get_session
-from ...old_models import MagnetUpdate
-from ...old_models import MPartBase, MPart, MPartCreate, MPartRead, MPartUpdate
-from ...old_models import MPartReadWithMagnet
+from ...models.attachment import Attachment
+from ...models.material import Material
+from ...models.part import Part
 
 router = APIRouter()
 
 
-@router.post("/api/mparts/", response_model=MPartRead)
-def create_mpart(*, session: Session = Depends(get_session), mpart: MPartCreate):
-    db_mpart = MPart.from_orm(mpart)
-    session.add(db_mpart)
-    session.commit()
-    session.refresh(db_mpart)
-    return db_mpart
-
-@router.get("/api/mparts/", response_model=List[MPartRead])
-def read_mparts(
-        *,
-        session: Session = Depends(get_session),
-        offset: int = 0,
-        limit: int = Query(default=100, lte=100),
-):
-    mparts = session.exec(select(MPart).offset(offset).limit(limit)).all()
-    return mparts
-
-@router.get("/api/mparts/{mpart_id}", response_model=MPartReadWithMagnet)
-def read_mpart(*, session: Session = Depends(get_session), mpart_id: int):
-    mpart = session.get(MPart, mpart_id)
-    if not mpart:
-        raise HTTPException(status_code=404, detail="MPart not found")
-    return mpart
-
-@router.patch("/api/mparts/{mpart_id}", response_model=MPartRead)
-def update_mpart(
-        *, session: Session = Depends(get_session), mpart_id: int, mpart: MPartUpdate):
-    db_mpart = session.get(MPart, mpart_id)
-    if not db_mpart:
-        raise HTTPException(status_code=404, detail="MPart not found")
-    mpart_data = mpart.dict(exclude_unset=True)
-    for key, value in mpart_data.items():
-        setattr(db_mpart, key, value)
-    session.add(db_mpart)
-    session.commit()
-    session.refresh(db_mpart)
-    return db_mpart
-
-@router.delete("/api/mparts/{mpart_id}")
-def delete_mpart(*, session: Session = Depends(get_session), mpart_id: int):
-    mpart = session.get(MPart, mpart_id)
-    if not mpart:
-        raise HTTPException(status_code=404, detail="MPart not found")
-    session.delete(mpart)
-    session.commit()
-    return {"ok": True}
+@router.get("/api/parts")
+def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
+    parts = Part.paginate(per_page, page)
+    return {
+        "current_page": parts.current_page,
+        "last_page": parts.last_page,
+        "total": parts.total,
+        "items": parts.serialize(),
+    }
 
 
-MagnetUpdate.update_forward_refs()
-MPartUpdate.update_forward_refs()
+@router.post("/api/parts")
+def create(name: str = Form(...), description: str = Form(None), status: str = Form(...), type: str = Form(...),
+           material_id: str = Form(...), cao: UploadFile = File(...), geometry: UploadFile = File(...)):
+    material = Material.find(material_id)
+    if not material:
+        raise HTTPException(status_code=404, detail="Material not found")
+
+    part = Part(name=name, description=description, status=status, type=type)
+    part.material().associate(material)
+    part.cao().associate(Attachment.upload(cao))
+    part.geometry().associate(Attachment.upload(geometry))
+    part.save()
+    return part.serialize()
+
+
+@router.get("/api/parts/{id}")
+def show(id: int):
+    part = Part.with_('material', 'cao', 'geometry', 'magnets').find(id)
+    if not part:
+        raise HTTPException(status_code=404, detail="Part not found")
+    return part.serialize()
+
+
+@router.patch("/api/parts/{id}")
+def update(id: int, name: str = Form(...), description: str = Form(None), status: str = Form(...),
+           type: str = Form(...), material_id: str = Form(...), cao: UploadFile = File(None),
+           geometry: UploadFile = File(None)):
+    part = Part.with_('material', 'cao', 'geometry').find(id)
+    if not part:
+        raise HTTPException(status_code=404, detail="Part not found")
+
+    material = Material.find(material_id)
+    if not material:
+        raise HTTPException(status_code=404, detail="Material not found")
+
+    part.name = name
+    part.description = description
+    part.status = status
+    part.type = type
+    part.material().associate(material)
+    if cao:
+        part.cao().associate(Attachment.upload(cao))
+    if geometry:
+        part.geometry().associate(Attachment.upload(geometry))
+    part.save()
+    return part.serialize()
+
+
+@router.delete("/api/parts/{id}")
+def destroy(id: int):
+    part = Part.find(id)
+    if not part:
+        raise HTTPException(status_code=404, detail="Part not found")
+    part.delete()
+    return part.serialize()
