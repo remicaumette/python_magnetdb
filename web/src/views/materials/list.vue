@@ -24,7 +24,10 @@
                 @click="$router.push({ name: 'material', params: { id: material.id } })"
             >
               <td>{{ material.name }}</td>
-              <td>{{ material.description }}</td>
+              <td>
+                <template v-if="material.description">{{ material.description }}</template>
+                <span v-else class="text-gray-500 italic">Not available</span>
+              </td>
             </tr>
           </tbody>
         </table>

@@ -13,7 +13,7 @@ class CreateMaterialsTable(Migration):
                 table.float('volumic_mass').default(0)
                 table.float('alpha').default(0)
                 table.float('specific_heat').default(0)
-                table.float('electrical_conductivity')
+                table.float('electrical_conductivity').default(0)
                 table.float('thermal_conductivity').default(0)
                 table.float('magnet_permeability').default(0)
                 table.float('young').default(0)

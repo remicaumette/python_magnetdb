@@ -1,22 +1,11 @@
 <template>
-  <div v-if="material">
-    <div class="flex items-center justify-between mb-6">
-      <div class="display-1">
-        Material Definition: {{ material.name }}
-      </div>
-      <Button class="btn btn-danger" type="button" @click="destroy">
-        Supprimer
-      </Button>
+  <div class="mx-auto w-full max-w-lg">
+    <div class="display-1 text-center mb-6">
+      New material
     </div>
 
-    <Alert v-if="error" class="alert alert-danger mb-6" :error="error"/>
-
-    <Card class="mb-6">
-      <template #header>
-        Details
-      </template>
-
-      <Form :initial-values="material" @submit="submit" @validate="validate">
+    <Card>
+      <Form @submit="submit" @validate="validate">
         <FormField
             label="Name"
             name="name"
@@ -118,40 +107,7 @@
         </Button>
       </Form>
     </Card>
-
-    <Card>
-      <template #header>
-        Related Parts
-      </template>
-
-      <div class="table-responsive">
-        <table>
-          <thead class="bg-white">
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-                v-for="part in material.parts" :key="part.id"
-                @click="$router.push({ name: 'part', params: { id: part.id } })"
-                class="cursor-pointer"
-            >
-              <td>{{ part.name }}</td>
-              <td>
-                <template v-if="part.description">{{ part.description }}</template>
-                <span v-else class="text-gray-500 italic">Not available</span>
-              </td>
-              <td>{{ part.status }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </Card>
   </div>
-  <Alert v-else-if="error" class="alert alert-danger" :error="error"/>
 </template>
 
 <script>
@@ -162,13 +118,12 @@ import Form from "@/components/Form";
 import FormField from "@/components/FormField";
 import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
+import FormUpload from "@/components/FormUpload";
 import Button from "@/components/Button";
-import Alert from "@/components/Alert";
 
 export default {
-  name: 'MaterialShow',
+  name: 'MaterialNew',
   components: {
-    Alert,
     Button,
     FormField,
     Form,
@@ -178,19 +133,16 @@ export default {
     return {
       FormInput,
       FormSelect,
+      FormUpload,
       error: null,
-      material: null,
     }
   },
   methods: {
     submit(values, {setRootError}) {
-      const payload = {
-        id: this.material.id,
-        ...values,
-      }
-
-      return materialService.update(payload)
-          .then(this.fetch)
+      return materialService.create(values)
+          .then((material) => {
+            this.$router.push({ name: 'material', params: { id: material.id } })
+          })
           .catch(setRootError)
     },
     validate() {
@@ -199,27 +151,6 @@ export default {
         rpe: Yup.string().required(),
       })
     },
-    fetch() {
-      return materialService.find({id: this.$route.params.id})
-          .then((material) => {
-            this.material = material
-          })
-          .catch((error) => {
-            this.error = error
-          })
-    },
-    destroy() {
-      return materialService.destroy({id: this.$route.params.id})
-          .then(() => {
-            this.$router.push({name: 'materials'})
-          })
-          .catch((error) => {
-            this.error = error
-          })
-    },
-  },
-  async mounted() {
-    await this.fetch()
   },
 }
 </script>

@@ -101,7 +101,10 @@
                 class="cursor-pointer"
             >
               <td>{{ magnet.name }}</td>
-              <td>{{ magnet.description }}</td>
+              <td>
+                <template v-if="magnet.description">{{ magnet.description }}</template>
+                <span v-else class="text-gray-500 italic">Not available</span>
+              </td>
               <td>{{ magnet.status }}</td>
             </tr>
           </tbody>

@@ -11,12 +11,20 @@ export function find({ id }) {
 }
 
 export function create(values) {
-  return client.post(`/api/magnets`, values)
+  const form = new FormData()
+  for (const [key, value] of Object.entries(values)) {
+    form.append(key, value)
+  }
+  return client.post(`/api/magnets`, form)
     .then((res) => res.data)
 }
 
 export function update({ id, ...values }) {
-  return client.patch(`/api/magnets/${id}`, values)
+  const form = new FormData()
+  for (const [key, value] of Object.entries(values)) {
+    form.append(key, value)
+  }
+  return client.patch(`/api/magnets/${id}`, form)
     .then((res) => res.data)
 }
 

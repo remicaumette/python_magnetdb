@@ -25,19 +25,10 @@
             :required="true"
         />
         <FormField
-            label="Be Ref"
-            name="be"
+            label="Description"
+            name="description"
             type="text"
             :component="FormInput"
-            :required="true"
-        />
-        <FormField
-            label="Geometry file"
-            name="geom"
-            type="text"
-            :component="FormInput"
-            :required="true"
-            :disabled="true"
         />
         <FormField
             label="Status"
@@ -50,6 +41,15 @@
               { name: 'Stock', value: 'in_stock' },
               { name: 'Defunct', value: 'defunct' },
             ]"
+            :default-value="magnet.status"
+        />
+        <FormField
+            label="CAO"
+            name="cao"
+            type="file"
+            :component="FormUpload"
+            :required="true"
+            :default-value="magnet.cao"
         />
         <Button type="submit" class="btn btn-primary">
           Save
@@ -57,30 +57,77 @@
       </Form>
     </Card>
 
-<!--    <Card>-->
-<!--      <template #header>-->
-<!--        Related Magnets-->
-<!--      </template>-->
+    <Card class="mb-6">
+      <template #header>
+        Related Parts
+      </template>
 
-<!--      <div class="table-responsive">-->
-<!--        <table>-->
-<!--          <thead class="bg-white">-->
-<!--            <tr>-->
-<!--              <th>#</th>-->
-<!--              <th>Name</th>-->
-<!--              <th>Status</th>-->
-<!--            </tr>-->
-<!--          </thead>-->
-<!--          <tbody>-->
-<!--            <tr v-for="magnet in site.magnets" :key="magnet.id">-->
-<!--              <td>{{ magnet.id }}</td>-->
-<!--              <td>{{ magnet.name }}</td>-->
-<!--              <td>{{ magnet.status }}</td>-->
-<!--            </tr>-->
-<!--          </tbody>-->
-<!--        </table>-->
-<!--      </div>-->
-<!--    </Card>-->
+      <div class="table-responsive">
+        <table>
+          <thead class="bg-white">
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Commissioned At</th>
+              <th>Decommissioned At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+                v-for="magnetPart in magnet.magnet_parts" :key="magnetPart.id"
+                @click="$router.push({ name: 'part', params: { id: magnetPart.part.id } })"
+                class="cursor-pointer"
+            >
+              <td>{{ magnetPart.part.name }}</td>
+              <td>
+                <template v-if="magnetPart.part.description">{{ magnetPart.part.description }}</template>
+                <span v-else class="text-gray-500 italic">Not available</span>
+              </td>
+              <td>{{ magnetPart.part.status }}</td>
+              <td>{{ magnetPart.commissioned_at }}</td>
+              <td>{{ magnetPart.decommissioned_at }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Card>
+
+    <Card class="mb-6">
+      <template #header>
+        Related Site
+      </template>
+
+      <div class="table-responsive">
+        <table>
+          <thead class="bg-white">
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Commissioned At</th>
+              <th>Decommissioned At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+                v-for="siteMagnet in magnet.site_magnets" :key="siteMagnet.id"
+                @click="$router.push({ name: 'site', params: { id: siteMagnet.site.id } })"
+                class="cursor-pointer"
+            >
+              <td>{{ siteMagnet.site.name }}</td>
+              <td>
+                <template v-if="siteMagnet.site.description">{{ siteMagnet.site.description }}</template>
+                <span v-else class="text-gray-500 italic">Not available</span>
+              </td>
+              <td>{{ siteMagnet.site.status }}</td>
+              <td>{{ siteMagnet.commissioned_at }}</td>
+              <td>{{ siteMagnet.decommissioned_at }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Card>
   </div>
   <Alert v-else-if="error" class="alert alert-danger" :error="error"/>
 </template>
@@ -93,6 +140,7 @@ import Form from "@/components/Form";
 import FormField from "@/components/FormField";
 import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
+import FormUpload from "@/components/FormUpload";
 import Button from "@/components/Button";
 import Alert from "@/components/Alert";
 
@@ -109,16 +157,21 @@ export default {
     return {
       FormInput,
       FormSelect,
+      FormUpload,
       error: null,
       magnet: null,
     }
   },
   methods: {
     submit(values, {setRootError}) {
-      const payload = {
+      let payload = {
         id: this.magnet.id,
         name: values.name,
-        status: values.status,
+        description: values.description,
+        status: values.status.value,
+      }
+      if (values.cao instanceof File) {
+        payload.cao = values.cao
       }
 
       return magnetService.update(payload)
@@ -128,7 +181,8 @@ export default {
     validate() {
       return Yup.object().shape({
         name: Yup.string().required(),
-        status: Yup.string().required(),
+        status: Yup.object().required(),
+        cao: Yup.mixed().required(),
       })
     },
     fetch() {

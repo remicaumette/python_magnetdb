@@ -12,6 +12,6 @@ class SiteMagnet(Model):
         return Magnet
 
     @belongs_to('site_id')
-    def part(self):
+    def site(self):
         from .site import Site
         return Site

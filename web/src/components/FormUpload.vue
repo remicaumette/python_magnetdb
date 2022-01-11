@@ -6,7 +6,7 @@
       <div v-if="$refs.input.files.length > 0" @click="clearFiles" class="do-not-open-upload">
         <TrashIcon class="h5 w-5" />
       </div>
-      <div v-else class="do-not-open-upload">
+      <div v-else class="do-not-open-upload" @click="downloadFile">
         <DownloadIcon class="h5 w-5" />
       </div>
     </div>
@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import client from '@/services/client'
 import { TrashIcon } from '@vue-hero-icons/outline'
 import { DownloadIcon } from '@vue-hero-icons/outline'
 
@@ -49,6 +50,9 @@ export default {
       this.inputKey = Date.now()
       this.fileName = this.defaultValue?.filename
       this.$forceUpdate()
+    },
+    downloadFile() {
+      window.open(`${client.defaults.baseURL}/api/attachments/${this.defaultValue.id}/download`, '_blank')
     },
   },
   mounted() {

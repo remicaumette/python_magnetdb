@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent="submit">
-    <Alert v-if="rootError" class="alert alert-danger" :error="rootError" />
+    <Alert v-if="rootError" class="alert alert-danger mb-4" :error="rootError" />
     <slot />
   </form>
 </template>

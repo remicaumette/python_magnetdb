@@ -3,7 +3,9 @@
     <div class="topbar">
       <div class="container-center">
         <div class="topbar-left">
-          <div class="topbar-title">MagnetDB</div>
+          <router-link class="topbar-title" :to="{ name: 'root' }">
+            MagnetDB
+          </router-link>
           <div class="topbar-link-list">
             <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'sites' }">
               Sites

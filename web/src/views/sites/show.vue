@@ -66,8 +66,8 @@
         <table>
           <thead class="bg-white">
             <tr>
-              <th>#</th>
               <th>Name</th>
+              <th>Description</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -77,8 +77,11 @@
                 @click="$router.push({ name: 'magnet', params: { id: magnet.id } })"
                 class="cursor-pointer"
             >
-              <td>{{ magnet.id }}</td>
               <td>{{ magnet.name }}</td>
+              <td>
+                <template v-if="magnet.description">{{ magnet.description }}</template>
+                <span v-else class="text-gray-500 italic">Not available</span>
+              </td>
               <td>{{ magnet.status }}</td>
             </tr>
           </tbody>

@@ -71,7 +71,6 @@ export default {
       FormSelect,
       FormUpload,
       error: null,
-      site: null,
     }
   },
   methods: {

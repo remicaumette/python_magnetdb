@@ -1,19 +1,29 @@
+from os import getenv
+
+from orator import DatabaseManager, Schema, Model
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
-from .config import static_files
 from .routes.api.magnets import router as api_magnets_router
 from .routes.api.materials import router as api_materials_router
 from .routes.api.parts import router as api_parts_router
 from .routes.api.sites import router as api_sites_router
-from .routes.home import router as home_router
-from .routes.magnets import router as magnets_router
-from .routes.materials import router as materials_router
-from .routes.parts import router as parts_router
-from .routes.records import router as records_router
-from .routes.sites import router as sites_router
-from .routes.geom import router as geoms_router
+from .routes.api.attachments import router as api_attachments_router
+
+db = DatabaseManager({
+    'postgres': {
+        'driver': 'postgres',
+        'host': getenv('DATABASE_HOST') or 'localhost',
+        'database': getenv('DATABASE_NAME') or 'magnetdb',
+        'user': getenv('DATABASE_USER') or 'magnetdb',
+        'password': getenv('DATABASE_PASSWORD') or 'magnetdb',
+        'prefix': ''
+    }
+})
+schema = Schema(db)
+Model.set_connection_resolver(db)
 
 app = FastAPI()
 
@@ -25,19 +35,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", static_files, name="static")
-
-app.include_router(home_router)
-app.include_router(magnets_router)
-app.include_router(materials_router)
-app.include_router(sites_router)
-app.include_router(parts_router)
-app.include_router(records_router)
-app.include_router(geoms_router)
 app.include_router(api_materials_router)
 app.include_router(api_parts_router)
 app.include_router(api_magnets_router)
 app.include_router(api_sites_router)
+app.include_router(api_attachments_router)
 
 def custom_openapi():
     if app.openapi_schema:

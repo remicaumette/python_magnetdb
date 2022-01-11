@@ -10,6 +10,9 @@ class Attachment(Model):
     __table__ = "storage_attachments"
     __fillable__ = ['key', 'filename', 'content_type']
 
+    def download(self):
+        return s3_client.get_object(s3_bucket, self.key)
+
     @classmethod
     def upload(cls, file: UploadFile):
         attachment = cls.create({
