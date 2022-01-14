@@ -19,7 +19,7 @@ def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
 
 @router.get("/api/magnets/{id}")
 def show(id: int):
-    magnet = Magnet.with_('magnet_parts.part', 'site_magnets.site', 'cao').find(id)
+    magnet = Magnet.with_('magnet_parts.part', 'site_magnets.site', 'cao', 'geometry').find(id)
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
     return magnet.serialize()
@@ -27,16 +27,19 @@ def show(id: int):
 
 @router.patch("/api/magnets/{id}")
 def update(id: int, name: str = Form(...), description: str = Form(None), status: str = Form(...),
-           cao: UploadFile = File(None)):
-    magnet = Magnet.with_('cao').find(id)
+           design_office_reference: str = Form(None), cao: UploadFile = File(None), geometry: UploadFile = File(None)):
+    magnet = Magnet.with_('cao', 'geometry').find(id)
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
 
     magnet.name = name
     magnet.description = description
     magnet.status = status
+    magnet.design_office_reference = design_office_reference
     if cao:
         magnet.cao().associate(Attachment.upload(cao))
+    if geometry:
+        magnet.geometry().associate(Attachment.upload(geometry))
     magnet.save()
     return magnet.serialize()
 

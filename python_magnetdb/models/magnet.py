@@ -8,10 +8,14 @@ from .site_magnet import SiteMagnet
 
 class Magnet(Model):
     __table__ = "magnets"
-    __fillable__ = ['name', 'description', 'status']
+    __fillable__ = ['name', 'description', 'status', 'design_office_reference']
 
     @belongs_to('cao_attachment_id')
     def cao(self):
+        return Attachment
+
+    @belongs_to('geometry_attachment_id')
+    def geometry(self):
         return Attachment
 
     @has_many

@@ -44,12 +44,24 @@
             :default-value="magnet.status"
         />
         <FormField
+            label="Design Office Reference"
+            name="design_office_reference"
+            type="text"
+            :component="FormInput"
+        />
+        <FormField
             label="CAO"
             name="cao"
             type="file"
             :component="FormUpload"
-            :required="true"
             :default-value="magnet.cao"
+        />
+        <FormField
+            label="Geometry"
+            name="geometry"
+            type="file"
+            :component="FormUpload"
+            :default-value="magnet.geometry"
         />
         <Button type="submit" class="btn btn-primary">
           Save
@@ -169,9 +181,13 @@ export default {
         name: values.name,
         description: values.description,
         status: values.status.value,
+        design_office_reference: values.design_office_reference,
       }
       if (values.cao instanceof File) {
         payload.cao = values.cao
+      }
+      if (values.geometry instanceof File) {
+        payload.geometry = values.geometry
       }
 
       return magnetService.update(payload)
@@ -182,7 +198,6 @@ export default {
       return Yup.object().shape({
         name: Yup.string().required(),
         status: Yup.object().required(),
-        cao: Yup.mixed().required(),
       })
     },
     fetch() {
