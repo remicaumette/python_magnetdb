@@ -39,25 +39,17 @@
             :required="true"
         />
         <FormField
+            label="Design Office Reference"
+            name="design_office_reference"
+            type="text"
+            :component="FormInput"
+        />
+        <FormField
             label="Material"
             name="material"
             :component="FormSelect"
             :required="true"
             :options="materialOptions"
-        />
-        <FormField
-            label="CAO"
-            name="cao"
-            type="file"
-            :component="FormUpload"
-            :required="true"
-        />
-        <FormField
-            label="Geometry"
-            name="geometry"
-            type="file"
-            :component="FormUpload"
-            :required="true"
         />
         <Button type="submit" class="btn btn-primary">
           Save
@@ -114,8 +106,6 @@ export default {
         status: Yup.object().required(),
         type: Yup.string().required(),
         material: Yup.object().required(),
-        cao: Yup.mixed().required(),
-        geometry: Yup.mixed().required(),
       })
     },
   },

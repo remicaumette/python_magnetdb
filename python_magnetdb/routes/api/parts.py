@@ -21,15 +21,14 @@ def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
 
 @router.post("/api/parts")
 def create(name: str = Form(...), description: str = Form(None), status: str = Form(...), type: str = Form(...),
-           material_id: str = Form(...), cao: UploadFile = File(...), geometry: UploadFile = File(...)):
+           material_id: str = Form(...), design_office_reference: str = Form(None)):
     material = Material.find(material_id)
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
 
-    part = Part(name=name, description=description, status=status, type=type)
+    part = Part(name=name, description=description, status=status, type=type,
+                design_office_reference=design_office_reference)
     part.material().associate(material)
-    part.cao().associate(Attachment.upload(cao))
-    part.geometry().associate(Attachment.upload(geometry))
     part.save()
     return part.serialize()
 
@@ -44,8 +43,8 @@ def show(id: int):
 
 @router.patch("/api/parts/{id}")
 def update(id: int, name: str = Form(...), description: str = Form(None), status: str = Form(...),
-           type: str = Form(...), material_id: str = Form(...), cao: UploadFile = File(None),
-           geometry: UploadFile = File(None)):
+           type: str = Form(...), material_id: str = Form(...), design_office_reference: str = Form(None),
+           cao: UploadFile = File(None), geometry: UploadFile = File(None)):
     part = Part.with_('material', 'cao', 'geometry').find(id)
     if not part:
         raise HTTPException(status_code=404, detail="Part not found")
@@ -58,6 +57,7 @@ def update(id: int, name: str = Form(...), description: str = Form(None), status
     part.description = description
     part.status = status
     part.type = type
+    part.design_office_reference = design_office_reference
     part.material().associate(material)
     if cao:
         part.cao().associate(Attachment.upload(cao))

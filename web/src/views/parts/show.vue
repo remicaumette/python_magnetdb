@@ -51,6 +51,12 @@
             :required="true"
         />
         <FormField
+            label="Design Office Reference"
+            name="design_office_reference"
+            type="text"
+            :component="FormInput"
+        />
+        <FormField
             label="Material"
             name="material"
             :component="FormSelect"
@@ -63,7 +69,6 @@
             name="cao"
             type="file"
             :component="FormUpload"
-            :required="true"
             :default-value="part.cao"
         />
         <FormField
@@ -71,7 +76,6 @@
             name="geometry"
             type="file"
             :component="FormUpload"
-            :required="true"
             :default-value="part.geometry"
         />
         <Button type="submit" class="btn btn-primary">
@@ -155,6 +159,7 @@ export default {
         description: values.description,
         status: values.status.value,
         type: values.type,
+        design_office_reference: values.design_office_reference,
         material_id: values.material.value,
       }
       if (values.cao instanceof File) {

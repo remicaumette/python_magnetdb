@@ -15,6 +15,7 @@
           <thead class="bg-white">
             <tr>
               <th>Name</th>
+              <th>Type</th>
               <th>Description</th>
               <th>Status</th>
             </tr>
@@ -25,6 +26,7 @@
                 @click="$router.push({ name: 'part', params: { id: part.id } })"
             >
               <td>{{ part.name }}</td>
+              <td>{{ part.type }}</td>
               <td>
                 <template v-if="part.description">{{ part.description }}</template>
                 <span v-else class="text-gray-500 italic">Not available</span>

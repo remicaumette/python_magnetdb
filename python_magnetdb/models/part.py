@@ -8,7 +8,7 @@ from .material import Material
 
 class Part(Model):
     __table__ = "parts"
-    __fillable__ = ['name', 'description', 'type', 'status', 'material_id']
+    __fillable__ = ['name', 'description', 'type', 'status', 'design_office_reference', 'material_id']
 
     @belongs_to('geometry_attachment_id')
     def geometry(self):
