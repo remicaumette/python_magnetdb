@@ -31,8 +31,8 @@
             :component="FormInput"
         />
         <FormField
-            label="Shade"
-            name="shade"
+            label="Nuance"
+            name="nuance"
             type="text"
             :component="FormInput"
         />

@@ -7,7 +7,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA15101601',
                 'description': 'H1',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -23,7 +23,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA15061703',
                 'description': 'H2',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -39,7 +39,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA15061801',
                 'description': 'H3',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -55,7 +55,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA15100501',
                 'description': 'H4',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -71,7 +71,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA15101501',
                 'description': 'H5',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -87,7 +87,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA18060101',
                 'description': 'H6',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -103,7 +103,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA18012501',
                 'description': 'H7',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -119,7 +119,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA18051801',
                 'description': 'H8',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -135,7 +135,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA18101201',
                 'description': 'H9',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -151,7 +151,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA18101201',
                 'description': 'H10',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -167,7 +167,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA19012101',
                 'description': 'H11',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -183,7 +183,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA19011601',
                 'description': 'H12',
-                'shade': 'CuAg5.5',
+                'nuance': 'CuAg5.5',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -199,7 +199,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA10061702',
                 'description': 'H13',
-                'shade': 'CuCrZr',
+                'nuance': 'CuCrZr',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -215,7 +215,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MA10061703',
                 'description': 'H14',
-                'shade': 'CuCrZr',
+                'nuance': 'CuCrZr',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -231,7 +231,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MAT1_RING',
                 'description': 'R1, R2',
-                'shade': 'unknow',
+                'nuance': 'unknow',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -247,7 +247,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MAT2_RING',
                 'description': 'R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13',
-                'shade': 'unknow',
+                'nuance': 'unknow',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -263,7 +263,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MAT_LEAD',
                 'description': 'il1 ol2',
-                'shade': 'unknow',
+                'nuance': 'unknow',
                 't_ref': 293,
                 'volumic_mass': 9e+3,
                 'specific_heat': 0,
@@ -279,7 +279,7 @@ class MaterialTableSeeder(Seeder):
             {
                 'name': 'MAT_ISOLANT',
                 'description': None,
-                'shade': 'unknow',
+                'nuance': 'unknow',
                 't_ref': 20,
                 'volumic_mass': 2e+3,
                 'specific_heat': 0,

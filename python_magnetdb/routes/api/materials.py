@@ -11,7 +11,7 @@ router = APIRouter()
 class MaterialPayload(BaseModel):
     name: str
     description: Optional[str]
-    shade: Optional[str]
+    nuance: Optional[str]
     t_ref: Optional[float] = 20
     volumic_mass: Optional[float] = 0
     alpha: Optional[float] = 0
