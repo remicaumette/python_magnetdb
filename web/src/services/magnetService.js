@@ -28,6 +28,11 @@ export function update({ id, ...values }) {
     .then((res) => res.data)
 }
 
+export function decommissionPart({ magnetId, partId }) {
+  return client.post(`/api/magnets/${magnetId}/parts/${partId}/decommission`)
+    .then((res) => res.data)
+}
+
 export function destroy({ id }) {
   return client.delete(`/api/magnets/${id}`)
     .then((res) => res.data)

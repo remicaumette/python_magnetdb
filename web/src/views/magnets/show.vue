@@ -71,7 +71,7 @@
 
     <Card class="mb-6">
       <template #header>
-        Related Parts
+        Parts
       </template>
 
       <div class="table-responsive">
@@ -83,22 +83,31 @@
               <th>Status</th>
               <th>Commissioned At</th>
               <th>Decommissioned At</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            <tr
-                v-for="magnetPart in magnet.magnet_parts" :key="magnetPart.id"
-                @click="$router.push({ name: 'part', params: { id: magnetPart.part.id } })"
-                class="cursor-pointer"
-            >
-              <td>{{ magnetPart.part.name }}</td>
+            <tr v-for="magnetPart in magnet.magnet_parts" :key="magnetPart.id">
+              <td>
+                <router-link :to="{ name: 'part', params: { id: magnetPart.part.id } }">
+                  {{ magnetPart.part.name }}
+                </router-link>
+              </td>
               <td>
                 <template v-if="magnetPart.part.description">{{ magnetPart.part.description }}</template>
                 <span v-else class="text-gray-500 italic">Not available</span>
               </td>
               <td>{{ magnetPart.part.status }}</td>
-              <td>{{ magnetPart.commissioned_at }}</td>
-              <td>{{ magnetPart.decommissioned_at }}</td>
+              <td>{{ magnetPart.commissioned_at | datetime }}</td>
+              <td>{{ magnetPart.decommissioned_at | datetime }}</td>
+              <td>
+                <Button
+                    v-if="!magnetPart.decommissioned_at" class="btn btn-danger btn-small"
+                    @click="decommissionPart(magnetPart)"
+                >
+                  Decommission
+                </Button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -122,12 +131,12 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-                v-for="siteMagnet in magnet.site_magnets" :key="siteMagnet.id"
-                @click="$router.push({ name: 'site', params: { id: siteMagnet.site.id } })"
-                class="cursor-pointer"
-            >
-              <td>{{ siteMagnet.site.name }}</td>
+            <tr v-for="siteMagnet in magnet.site_magnets" :key="siteMagnet.id">
+              <td>
+                <router-link :to="{ name: 'site', params: { id: siteMagnet.site.id } }">
+                  {{ siteMagnet.site.name }}
+                </router-link>
+              </td>
               <td>
                 <template v-if="siteMagnet.site.description">{{ siteMagnet.site.description }}</template>
                 <span v-else class="text-gray-500 italic">Not available</span>
@@ -175,6 +184,13 @@ export default {
     }
   },
   methods: {
+    decommissionPart(magnetPart) {
+      return magnetService.decommissionPart({ magnetId: magnetPart.magnet_id, partId: magnetPart.part_id })
+          .then(this.fetch)
+          .catch((error) => {
+            this.error = error
+          })
+    },
     submit(values, {setRootError}) {
       let payload = {
         id: this.magnet.id,
