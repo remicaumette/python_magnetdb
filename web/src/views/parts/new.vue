@@ -20,18 +20,6 @@
             :component="FormInput"
         />
         <FormField
-            label="Status"
-            name="status"
-            :component="FormSelect"
-            :required="true"
-            :options="[
-              { name: 'Study', value: 'in_study' },
-              { name: 'Operation', value: 'in_operation' },
-              { name: 'Stock', value: 'in_stock' },
-              { name: 'Defunct', value: 'defunct' },
-            ]"
-        />
-        <FormField
             label="Type"
             name="type"
             type="text"
@@ -72,7 +60,7 @@ import Button from "@/components/Button";
 import FormUpload from "@/components/FormUpload";
 
 export default {
-  name: 'SiteNew',
+  name: 'PartNew',
   components: {
     Button,
     FormField,
@@ -93,7 +81,6 @@ export default {
       return partService.create({
         ...values,
         material_id: values.material.value,
-        status: values.status.value,
       })
           .then((part) => {
             this.$router.push({ name: 'part', params: { id: part.id } })
@@ -103,7 +90,6 @@ export default {
     validate() {
       return Yup.object().shape({
         name: Yup.string().required(),
-        status: Yup.object().required(),
         type: Yup.string().required(),
         material: Yup.object().required(),
       })

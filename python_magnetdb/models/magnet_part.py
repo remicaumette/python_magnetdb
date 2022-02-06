@@ -15,17 +15,3 @@ class MagnetPart(Model):
     def part(self):
         from .part import Part
         return Part
-
-
-class MagnetPartObserver:
-    def created(self, magnet_part):
-        magnet_part.part().status = 'in_operation'
-        magnet_part.part().save()
-
-    def updated(self, magnet_part):
-        if magnet_part.decommissioned_at is not None and magnet_part.part.status == 'in_operation':
-            magnet_part.part.status = 'stock'
-            magnet_part.part.save()
-
-
-MagnetPart.observe(MagnetPartObserver())

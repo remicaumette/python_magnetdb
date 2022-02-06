@@ -10,7 +10,7 @@ export function createFormField() {
       setValue(name, value) {
         const values = cloneDeep(this.form.values)
         set(values, name, value)
-        this.form.values = values
+        this.form.setValues(values)
       },
     },
     computed: {

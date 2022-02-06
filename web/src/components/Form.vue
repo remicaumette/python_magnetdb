@@ -26,7 +26,7 @@ export default {
   },
   reactiveProvide: {
     name: 'form',
-    include: ['values', 'errors', 'loading', 'dirty', 'submit'],
+    include: ['values', 'errors', 'loading', 'dirty', 'submit', 'computeDirty', 'setValues'],
   },
   watch: {
     values: {
@@ -45,6 +45,9 @@ export default {
     },
   },
   methods: {
+    setValues(values) {
+      this.values = values
+    },
     computeDirty() {
       this.dirty = !isEqual(this.initialValues, this.values)
     },

@@ -1,7 +1,7 @@
 <template>
   <div class="mx-auto w-full max-w-lg">
     <div class="display-1 text-center mb-6">
-      New site
+      New magnet
     </div>
 
     <Card>
@@ -20,11 +20,22 @@
             :component="FormInput"
         />
         <FormField
-            label="Config file"
-            name="config"
+            label="Design Office Reference"
+            name="design_office_reference"
+            type="text"
+            :component="FormInput"
+        />
+        <FormField
+            label="CAO"
+            name="cao"
             type="file"
             :component="FormUpload"
-            :required="true"
+        />
+        <FormField
+            label="Geometry"
+            name="geometry"
+            type="file"
+            :component="FormUpload"
         />
         <Button type="submit" class="btn btn-primary">
           Save
@@ -36,16 +47,17 @@
 
 <script>
 import * as Yup from 'yup'
-import * as siteService from '@/services/siteService'
+import * as magnetService from '@/services/magnetService'
 import Card from '@/components/Card'
 import Form from "@/components/Form";
 import FormField from "@/components/FormField";
 import FormInput from "@/components/FormInput";
-import FormUpload from "@/components/FormUpload";
+import FormSelect from "@/components/FormSelect";
 import Button from "@/components/Button";
+import FormUpload from "@/components/FormUpload";
 
 export default {
-  name: 'SiteNew',
+  name: 'MagnetNew',
   components: {
     Button,
     FormField,
@@ -55,22 +67,22 @@ export default {
   data() {
     return {
       FormInput,
+      FormSelect,
       FormUpload,
       error: null,
     }
   },
   methods: {
     submit(values, {setRootError}) {
-      return siteService.create(values)
-          .then((site) => {
-            this.$router.push({ name: 'site', params: { id: site.id } })
+      return magnetService.create(values)
+          .then((magnet) => {
+            this.$router.push({ name: 'magnet', params: { id: magnet.id } })
           })
           .catch(setRootError)
     },
     validate() {
       return Yup.object().shape({
         name: Yup.string().required(),
-        config: Yup.mixed().required(),
       })
     },
   },

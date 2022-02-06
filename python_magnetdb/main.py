@@ -12,6 +12,7 @@ from .routes.api.parts import router as api_parts_router
 from .routes.api.sites import router as api_sites_router
 from .routes.api.attachments import router as api_attachments_router
 from .routes.api.magnet_parts import router as api_magnet_parts_router
+from .routes.api.site_magnets import router as api_site_magnets_router
 
 db = DatabaseManager({
     'postgres': {
@@ -42,6 +43,7 @@ app.include_router(api_magnets_router)
 app.include_router(api_sites_router)
 app.include_router(api_attachments_router)
 app.include_router(api_magnet_parts_router)
+app.include_router(api_site_magnets_router)
 
 def custom_openapi():
     if app.openapi_schema:

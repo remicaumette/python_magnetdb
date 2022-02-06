@@ -28,7 +28,7 @@ export function update({ id, ...values }) {
     .then((res) => res.data)
 }
 
-export function destroy({ id }) {
-  return client.delete(`/api/parts/${id}`)
+export function defunct({ partId }) {
+  return client.post(`/api/parts/${partId}/defunct`)
     .then((res) => res.data)
 }

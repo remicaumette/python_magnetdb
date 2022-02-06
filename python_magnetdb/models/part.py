@@ -8,7 +8,7 @@ from .material import Material
 
 class Part(Model):
     __table__ = "parts"
-    __fillable__ = ['name', 'description', 'type', 'status', 'design_office_reference', 'material_id']
+    __fillable__ = ['name', 'description', 'status', 'type', 'design_office_reference', 'material_id']
 
     @belongs_to('geometry_attachment_id')
     def geometry(self):
@@ -23,7 +23,7 @@ class Part(Model):
         return Material
 
     @has_many
-    def site_magnets(self):
+    def magnet_parts(self):
         return MagnetPart
 
     @has_many_through(MagnetPart, 'part_id', 'id')

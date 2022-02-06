@@ -2,10 +2,10 @@
   <div v-if="part">
     <div class="flex items-center justify-between mb-6">
       <div class="display-1">
-        Part Definition: {{ part.name }}
+        Part Definition: {{ part.name }} ({{ part.status }})
       </div>
-      <Button class="btn btn-danger" type="button" @click="destroy">
-        Supprimer
+      <Button v-if="part.status === 'in_stock'" class="btn btn-danger" type="button" @click="defunct">
+        Defunct
       </Button>
     </div>
 
@@ -29,19 +29,6 @@
             name="description"
             type="text"
             :component="FormInput"
-        />
-        <FormField
-            label="Status"
-            name="status"
-            :component="FormSelect"
-            :required="true"
-            :options="[
-              { name: 'Study', value: 'in_study' },
-              { name: 'Operation', value: 'in_operation' },
-              { name: 'Stock', value: 'in_stock' },
-              { name: 'Defunct', value: 'defunct' },
-            ]"
-            :default-value="part.status"
         />
         <FormField
             label="Type"
@@ -86,7 +73,7 @@
 
     <Card>
       <template #header>
-        Related Magnets
+        Magnets
       </template>
 
       <div class="table-responsive">
@@ -99,17 +86,17 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-                v-for="magnet in part.magnets" :key="magnet.id"
-                @click="$router.push({ name: 'magnet', params: { id: magnet.id } })"
-                class="cursor-pointer"
-            >
-              <td>{{ magnet.name }}</td>
+            <tr v-for="magnetPart in part.magnet_parts" :key="magnetPart.id">
               <td>
-                <template v-if="magnet.description">{{ magnet.description }}</template>
+                <router-link :to="{ name: 'magnet', params: { id: magnetPart.magnet.id } }" class="link">
+                  {{ magnetPart.magnet.name }}
+                </router-link>
+              </td>
+              <td>
+                <template v-if="magnetPart.magnet.description">{{ magnetPart.magnet.description }}</template>
                 <span v-else class="text-gray-500 italic">Not available</span>
               </td>
-              <td>{{ magnet.status }}</td>
+              <td>{{ magnetPart.magnet.status }}</td>
             </tr>
           </tbody>
         </table>
@@ -152,12 +139,18 @@ export default {
     }
   },
   methods: {
+    defunct() {
+      return partService.defunct({ partId: this.part.id })
+          .then(this.fetch)
+          .catch((error) => {
+            this.error = error
+          })
+    },
     submit(values, {setRootError}) {
       let payload = {
         id: this.part.id,
         name: values.name,
         description: values.description,
-        status: values.status.value,
         type: values.type,
         design_office_reference: values.design_office_reference,
         material_id: values.material.value,
@@ -176,7 +169,6 @@ export default {
     validate() {
       return Yup.object().shape({
         name: Yup.string().required(),
-        status: Yup.object().required(),
         type: Yup.string().required(),
         material: Yup.object().required(),
       })
@@ -185,15 +177,6 @@ export default {
       return partService.find({id: this.$route.params.id})
           .then((part) => {
             this.part = part
-          })
-          .catch((error) => {
-            this.error = error
-          })
-    },
-    destroy() {
-      return partService.destroy({id: this.$route.params.id})
-          .then(() => {
-            this.$router.push({name: 'parts'})
           })
           .catch((error) => {
             this.error = error

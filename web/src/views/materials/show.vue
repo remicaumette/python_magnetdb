@@ -4,9 +4,6 @@
       <div class="display-1">
         Material Definition: {{ material.name }}
       </div>
-      <Button class="btn btn-danger" type="button" @click="destroy">
-        Supprimer
-      </Button>
     </div>
 
     <Alert v-if="error" class="alert alert-danger mb-6" :error="error"/>
@@ -203,15 +200,6 @@ export default {
       return materialService.find({id: this.$route.params.id})
           .then((material) => {
             this.material = material
-          })
-          .catch((error) => {
-            this.error = error
-          })
-    },
-    destroy() {
-      return materialService.destroy({id: this.$route.params.id})
-          .then(() => {
-            this.$router.push({name: 'materials'})
           })
           .catch((error) => {
             this.error = error

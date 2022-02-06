@@ -1,19 +1,28 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Form
 from datetime import datetime
 
-from ...models.magnet import MagnetPart
+from ...models.magnet import MagnetPart, Magnet
+from ...models.part import Part
 
 router = APIRouter()
 
 
-@router.post("/api/magnets/{magnet_id}/parts/{part_id}/decommission")
-def destroy(magnet_id: int, part_id: int):
-    magnet_part = MagnetPart.where('magnet_id', magnet_id).where('part_id', part_id).first()
-    if not magnet_part:
-        raise HTTPException(status_code=404, detail="MagnetPart not found")
-    if magnet_part.decommissioned_at is not None:
-        raise HTTPException(status_code=400, detail="MagnetPart already decommissioned")
+@router.post("/api/magnets/{magnet_id}/parts")
+def create(magnet_id: int, part_id: int = Form(...)):
+    magnet = Magnet.find(magnet_id)
+    if not magnet:
+        raise HTTPException(status_code=404, detail="Magnet not found")
+    part = Part.with_('magnet_parts.magnet').find(part_id)
+    if not part:
+        raise HTTPException(status_code=404, detail="Part not found")
 
-    magnet_part.decommissioned_at = datetime.now()
+    for magnet_part in part.magnet_parts:
+        if magnet_part.magnet.status == 'in_study':
+            magnet_part.delete()
+
+    magnet_part = MagnetPart(commissioned_at=datetime.now())
+    magnet_part.magnet().associate(magnet)
+    magnet_part.part().associate(part)
     magnet_part.save()
+
     return magnet_part.serialize()

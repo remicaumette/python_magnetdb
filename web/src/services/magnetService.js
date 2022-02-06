@@ -28,12 +28,14 @@ export function update({ id, ...values }) {
     .then((res) => res.data)
 }
 
-export function decommissionPart({ magnetId, partId }) {
-  return client.post(`/api/magnets/${magnetId}/parts/${partId}/decommission`)
+export function addPart({ magnetId, partId }) {
+  const form = new FormData()
+  form.append('part_id', partId)
+  return client.post(`/api/magnets/${magnetId}/parts`, form)
     .then((res) => res.data)
 }
 
-export function destroy({ id }) {
-  return client.delete(`/api/magnets/${id}`)
+export function defunct({ magnetId }) {
+  return client.post(`/api/magnets/${magnetId}/defunct`)
     .then((res) => res.data)
 }

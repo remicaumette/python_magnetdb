@@ -2,10 +2,13 @@
   <div v-if="site">
     <div class="flex items-center justify-between mb-6">
       <div class="display-1">
-        Site Definition: {{ site.name }}
+        Site Definition: {{ site.name }} ({{ site.status }})
       </div>
-      <Button class="btn btn-danger" type="button" @click="destroy">
-        Supprimer
+      <Button v-if="site.status === 'in_study'" class="btn btn-success" type="button" @click="putInOperation">
+        Put in operation
+      </Button>
+      <Button v-else-if="site.status === 'in_operation'" class="btn btn-danger" type="button" @click="shutdown">
+        Shutdown site
       </Button>
     </div>
 
@@ -38,19 +41,6 @@
             :required="true"
             :default-value="site.config"
         />
-        <FormField
-            label="Status"
-            name="status"
-            :component="FormSelect"
-            :required="true"
-            :options="[
-              { name: 'Study', value: 'in_study' },
-              { name: 'Operation', value: 'in_operation' },
-              { name: 'Stock', value: 'in_stock' },
-              { name: 'Defunct', value: 'defunct' },
-            ]"
-            :default-value="site.status"
-        />
         <Button type="submit" class="btn btn-primary">
           Save
         </Button>
@@ -59,7 +49,16 @@
 
     <Card>
       <template #header>
-        Related Magnets
+        <div class="flex items-center justify-between">
+          <div>Magnets</div>
+          <Button
+              v-if="site.status === 'in_study'"
+              class="btn btn-primary btn-small"
+              @click="attachMagnetModalVisible = true"
+          >
+            Add a magnet
+          </Button>
+        </div>
       </template>
 
       <div class="table-responsive">
@@ -72,22 +71,28 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-                v-for="magnet in site.magnets" :key="magnet.id"
-                @click="$router.push({ name: 'magnet', params: { id: magnet.id } })"
-                class="cursor-pointer"
-            >
-              <td>{{ magnet.name }}</td>
+            <tr v-for="siteMagnet in site.site_magnets" :key="siteMagnet.id">
               <td>
-                <template v-if="magnet.description">{{ magnet.description }}</template>
+                <router-link :to="{ name: 'magnet', params: { id: siteMagnet.magnet.id } }" class="link">
+                  {{ siteMagnet.magnet.name }}
+                </router-link>
+              </td>
+              <td>
+                <template v-if="siteMagnet.magnet.description">{{ siteMagnet.magnet.description }}</template>
                 <span v-else class="text-gray-500 italic">Not available</span>
               </td>
-              <td>{{ magnet.status }}</td>
+              <td>{{ siteMagnet.magnet.status }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </Card>
+
+    <AttachMagnetToSiteModal
+      :site-id="site.id"
+      :visible="attachMagnetModalVisible"
+      @close="attachMagnetModalVisible = false; fetch()"
+    />
   </div>
   <Alert v-else-if="error" class="alert alert-danger" :error="error"/>
 </template>
@@ -103,10 +108,12 @@ import FormSelect from "@/components/FormSelect";
 import FormUpload from "@/components/FormUpload";
 import Button from "@/components/Button";
 import Alert from "@/components/Alert";
+import AttachMagnetToSiteModal from "@/views/sites/show/AttachMagnetToSiteModal";
 
 export default {
   name: 'SiteShow',
   components: {
+    AttachMagnetToSiteModal,
     Alert,
     Button,
     FormField,
@@ -120,15 +127,29 @@ export default {
       FormUpload,
       error: null,
       site: null,
+      attachMagnetModalVisible: false,
     }
   },
   methods: {
+    putInOperation() {
+      return siteService.putInOperation({ siteId: this.site.id })
+          .then(this.fetch)
+          .catch((error) => {
+            this.error = error
+          })
+    },
+    shutdown() {
+      return siteService.shutdown({ siteId: this.site.id })
+          .then(this.fetch)
+          .catch((error) => {
+            this.error = error
+          })
+    },
     submit(values, {setRootError}) {
       const payload = {
         id: this.site.id,
         name: values.name,
         description: values.description,
-        status: values.status.value,
       }
       if (values.config instanceof File) {
         payload.config = values.config
@@ -141,7 +162,6 @@ export default {
     validate() {
       return Yup.object().shape({
         name: Yup.string().required(),
-        status: Yup.object().required(),
         config: Yup.mixed().required(),
       })
     },
