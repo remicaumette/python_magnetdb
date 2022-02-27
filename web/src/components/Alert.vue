@@ -10,6 +10,9 @@ export default {
   props: ['message', 'error'],
   computed: {
     messageToDisplay() {
+      if (this.error?.isAxiosError && this.error.response?.data?.detail) {
+        return this.error.response.data.detail
+      }
       if (this.error) {
         return this.error.message
       }

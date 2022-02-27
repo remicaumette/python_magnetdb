@@ -19,7 +19,7 @@
     "vue-reactive-provide": "^0.3.0",
     "vue-router": "^3.5.3",
     "vue-select": "^3.16.0",
-    "vuex": "^3.6.2",
+    "vuex": "3",
     "yup": "^0.32.11"
   },
   "devDependencies": {

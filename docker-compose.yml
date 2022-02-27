@@ -20,6 +20,11 @@ services:
       - 9080:9080
     volumes:
       - minio:/data
+  ldap:
+    image: osixia/openldap
+    ports:
+      - 389:389
+      - 636:636
 volumes:
   minio: {}
   postgres: {}

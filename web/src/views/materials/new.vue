@@ -108,7 +108,25 @@
             name="young"
             type="number"
             placeholder="0"
-            :component="FormInput"
+            :component="FormInputWithUnit"
+            :unit-options="[
+                {
+                  name: 'Pascal',
+                  value: 'Pa',
+                  symbol: 'Pa',
+                  default: true,
+                },
+                {
+                  name: 'Mega Pascal',
+                  value: 'MPa',
+                  symbol: 'MPa',
+                },
+                {
+                  name: 'Bar',
+                  value: 'bar',
+                  symbol: 'bar',
+                },
+            ]"
         />
         <FormField
             label="Poisson"
@@ -122,7 +140,30 @@
             name="expansion_coefficient"
             type="number"
             placeholder="0"
-            :component="FormInput"
+            :component="FormInputWithUnit"
+            :unit-options="[
+                {
+                  name: '1/Celsius',
+                  value: 'celsius',
+                  symbol: '1/°C',
+                },
+                {
+                  name: '1/Fahrenheit',
+                  value: 'fahrenheit',
+                  symbol: '1/°F',
+                },
+                {
+                  name: '1/Rankine',
+                  value: 'rankine',
+                  symbol: '1/°R',
+                },
+                {
+                  name: '1/Kelvin',
+                  value: 'kelvin',
+                  symbol: '1/K',
+                  default: true,
+                }
+            ]"
         />
         <Button type="submit" class="btn btn-primary">
           Save

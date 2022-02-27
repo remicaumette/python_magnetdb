@@ -31,6 +31,8 @@ import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
 import Button from "@/components/Button";
 
+window.mathUnit = unit
+
 export default {
   name: 'FormInputWithUnit',
   inheritAttrs: false,

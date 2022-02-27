@@ -1,4 +1,5 @@
 import VueRouter from "vue-router";
+import store from './store'
 
 const router = new VueRouter({
   mode: 'history',
@@ -16,7 +17,15 @@ const router = new VueRouter({
     { name: 'new_part', path: '/parts/new', component: () => import('./views/parts/new') },
     { name: 'part', path: '/parts/:id', component: () => import('./views/parts/show') },
     { name: 'root', path: '/', component: () => import('./views/root') },
+    { name: 'sign_in', path: '/sign_in', component: () => import('./views/signin') }
   ]
+})
+
+router.beforeEach(async (to, _, next) => {
+  if (to.name !== 'sign_in' && !store.getters.isLogged) {
+    return next({ name: 'sign_in' })
+  }
+  return next()
 })
 
 export default router
