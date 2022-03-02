@@ -1,22 +1,12 @@
-import ldap
 import jwt
 
 from datetime import datetime
 from os import getenv
 
-server_url = getenv('LDAP_SERVER') or "ldap://localhost:389"
-root_dn = getenv('LDAP_ROOT_DN') or "dc=example,dc=org"
+authorization_server = getenv('SECURITY_AUTHORIZATION_SERVER') or "http://auth.example.com"
+client_id = getenv('SECURITY_CLIENT_ID') or "testid"
+client_secret = getenv('SECURITY_CLIENT_SECRET') or "testsecret"
 secret = getenv("SECRET") or "defaultsecretpleasechangeme"
-
-
-def authenticate(username, password):
-    user = f'cn={username.strip()},{root_dn}'
-    try:
-        server = ldap.initialize(server_url)
-        server.simple_bind_s(user, password.strip())
-        return True
-    except ldap.INVALID_CREDENTIALS:
-        return False
 
 
 def generate_user_token(user):

@@ -25,6 +25,12 @@ services:
     ports:
       - 389:389
       - 636:636
+  lemonldap:
+    image: coudot/lemonldap-ng
+    ports:
+      - 80:80
+    environment:
+      LOGLEVEL: debug
 volumes:
   minio: {}
   postgres: {}

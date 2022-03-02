@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Form
+from fastapi import APIRouter, HTTPException, Form, Depends
 
+from ...dependencies import get_user
 from ...models.magnet import Magnet
 from ...models.site import Site
 from ...models.site_magnet import SiteMagnet
@@ -10,7 +11,7 @@ router = APIRouter()
 
 
 @router.post("/api/sites/{site_id}/magnets")
-def create(site_id: int, magnet_id: int = Form(...)):
+def create(site_id: int, user=Depends(get_user('create')), magnet_id: int = Form(...)):
     site = Site.find(site_id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")

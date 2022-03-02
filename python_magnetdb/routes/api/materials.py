@@ -1,8 +1,9 @@
 from typing import Optional
 
 from pydantic import BaseModel
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 
+from ...dependencies import get_user
 from ...models.material import Material
 
 router = APIRouter()
@@ -26,7 +27,7 @@ class MaterialPayload(BaseModel):
 
 
 @router.get("/api/materials")
-def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
+def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100)):
     materials = Material.paginate(per_page, page)
     return {
         "current_page": materials.current_page,
@@ -37,13 +38,13 @@ def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
 
 
 @router.post("/api/materials")
-def create(payload: MaterialPayload):
+def create(payload: MaterialPayload, user=Depends(get_user('create'))):
     material = Material.create(payload.dict(exclude_unset=True))
     return material.serialize()
 
 
 @router.get("/api/materials/{id}")
-def show(id: int):
+def show(id: int, user=Depends(get_user('read'))):
     material = Material.with_('parts').find(id)
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
@@ -51,7 +52,7 @@ def show(id: int):
 
 
 @router.patch("/api/materials/{id}")
-def update(id: int, payload: MaterialPayload):
+def update(id: int, payload: MaterialPayload, user=Depends(get_user('update'))):
     material = Material.find(id)
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
@@ -60,7 +61,7 @@ def update(id: int, payload: MaterialPayload):
 
 
 @router.delete("/api/materials/{id}")
-def destroy(id: int):
+def destroy(id: int, user=Depends(get_user('delete'))):
     material = Material.find(id)
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")

@@ -5,31 +5,15 @@
     </div>
 
     <Card>
-      <Form @submit="submit" @validate="validate">
-        <FormField
-            label="Username"
-            name="username"
-            type="text"
-            :component="FormInput"
-            :required="true"
-        />
-        <FormField
-            label="Password"
-            name="password"
-            type="password"
-            :component="FormInput"
-            :required="true"
-        />
-        <Button type="submit" class="btn btn-primary btn-block">
-          Sign In
-        </Button>
-      </Form>
+      <Alert v-if="error" :error="error" class="alert alert-danger" />
+      <div v-else class="display-2 text-center">
+        {{ $route.query.code ? 'Loading' : 'Redirecting' }}...
+      </div>
     </Card>
   </div>
 </template>
 
 <script>
-import * as Yup from 'yup'
 import * as sessionService from '@/services/sessionService'
 import Card from '@/components/Card'
 import Form from "@/components/Form";
@@ -37,10 +21,12 @@ import FormField from "@/components/FormField";
 import FormInput from "@/components/FormInput";
 import FormUpload from "@/components/FormUpload";
 import Button from "@/components/Button";
+import Alert from "@/components/Alert";
 
 export default {
   name: 'SignIn',
   components: {
+    Alert,
     Button,
     FormField,
     Form,
@@ -53,21 +39,24 @@ export default {
       error: null,
     }
   },
-  methods: {
-    submit(values, {setRootError}) {
-      return sessionService.create(values)
-        .then((res) => {
-          this.$store.commit('setToken', res.token)
-          this.$router.push('/')
+  async mounted() {
+    try {
+      const redirectUri = `${window.location.origin}/sign_in`
+      if (this.$route.query.code) {
+        const res = await sessionService.create({
+          code: this.$route.query.code,
+          redirect_uri: redirectUri,
         })
-        .catch(setRootError)
-    },
-    validate() {
-      return Yup.object().shape({
-        username: Yup.string().required(),
-        password: Yup.string().required(),
-      })
-    },
+        this.$store.commit('setToken', res.token)
+        this.$router.push('/')
+        return
+      }
+
+      const res = await sessionService.getAuthorizationUrl({ redirect_uri: redirectUri })
+      window.location.href = res.url
+    } catch (error) {
+      this.error = error
+    }
   },
 }
 </script>

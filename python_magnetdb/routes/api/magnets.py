@@ -1,17 +1,16 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File
+from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
 
+from ...dependencies import get_user
 from ...models.attachment import Attachment
 from ...models.magnet import Magnet
-from ...models.site import Site
-from ...models.site_magnet import SiteMagnet
 
 router = APIRouter()
 
 
 @router.get("/api/magnets")
-def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
+def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100)):
     magnets = Magnet.paginate(per_page, page)
     return {
         "current_page": magnets.current_page,
@@ -22,8 +21,8 @@ def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
 
 
 @router.post("/api/magnets")
-def create(name: str = Form(...), description: str = Form(None), design_office_reference: str = Form(None),
-           cao: UploadFile = File(None), geometry: UploadFile = File(None)):
+def create(user=Depends(get_user('create')), name: str = Form(...), description: str = Form(None),
+           design_office_reference: str = Form(None), cao: UploadFile = File(None), geometry: UploadFile = File(None)):
     magnet = Magnet(name=name, description=description, design_office_reference=design_office_reference,
                     status='in_study')
     if cao:
@@ -35,7 +34,7 @@ def create(name: str = Form(...), description: str = Form(None), design_office_r
 
 
 @router.get("/api/magnets/{id}")
-def show(id: int):
+def show(id: int, user=Depends(get_user('read'))):
     magnet = Magnet.with_('magnet_parts.part', 'site_magnets.site', 'cao', 'geometry').find(id)
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
@@ -43,8 +42,8 @@ def show(id: int):
 
 
 @router.patch("/api/magnets/{id}")
-def update(id: int, name: str = Form(...), description: str = Form(None), design_office_reference: str = Form(None),
-           cao: UploadFile = File(None), geometry: UploadFile = File(None)):
+def update(id: int, user=Depends(get_user('update')), name: str = Form(...), description: str = Form(None),
+           design_office_reference: str = Form(None), cao: UploadFile = File(None), geometry: UploadFile = File(None)):
     magnet = Magnet.with_('cao', 'geometry').find(id)
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
@@ -61,7 +60,7 @@ def update(id: int, name: str = Form(...), description: str = Form(None), design
 
 
 @router.post("/api/magnets/{id}/defunct")
-def defunct(id: int):
+def defunct(id: int, user=Depends(get_user('update'))):
     magnet = Magnet.with_('magnet_parts.part').find(id)
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
@@ -78,7 +77,7 @@ def defunct(id: int):
 
 
 @router.delete("/api/magnets/{id}")
-def destroy(id: int):
+def destroy(id: int, user=Depends(get_user('delete'))):
     magnet = Magnet.find(id)
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")

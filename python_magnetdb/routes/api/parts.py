@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Query, HTTPException, UploadFile
+from fastapi import APIRouter, Query, HTTPException, UploadFile, Depends
 from fastapi.params import File, Form
 
+from ...dependencies import get_user
 from ...models.attachment import Attachment
 from ...models.material import Material
 from ...models.part import Part
@@ -9,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/api/parts")
-def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
+def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100)):
     parts = Part.paginate(per_page, page)
     return {
         "current_page": parts.current_page,
@@ -20,8 +21,8 @@ def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
 
 
 @router.post("/api/parts")
-def create(name: str = Form(...), description: str = Form(None), type: str = Form(...),
-           material_id: str = Form(...), design_office_reference: str = Form(None)):
+def create(user=Depends(get_user('create')), name: str = Form(...), description: str = Form(None),
+           type: str = Form(...), material_id: str = Form(...), design_office_reference: str = Form(None)):
     material = Material.find(material_id)
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
@@ -34,7 +35,7 @@ def create(name: str = Form(...), description: str = Form(None), type: str = For
 
 
 @router.get("/api/parts/{id}")
-def show(id: int):
+def show(id: int, user=Depends(get_user('read'))):
     part = Part.with_('material', 'cao', 'geometry', 'magnet_parts.magnet').find(id)
     if not part:
         raise HTTPException(status_code=404, detail="Part not found")
@@ -42,8 +43,8 @@ def show(id: int):
 
 
 @router.patch("/api/parts/{id}")
-def update(id: int, name: str = Form(...), description: str = Form(None), type: str = Form(...),
-           material_id: str = Form(...), design_office_reference: str = Form(None),
+def update(id: int, user=Depends(get_user('update')), name: str = Form(...), description: str = Form(None),
+           type: str = Form(...), material_id: str = Form(...), design_office_reference: str = Form(None),
            cao: UploadFile = File(None), geometry: UploadFile = File(None)):
     part = Part.with_('material', 'cao', 'geometry').find(id)
     if not part:
@@ -67,7 +68,7 @@ def update(id: int, name: str = Form(...), description: str = Form(None), type: 
 
 
 @router.post("/api/parts/{id}/defunct")
-def destroy(id: int):
+def defunct(id: int, user=Depends(get_user('update'))):
     part = Part.find(id)
     if not part:
         raise HTTPException(status_code=404, detail="Part not found")
@@ -78,7 +79,7 @@ def destroy(id: int):
 
 
 @router.delete("/api/parts/{id}")
-def destroy(id: int):
+def destroy(id: int, user=Depends(get_user('delete'))):
     part = Part.find(id)
     if not part:
         raise HTTPException(status_code=404, detail="Part not found")

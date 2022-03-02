@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
+from fastapi import Depends, APIRouter, HTTPException, Query, UploadFile, File, Form
 
+from ...dependencies import get_user
 from ...models.attachment import Attachment
 from ...models.site import Site
 
@@ -9,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/api/sites")
-def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
+def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100)):
     sites = Site.paginate(per_page, page)
     return {
         "current_page": sites.current_page,
@@ -20,7 +21,8 @@ def index(page: int = 1, per_page: int = Query(default=25, lte=100)):
 
 
 @router.post("/api/sites")
-def create(name: str = Form(...), description: str = Form(None), config: UploadFile = File(...)):
+def create(user=Depends(get_user('create')), name: str = Form(...), description: str = Form(None),
+           config: UploadFile = File(...)):
     site = Site(name=name, description=description, status='in_study')
     site.config().associate(Attachment.upload(config))
     site.save()
@@ -28,7 +30,7 @@ def create(name: str = Form(...), description: str = Form(None), config: UploadF
 
 
 @router.get("/api/sites/{id}")
-def show(id: int):
+def show(id: int, user=Depends(get_user('read'))):
     site = Site.with_('config', 'site_magnets.magnet').find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
@@ -36,8 +38,8 @@ def show(id: int):
 
 
 @router.patch("/api/sites/{id}")
-def update(id: int, name: str = Form(...), description: str = Form(None), status: str = Form(...),
-           config: UploadFile = File(None)):
+def update(id: int, user=Depends(get_user('update')), name: str = Form(...), description: str = Form(None),
+           status: str = Form(...), config: UploadFile = File(None)):
     site = Site.find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
@@ -52,7 +54,7 @@ def update(id: int, name: str = Form(...), description: str = Form(None), status
 
 
 @router.post("/api/sites/{id}/put_in_operation")
-def put_in_operation(id: int):
+def put_in_operation(id: int, user=Depends(get_user('update'))):
     site = Site.with_('site_magnets.magnet.magnet_parts.part').find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
@@ -70,7 +72,7 @@ def put_in_operation(id: int):
 
 
 @router.post("/api/sites/{id}/shutdown")
-def shutdown(id: int):
+def shutdown(id: int, user=Depends(get_user('update'))):
     site = Site.with_('site_magnets.magnet').find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
@@ -87,7 +89,7 @@ def shutdown(id: int):
 
 
 @router.delete("/api/sites/{id}")
-def destroy(id: int):
+def destroy(id: int, user=Depends(get_user('delete'))):
     site = Site.find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")

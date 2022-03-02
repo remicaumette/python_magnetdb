@@ -8,5 +8,5 @@ python-multipart
 minio
 psycopg2
 orator
-python-ldap
 pyjwt
+requests

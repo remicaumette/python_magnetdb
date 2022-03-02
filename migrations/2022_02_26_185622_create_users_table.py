@@ -7,7 +7,9 @@ class CreateUsersTable(Migration):
             with self.schema.create('users') as table:
                 table.big_increments('id')
                 table.string('username')
-                table.string('role').default('user')
+                table.string('email')
+                table.string('name')
+                table.string('role').default('guest')
                 table.timestamps()
                 table.unique('username')
 
