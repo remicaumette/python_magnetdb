@@ -16,26 +16,16 @@
 <script>
 import * as sessionService from '@/services/sessionService'
 import Card from '@/components/Card'
-import Form from "@/components/Form";
-import FormField from "@/components/FormField";
-import FormInput from "@/components/FormInput";
-import FormUpload from "@/components/FormUpload";
-import Button from "@/components/Button";
 import Alert from "@/components/Alert";
 
 export default {
   name: 'SignIn',
   components: {
     Alert,
-    Button,
-    FormField,
-    Form,
     Card,
   },
   data() {
     return {
-      FormInput,
-      FormUpload,
       error: null,
     }
   },

@@ -22,9 +22,34 @@
         <FormField
             label="Type"
             name="type"
-            type="text"
-            :component="FormInput"
+            :component="FormSelect"
             :required="true"
+            :options="[
+              {
+                name: 'Helix',
+                value: 'helix'
+              },
+              {
+                name: 'Ring',
+                value: 'ring'
+              },
+              {
+                name: 'Lead',
+                value: 'lead'
+              },
+              {
+                name: 'Bitter',
+                value: 'bitter'
+              },
+              {
+                name: 'Supra',
+                value: 'supra'
+              },
+              {
+                name: 'Screen',
+                value: 'screen'
+              },
+            ]"
         />
         <FormField
             label="Design Office Reference"
@@ -80,6 +105,7 @@ export default {
     submit(values, {setRootError}) {
       return partService.create({
         ...values,
+        type: values.type.value,
         material_id: values.material.value,
       })
           .then((part) => {
@@ -90,8 +116,8 @@ export default {
     validate() {
       return Yup.object().shape({
         name: Yup.string().required(),
-        type: Yup.string().required(),
-        material: Yup.object().required(),
+        type: Yup.mixed().required(),
+        material: Yup.mixed().required(),
       })
     },
   },
