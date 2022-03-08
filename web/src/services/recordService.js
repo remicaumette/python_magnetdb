@@ -10,6 +10,11 @@ export function find({ id }) {
     .then((res) => res.data)
 }
 
+export function visualize({ id, x, y }) {
+  return client.get(`/api/records/${id}/visualize`, { params: { x, y } })
+    .then((res) => res.data)
+}
+
 export function create(values) {
   const form = new FormData()
   for (const [key, value] of Object.entries(values)) {

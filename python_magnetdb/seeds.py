@@ -2,13 +2,14 @@ from datetime import datetime
 from uuid import uuid4
 
 from orator import DatabaseManager, Schema, Model
-from os import getenv, path
+from os import getenv, path, listdir
 
 from .models.attachment import Attachment
 from .models.magnet import Magnet
 from .models.magnet_part import MagnetPart
 from .models.material import Material
 from .models.part import Part
+from .models.record import Record
 from .models.site import Site
 from .models.site_magnet import SiteMagnet
 from .storage import s3_client, s3_bucket
@@ -89,6 +90,14 @@ def create_magnet(obj):
             return magnet_part
         magnet.magnet_parts().save_many(map(generate_part, parts))
     return magnet
+
+
+def create_record(file, site):
+    record = Record(name=path.basename(file))
+    record.attachment().associate(upload_attachment(file))
+    record.site().associate(site)
+    record.save()
+    return record
 
 
 MA15101601 = create_material({
@@ -480,3 +489,6 @@ LEADtest = create_magnet({
     'geometry': 'test',
     'cao': 'HL-31',
 })
+
+for file in listdir(path.join(data_directory, 'mrecords')):
+    create_record(path.join(data_directory, 'mrecords', file), M10)

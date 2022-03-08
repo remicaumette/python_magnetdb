@@ -74,6 +74,10 @@ export default {
       }
     },
     async validate() {
+      if (!this.$listeners.validate) {
+        return {}
+      }
+
       const res = this.$listeners.validate(this.values)
       try {
         await res.validate(this.values, { strict: true, abortEarly: false, recursive: true })

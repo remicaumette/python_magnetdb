@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
+import pandas as pd
 
 from ...dependencies import get_user
 from ...models.attachment import Attachment
@@ -40,6 +43,28 @@ def show(id: int, user=Depends(get_user('read'))):
         raise HTTPException(status_code=404, detail="Record not found")
 
     return record.serialize()
+
+
+@router.get("/api/records/{id}/visualize")
+def visualize(id: int, user=Depends(get_user('read')), x=Query(None), y=Query(None)):
+    record = Record.with_('attachment').find(id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    time_format = "%Y.%m.%d %H:%M:%S"
+    data = pd.read_csv(record.attachment.download(), sep=r'\s+', skiprows=1)
+    t0 = datetime.strptime(data['Date'].iloc[0] + " " + data['Time'].iloc[0], time_format)
+    data["t"] = data.apply(
+        lambda row: (datetime.strptime(row.Date + " " + row.Time, time_format) - t0).total_seconds(),
+        axis=1
+    )
+    data["timestamp"] = data.apply(lambda row: datetime.strptime(row.Date + " " + row.Time, time_format), axis=1)
+
+    result = {}
+    if x is not None and y is not None:
+        for (x_value, y_value) in data[[x, y]].values:
+            result[x_value] = y_value
+    return {'result': result, 'columns': data.columns.tolist()}
 
 
 @router.delete("/api/records/{id}")

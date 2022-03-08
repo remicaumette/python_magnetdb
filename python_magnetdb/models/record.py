@@ -15,8 +15,3 @@ class Record(Model):
     def attachment(self):
         from .attachment import Attachment
         return Attachment
-
-    @belongs_to('created_by')
-    def created_by(self):
-        from .user import User
-        return User
