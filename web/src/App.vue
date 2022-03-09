@@ -1,31 +1,55 @@
 <template>
   <div id="app" class="mb-16">
-    <div class="topbar">
+    <div class="topbar"  :class="{ 'topbar-admin': isInAdminMode }">
       <div class="container-center">
         <div class="topbar-left">
           <router-link class="topbar-title" :to="{ name: 'root' }">
             MagnetDB
           </router-link>
           <div v-if="$store.getters.isLogged" class="topbar-link-list">
-            <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'sites' }">
-              Sites
-            </router-link>
-            <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'magnets' }">
-              Magnets
-            </router-link>
-            <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'parts' }">
-              Parts
-            </router-link>
-            <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'materials' }">
-              Materials
-            </router-link>
-            <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'records' }">
-              Records
-            </router-link>
+            <template v-if="isInAdminMode">
+              <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'admin_config' }">
+                Config
+              </router-link>
+            </template>
+            <template v-else>
+              <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'sites' }">
+                Sites
+              </router-link>
+              <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'magnets' }">
+                Magnets
+              </router-link>
+              <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'parts' }">
+                Parts
+              </router-link>
+              <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'materials' }">
+                Materials
+              </router-link>
+              <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'records' }">
+                Records
+              </router-link>
+            </template>
           </div>
         </div>
-        <div class="topbar-right">
-
+        <div v-if="$store.state.user" class="topbar-right topbar-dropdown" @click="dropdownActive = !dropdownActive">
+          <span class="flex items-center cursor-pointer">
+            Welcome, {{$store.state.user.name}}
+            <ChevronDownIcon class="ml-1 h-5 w-5" />
+          </span>
+          <div v-if="dropdownActive" class="topbar-dropdown-content">
+            <router-link class="topbar-dropdown-link" :to="{ name: 'profile' }">
+              Profile
+            </router-link>
+            <router-link
+                v-if="$store.state.user.role === 'admin'"
+                class="topbar-dropdown-link" :to="{ name: 'admin_config' }"
+            >
+              Administrate
+            </router-link>
+            <div class="topbar-dropdown-link topbar-dropdown-logout" @click="logout">
+              Log out
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -37,9 +61,40 @@
 </template>
 
 <script>
+import { ChevronDownIcon } from '@vue-hero-icons/solid'
+import * as userService from '@/services/userService'
+
 export default {
   name: 'App',
+  data() {
+    return {
+      dropdownActive: false,
+    }
+  },
   components: {
+    ChevronDownIcon,
+  },
+  watch: {
+    '$store.getters.isLogged': {
+      immediate: true,
+      handler(logged) {
+        if (!logged) return
+
+        userService.find()
+          .then((user) => this.$store.commit('setUser', user))
+          .catch(console.error)
+      },
+    },
+  },
+  methods: {
+    logout() {
+      this.$store.commit('setToken', null)
+    },
+  },
+  computed: {
+    isInAdminMode() {
+      return this.$route.name?.startsWith('admin_')
+    }
   }
 }
 </script>
@@ -76,5 +131,33 @@ export default {
 
 .topbar-link-active {
   @apply bg-gray-100;
+}
+
+.topbar-dropdown {
+  @apply relative;
+}
+
+.topbar-dropdown-content {
+  @apply top-7 left-0 absolute w-64 bg-white border border-gray-100 shadow-md rounded-md flex flex-col;
+}
+
+.topbar-dropdown-link {
+  @apply text-gray-700 font-medium hover:bg-gray-100 py-2 px-3 cursor-pointer;
+}
+
+.topbar-dropdown-logout {
+  @apply text-red-500 border-t border-gray-200;
+}
+
+.topbar-admin {
+  @apply bg-red-100;
+}
+
+.topbar-admin .topbar-title {
+  @apply text-red-700;
+}
+
+.topbar-admin .topbar-link-active {
+  @apply bg-red-200;
 }
 </style>

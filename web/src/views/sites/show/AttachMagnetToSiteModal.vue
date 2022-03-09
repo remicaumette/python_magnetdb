@@ -71,7 +71,6 @@ export default {
   },
   async mounted() {
     const magnets = await magnetService.list()
-    console.log(magnets)
     this.magnetOptions = magnets.items
         .filter((item) => ['in_study', 'in_stock'].includes(item.status))
         .map((item) => ({ name: item.name, value: item.id }))

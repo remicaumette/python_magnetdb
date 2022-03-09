@@ -2,6 +2,8 @@ import requests
 
 from urllib.parse import urlencode
 from fastapi import APIRouter, Form, HTTPException
+
+from ...models.log import Log
 from ...security import generate_user_token, authorization_server, client_id, client_secret
 from ...models.user import User
 
@@ -46,7 +48,7 @@ def create(code: str = Form(...), redirect_uri: str = Form(...)):
     user.email = userinfo_data['email']
     user.name = userinfo_data['name']
     user.save()
-
+    Log.log(user, "User logged", object=user)
     return {"token": generate_user_token(user)}
 
 

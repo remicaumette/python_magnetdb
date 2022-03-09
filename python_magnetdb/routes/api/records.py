@@ -5,6 +5,7 @@ import pandas as pd
 
 from ...dependencies import get_user
 from ...models.attachment import Attachment
+from ...models.log import Log
 from ...models.record import Record
 from ...models.site import Site
 
@@ -33,6 +34,7 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
     record.attachment().associate(Attachment.upload(attachment))
     record.site().associate(site)
     record.save()
+    Log.log(user, "Record created", object=record)
     return record.serialize()
 
 
@@ -59,7 +61,7 @@ def visualize(id: int, user=Depends(get_user('read')), x=Query(None), y=Query(No
         axis=1
     )
     data["timestamp"] = data.apply(lambda row: datetime.strptime(row.Date + " " + row.Time, time_format), axis=1)
-
+    # https://en.wikipedia.org/wiki/Curve_fitting
     result = {}
     if x is not None and y is not None:
         for (x_value, y_value) in data[[x, y]].values:
@@ -74,4 +76,5 @@ def destroy(id: int, user=Depends(get_user('delete'))):
         raise HTTPException(status_code=404, detail="Record not found")
 
     record.delete()
+    Log.log(user, "Record deleted", object=record)
     return record.serialize()

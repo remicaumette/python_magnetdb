@@ -35,7 +35,6 @@
       </div>
     </Form>
 
-
     <canvas ref="chart"></canvas>
   </Card>
 </template>

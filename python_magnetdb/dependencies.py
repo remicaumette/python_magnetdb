@@ -12,7 +12,7 @@ def is_authorize(user: User, action: str) -> bool:
     elif user.role == 'designer':
         return action in ['create', 'read', 'update', 'delete']
     elif user.role == 'admin':
-        return action in ['create', 'read', 'update', 'delete']
+        return action in ['create', 'read', 'update', 'delete', 'admin']
     return False
 
 

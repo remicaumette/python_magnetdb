@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, Query, Depends
 
 from ...dependencies import get_user
+from ...models.log import Log
 from ...models.material import Material
 
 router = APIRouter()
@@ -40,6 +41,7 @@ def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(d
 @router.post("/api/materials")
 def create(payload: MaterialPayload, user=Depends(get_user('create'))):
     material = Material.create(payload.dict(exclude_unset=True))
+    Log.log(user, "Material created", object=material)
     return material.serialize()
 
 
@@ -57,6 +59,7 @@ def update(id: int, payload: MaterialPayload, user=Depends(get_user('update'))):
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
     material.update(payload.dict(exclude_unset=True))
+    Log.log(user, "Material updated", object=material)
     return material.serialize()
 
 
@@ -66,4 +69,5 @@ def destroy(id: int, user=Depends(get_user('delete'))):
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
     material.delete()
+    Log.log(user, "Material deleted", object=material)
     return material.serialize()

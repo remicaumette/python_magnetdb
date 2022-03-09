@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Form, Depends
 
 from ...dependencies import get_user
+from ...models.log import Log
 from ...models.magnet import Magnet
 from ...models.site import Site
 from ...models.site_magnet import SiteMagnet
@@ -27,5 +28,5 @@ def create(site_id: int, user=Depends(get_user('create')), magnet_id: int = Form
     site_magnet.site().associate(site)
     site_magnet.magnet().associate(magnet)
     site_magnet.save()
-
+    Log.log(user, "Magnet added to site", object=magnet)
     return site_magnet.serialize()
