@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!error">
+  <div>
     <div class="flex items-center justify-between mb-6">
       <div class="display-1">
         Magnets from MagnetDB
@@ -10,30 +10,31 @@
     </div>
 
     <Card>
-      <div class="table-responsive">
-        <table>
-          <thead class="bg-white">
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-                v-for="magnet in magnets" :key="magnet.id" class="cursor-pointer"
-                @click="$router.push({ name: 'magnet', params: { id: magnet.id } })"
-            >
-              <td>{{ magnet.name }}</td>
-              <td>
-                <template v-if="magnet.description">{{ magnet.description }}</template>
-                <span v-else class="text-gray-500 italic">Not available</span>
-              </td>
-              <td>{{ magnet.status }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        :headers="headers" @fetch="fetch"
+        @item-selected="$router.push({ name: 'magnet', params: { id: $event.id } })"
+      >
+        <template v-slot:item.name="{ item }">
+          {{ item.name }}
+        </template>
+        <template v-slot:item.description="{ item }">
+          <template v-if="item.description">{{ item.description }}</template>
+          <span v-else class="text-gray-500 italic">Not available</span>
+        </template>
+        <template v-slot:item.status="{ item }">
+          <StatusBadge :status="item.status"></StatusBadge>
+        </template>
+        <template v-slot:item.design_office_reference="{ item }">
+          <template v-if="item.design_office_reference">{{ item.design_office_reference }}</template>
+          <span v-else class="text-gray-500 italic">Not available</span>
+        </template>
+        <template v-slot:item.created_at="{ item }">
+          {{ item.created_at | datetime }}
+        </template>
+        <template v-slot:item.updated_at="{ item }">
+          {{ item.updated_at | datetime }}
+        </template>
+      </DataTable>
     </Card>
   </div>
 </template>
@@ -41,26 +42,64 @@
 <script>
 import * as magnetService from '@/services/magnetService'
 import Card from '@/components/Card'
+import DataTable from "@/components/DataTable";
+import StatusBadge from "@/components/StatusBadge";
 
 export default {
   name: 'MagnetList',
   components: {
     Card,
+    DataTable,
+    StatusBadge,
   },
   data() {
     return {
-      error: null,
-      magnets: [],
+      headers: [
+        {
+          key: 'name',
+          name: 'Name',
+          default: true,
+          sortable: true,
+        },
+        {
+          key: 'description',
+          name: 'Description',
+          default: true,
+        },
+        {
+          key: 'status',
+          name: 'Status',
+        },
+        {
+          key: 'design_office_reference',
+          name: 'Design Office Reference',
+        },
+        {
+          key: 'created_at',
+          name: 'Created At',
+          default: true,
+          sortable: true,
+        },
+        {
+          key: 'updated_at',
+          name: 'Updated At',
+          sortable: true,
+        },
+      ]
     }
   },
-  async mounted() {
-    magnetService.list()
-        .then((res) => {
-          this.magnets = res.items
-        })
-        .catch((error) => {
-          this.error = error
-        })
+  methods: {
+    fetch({ query, page, perPage, sortBy, sortDesc }) {
+      return magnetService.list({ query, page, perPage, sortBy, sortDesc }).then((res) => ({
+        currentPage: res.current_page,
+        lastPage: res.last_page,
+        items: res.items,
+        perPage,
+        query,
+        sortBy,
+        sortDesc,
+      }))
+    },
   },
 }
 </script>

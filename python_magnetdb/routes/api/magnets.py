@@ -11,8 +11,14 @@ router = APIRouter()
 
 
 @router.get("/api/magnets")
-def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100)):
-    magnets = Magnet.paginate(per_page, page)
+def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
+          query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False)):
+    magnets = Magnet
+    if query is not None and query.strip() != '':
+        magnets = magnets.where('name', 'ilike', f'%{query}%')
+    if sort_by is not None:
+        magnets = magnets.order_by(sort_by, 'desc' if sort_desc else 'asc')
+    magnets = magnets.paginate(per_page, page)
     return {
         "current_page": magnets.current_page,
         "last_page": magnets.last_page,

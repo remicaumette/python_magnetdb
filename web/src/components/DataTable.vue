@@ -207,7 +207,7 @@ export default {
       this.currentHeaders = currentHeaders
     },
     search: debounce(function (query) {
-      this.fetch({ query })
+      this.fetch({ query, page: 1 })
     }, 2000),
   },
   computed: {
