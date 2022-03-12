@@ -6,7 +6,7 @@
 
     <Card>
       <DataTable :headers="headers" @fetch="fetch">
-        <template v-slot:item.date="{ item }">
+        <template v-slot:item.created_at="{ item }">
           {{ item.created_at | datetime }}
         </template>
         <template v-slot:item.message="{ item }">
@@ -47,9 +47,10 @@ export default {
     return {
       headers: [
         {
-          key: 'date',
+          key: 'created_at',
           name: 'Date',
           default: true,
+          sortable: true,
         },
         {
           key: 'message',
@@ -59,21 +60,26 @@ export default {
         {
           key: 'user',
           name: 'User',
+          default: true,
         },
         {
           key: 'resource',
           name: 'Resource',
+          default: true,
         },
       ]
     }
   },
   methods: {
-    fetch({ page, perPage }) {
-      return auditLogService.list({ page, perPage }).then((res) => ({
+    fetch({ query, page, perPage, sortBy, sortDesc }) {
+      return auditLogService.list({ query, page, perPage, sortBy, sortDesc }).then((res) => ({
         currentPage: res.current_page,
         lastPage: res.last_page,
         items: res.items,
         perPage,
+        query,
+        sortBy,
+        sortDesc,
       }))
     },
   },

@@ -24,6 +24,8 @@ Vue.filter('datetime', (date) => {
   }).format(date instanceof Date ? date : new Date(date))
 })
 
+Vue.filter('statusName', (status) => status)
+
 new Vue({
   render: h => h(App),
   router,

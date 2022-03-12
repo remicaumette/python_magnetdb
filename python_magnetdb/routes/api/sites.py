@@ -11,8 +11,14 @@ router = APIRouter()
 
 
 @router.get("/api/sites")
-def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100)):
-    sites = Site.paginate(per_page, page)
+def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
+          query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False)):
+    sites = Site
+    if query is not None and query.strip() != '':
+        sites = sites.where('name', 'ilike', f'%{query}%')
+    if sort_by is not None:
+        sites = sites.order_by(sort_by, 'desc' if sort_desc else 'asc')
+    sites = sites.paginate(per_page, page)
     return {
         "current_page": sites.current_page,
         "last_page": sites.last_page,
