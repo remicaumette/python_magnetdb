@@ -6,6 +6,7 @@
     @input="onInput"
     :options="options"
     :disabled="disabled"
+    :clearable="clearable"
   />
 </template>
 
@@ -18,7 +19,7 @@ export default {
   components: {
     VueSelect,
   },
-  props: ['hasError', 'options', 'value', 'disabled', 'defaultValue'],
+  props: ['hasError', 'options', 'value', 'disabled', 'defaultValue', 'clearable'],
   methods: {
     onInput(event) {
       this.$emit('value', event)

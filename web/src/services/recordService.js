@@ -1,7 +1,15 @@
 import client from "./client";
 
-export function list() {
-  return client.get('/api/records')
+export function list({ page, perPage, sortBy, sortDesc, query } = {}) {
+  return client.get('/api/records', {
+    params: {
+      page,
+      query,
+      sort_by: sortBy,
+      sort_desc: sortDesc,
+      per_page: perPage,
+    },
+  })
     .then((res) => res.data)
 }
 
