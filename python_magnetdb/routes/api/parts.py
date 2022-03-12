@@ -11,8 +11,14 @@ router = APIRouter()
 
 
 @router.get("/api/parts")
-def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100)):
-    parts = Part.paginate(per_page, page)
+def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
+          query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False)):
+    parts = Part
+    if query is not None and query.strip() != '':
+        parts = parts.where('name', 'ilike', f'%{query}%')
+    if sort_by is not None:
+        parts = parts.order_by(sort_by, 'desc' if sort_desc else 'asc')
+    parts = parts.paginate(per_page, page)
     return {
         "current_page": parts.current_page,
         "last_page": parts.last_page,

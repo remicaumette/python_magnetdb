@@ -10,32 +10,34 @@
     </div>
 
     <Card>
-      <div class="table-responsive">
-        <table>
-          <thead class="bg-white">
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Description</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-                v-for="part in parts" :key="part.id" class="cursor-pointer"
-                @click="$router.push({ name: 'part', params: { id: part.id } })"
-            >
-              <td>{{ part.name }}</td>
-              <td>{{ part.type }}</td>
-              <td>
-                <template v-if="part.description">{{ part.description }}</template>
-                <span v-else class="text-gray-500 italic">Not available</span>
-              </td>
-              <td>{{ part.status }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+          :headers="headers" @fetch="fetch"
+          @item-selected="$router.push({ name: 'part', params: { id: $event.id } })"
+      >
+        <template v-slot:item.name="{ item }">
+          {{ item.name }}
+        </template>
+        <template v-slot:item.type="{ item }">
+          {{ item.type }}
+        </template>
+        <template v-slot:item.description="{ item }">
+          <template v-if="item.description">{{ item.description }}</template>
+          <span v-else class="text-gray-500 italic">Not available</span>
+        </template>
+        <template v-slot:item.design_office_reference="{ item }">
+          <template v-if="item.design_office_reference">{{ item.design_office_reference }}</template>
+          <span v-else class="text-gray-500 italic">Not available</span>
+        </template>
+        <template v-slot:item.status="{ item }">
+          <StatusBadge :status="item.status"></StatusBadge>
+        </template>
+        <template v-slot:item.created_at="{ item }">
+          {{ item.created_at | datetime }}
+        </template>
+        <template v-slot:item.updated_at="{ item }">
+          {{ item.updated_at | datetime }}
+        </template>
+      </DataTable>
     </Card>
   </div>
 </template>
@@ -43,26 +45,69 @@
 <script>
 import * as partService from '@/services/partService'
 import Card from '@/components/Card'
+import StatusBadge from "@/components/StatusBadge";
+import DataTable from "@/components/DataTable";
 
 export default {
   name: 'PartList',
   components: {
+    StatusBadge,
     Card,
+    DataTable,
   },
   data() {
     return {
-      error: null,
-      parts: [],
+      headers: [
+        {
+          key: 'name',
+          name: 'Name',
+          default: true,
+          sortable: true,
+        },
+        {
+          key: 'type',
+          name: 'Type',
+          default: true,
+        },
+        {
+          key: 'description',
+          name: 'Description',
+          default: true,
+        },
+        {
+          key: 'design_office_reference',
+          name: 'Design Office Reference',
+        },
+        {
+          key: 'status',
+          name: 'Status',
+        },
+        {
+          key: 'created_at',
+          name: 'Created At',
+          default: true,
+          sortable: true,
+        },
+        {
+          key: 'updated_at',
+          name: 'Updated At',
+          sortable: true,
+        },
+      ]
     }
   },
-  async mounted() {
-    partService.list()
-        .then((res) => {
-          this.parts = res.items
-        })
-        .catch((error) => {
-          this.error = error
-        })
+  methods: {
+    fetch({ query, page, perPage, sortBy, sortDesc }) {
+      return partService.list({ query, page, perPage, sortBy, sortDesc }).then((res) => ({
+        currentPage: res.current_page,
+        lastPage: res.last_page,
+        items: res.items,
+        perPage,
+        query,
+        sortBy,
+        sortDesc,
+      }))
+    },
   },
 }
 </script>
