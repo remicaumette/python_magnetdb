@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Dep
 
 from ...dependencies import get_user
 from ...models.attachment import Attachment
-from ...models.log import Log
+from ...models.audit_log import AuditLog
 from ...models.magnet import Magnet
 
 router = APIRouter()
@@ -31,7 +31,7 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
     if geometry:
         magnet.geometry().associate(Attachment.upload(geometry))
     magnet.save()
-    Log.log(user, "Magnet created", object=magnet)
+    AuditLog.log(user, "Magnet created", resource=magnet)
     return magnet.serialize()
 
 
@@ -58,7 +58,7 @@ def update(id: int, user=Depends(get_user('update')), name: str = Form(...), des
     if geometry:
         magnet.geometry().associate(Attachment.upload(geometry))
     magnet.save()
-    Log.log(user, "Magnet updated", object=magnet)
+    AuditLog.log(user, "Magnet updated", resource=magnet)
     return magnet.serialize()
 
 
@@ -76,7 +76,7 @@ def defunct(id: int, user=Depends(get_user('update'))):
 
     magnet.status = 'defunct'
     magnet.save()
-    Log.log(user, "Magnet defunct", object=magnet)
+    AuditLog.log(user, "Magnet defunct", resource=magnet)
     return magnet.serialize()
 
 
@@ -86,5 +86,5 @@ def destroy(id: int, user=Depends(get_user('delete'))):
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
     magnet.delete()
-    Log.log(user, "Magnet deleted", object=magnet)
+    AuditLog.log(user, "Magnet deleted", resource=magnet)
     return magnet.serialize()

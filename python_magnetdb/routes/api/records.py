@@ -5,7 +5,7 @@ import pandas as pd
 
 from ...dependencies import get_user
 from ...models.attachment import Attachment
-from ...models.log import Log
+from ...models.audit_log import AuditLog
 from ...models.record import Record
 from ...models.site import Site
 
@@ -34,7 +34,7 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
     record.attachment().associate(Attachment.upload(attachment))
     record.site().associate(site)
     record.save()
-    Log.log(user, "Record created", object=record)
+    AuditLog.log(user, "Record created", resource=record)
     return record.serialize()
 
 
@@ -76,5 +76,5 @@ def destroy(id: int, user=Depends(get_user('delete'))):
         raise HTTPException(status_code=404, detail="Record not found")
 
     record.delete()
-    Log.log(user, "Record deleted", object=record)
+    AuditLog.log(user, "Record deleted", resource=record)
     return record.serialize()

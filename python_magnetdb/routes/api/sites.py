@@ -4,7 +4,7 @@ from fastapi import Depends, APIRouter, HTTPException, Query, UploadFile, File, 
 
 from ...dependencies import get_user
 from ...models.attachment import Attachment
-from ...models.log import Log
+from ...models.audit_log import AuditLog
 from ...models.site import Site
 
 router = APIRouter()
@@ -27,7 +27,7 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
     site = Site(name=name, description=description, status='in_study')
     site.config().associate(Attachment.upload(config))
     site.save()
-    Log.log(user, "Site created", object=site)
+    AuditLog.log(user, "Site created", resource=site)
     return site.serialize()
 
 
@@ -52,7 +52,7 @@ def update(id: int, user=Depends(get_user('update')), name: str = Form(...), des
     if config:
         site.config().associate(Attachment.upload(config))
     site.save()
-    Log.log(user, "Site updated", object=site)
+    AuditLog.log(user, "Site updated", resource=site)
     return site.serialize()
 
 
@@ -71,7 +71,7 @@ def put_in_operation(id: int, user=Depends(get_user('update'))):
 
     site.status = 'in_operation'
     site.save()
-    Log.log(user, "Site put in operation", object=site)
+    AuditLog.log(user, "Site put in operation", resource=site)
     return site.serialize()
 
 
@@ -89,7 +89,7 @@ def shutdown(id: int, user=Depends(get_user('update'))):
 
     site.status = 'defunct'
     site.save()
-    Log.log(user, "Site shutdown", object=site)
+    AuditLog.log(user, "Site shutdown", resource=site)
     return site.serialize()
 
 
@@ -99,5 +99,5 @@ def destroy(id: int, user=Depends(get_user('delete'))):
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
     site.delete()
-    Log.log(user, "Site deleted", object=site)
+    AuditLog.log(user, "Site deleted", resource=site)
     return site.serialize()

@@ -3,7 +3,7 @@ from fastapi.params import File, Form
 
 from ...dependencies import get_user
 from ...models.attachment import Attachment
-from ...models.log import Log
+from ...models.audit_log import AuditLog
 from ...models.material import Material
 from ...models.part import Part
 
@@ -32,7 +32,7 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
                 design_office_reference=design_office_reference)
     part.material().associate(material)
     part.save()
-    Log.log(user, "Part created", object=part)
+    AuditLog.log(user, "Part created", resource=part)
     return part.serialize()
 
 
@@ -66,7 +66,7 @@ def update(id: int, user=Depends(get_user('update')), name: str = Form(...), des
     if geometry:
         part.geometry().associate(Attachment.upload(geometry))
     part.save()
-    Log.log(user, "Part updated", object=part)
+    AuditLog.log(user, "Part updated", resource=part)
     return part.serialize()
 
 
@@ -78,7 +78,7 @@ def defunct(id: int, user=Depends(get_user('update'))):
 
     part.status = 'defunct'
     part.save()
-    Log.log(user, "Part defunct", object=part)
+    AuditLog.log(user, "Part defunct", resource=part)
     return part.serialize()
 
 
@@ -88,5 +88,5 @@ def destroy(id: int, user=Depends(get_user('delete'))):
     if not part:
         raise HTTPException(status_code=404, detail="Part not found")
     part.delete()
-    Log.log(user, "Part deleted", object=part)
+    AuditLog.log(user, "Part deleted", resource=part)
     return part.serialize()

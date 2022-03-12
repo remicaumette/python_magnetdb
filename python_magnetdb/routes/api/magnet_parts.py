@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Form, Depends
 from datetime import datetime
 
 from ...dependencies import get_user
-from ...models.log import Log
+from ...models.audit_log import AuditLog
 from ...models.magnet import MagnetPart, Magnet
 from ...models.part import Part
 
@@ -27,5 +27,5 @@ def create(magnet_id: int, user=Depends(get_user('create')), part_id: int = Form
     magnet_part.part().associate(part)
     magnet_part.save()
 
-    Log.log(user, "Part added to magnet", object=magnet)
+    AuditLog.log(user, "Part added to magnet", resource=magnet)
     return magnet_part.serialize()
