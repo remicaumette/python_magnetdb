@@ -31,6 +31,7 @@
             :component="FormSelect"
             :required="true"
             :options="siteOptions"
+            :default-value="record.site.id"
         />
         <FormField
             label="File"
@@ -39,6 +40,7 @@
             :required="true"
             :component="FormUpload"
             :default-value="record.attachment"
+            :disabled="true"
         />
         <Button type="submit" class="btn btn-primary">
           Save
@@ -87,15 +89,13 @@ export default {
   },
   methods: {
     submit(values, {setRootError}) {
-      // return recordService.create({
-      //   name: values.name,
-      //   site_id: values.site.value,
-      //   attachment: values.attachment,
-      // })
-      //     .then((record) => {
-      //       this.$router.push({ name: 'record', params: { id: record.id } })
-      //     })
-      //     .catch(setRootError)
+      return recordService.update({
+        id: this.record.id,
+        name: values.name,
+        description: values.description,
+        site_id: values.site.value,
+      })
+          .catch(setRootError)
     },
     validate() {
       return Yup.object().shape({
@@ -106,7 +106,7 @@ export default {
     },
   },
   async mounted() {
-    const sitesRes = await siteService.list()
+    const sitesRes = await siteService.list({})
     this.siteOptions = sitesRes.items.map(site => ({
       name: site.name,
       value: site.id,

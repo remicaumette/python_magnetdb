@@ -31,3 +31,12 @@ export function create(values) {
   return client.post(`/api/records`, form)
     .then((res) => res.data)
 }
+
+export function update({ id, ...values }) {
+  const form = new FormData()
+  for (const [key, value] of Object.entries(values)) {
+    form.append(key, value)
+  }
+  return client.patch(`/api/records/${id}`, form)
+    .then((res) => res.data)
+}

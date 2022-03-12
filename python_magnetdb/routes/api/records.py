@@ -75,6 +75,24 @@ def visualize(id: int, user=Depends(get_user('read')), x=Query(None), y=Query(No
     return {'result': result, 'columns': data.columns.tolist()}
 
 
+@router.patch("/api/records/{id}")
+def update(id: int, user=Depends(get_user('update')), name: str = Form(...), description: str = Form(None),
+           site_id: str = Form(...)):
+    record = Record.find(id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+    site = Site.find(site_id)
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
+
+    record.name = name
+    record.description = description
+    record.site().associate(site)
+    record.save()
+    AuditLog.log(user, "Record updated", resource=record)
+    return record.serialize()
+
+
 @router.delete("/api/records/{id}")
 def destroy(id: int, user=Depends(get_user('delete'))):
     record = Record.find(id)
