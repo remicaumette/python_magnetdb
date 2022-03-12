@@ -28,8 +28,14 @@ class MaterialPayload(BaseModel):
 
 
 @router.get("/api/materials")
-def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100)):
-    materials = Material.paginate(per_page, page)
+def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
+          query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False)):
+    materials = Material
+    if query is not None and query.strip() != '':
+        materials = materials.where('name', 'ilike', f'%{query}%')
+    if sort_by is not None:
+        materials = materials.order_by(sort_by, 'desc' if sort_desc else 'asc')
+    materials = materials.paginate(per_page, page)
     return {
         "current_page": materials.current_page,
         "last_page": materials.last_page,

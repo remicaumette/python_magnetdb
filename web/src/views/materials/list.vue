@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!error">
+  <div>
     <div class="flex items-center justify-between mb-6">
       <div class="display-1">
         Materials from MagnetDB
@@ -10,28 +10,24 @@
     </div>
 
     <Card>
-      <div class="table-responsive">
-        <table>
-          <thead class="bg-white">
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-                v-for="material in materials" :key="material.id" class="cursor-pointer"
-                @click="$router.push({ name: 'material', params: { id: material.id } })"
-            >
-              <td>{{ material.name }}</td>
-              <td>
-                <template v-if="material.description">{{ material.description }}</template>
-                <span v-else class="text-gray-500 italic">Not available</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        :headers="headers" @fetch="fetch"
+        @item-selected="$router.push({ name: 'material', params: { id: $event.id } })"
+      >
+        <template v-slot:item.name="{ item }">
+          {{ item.name }}
+        </template>
+        <template v-slot:item.description="{ item }">
+          <template v-if="item.description">{{ item.description }}</template>
+          <span v-else class="text-gray-500 italic">Not available</span>
+        </template>
+        <template v-slot:item.created_at="{ item }">
+          {{ item.created_at | datetime }}
+        </template>
+        <template v-slot:item.updated_at="{ item }">
+          {{ item.updated_at | datetime }}
+        </template>
+      </DataTable>
     </Card>
   </div>
 </template>
@@ -39,26 +35,57 @@
 <script>
 import * as materialService from '@/services/materialService'
 import Card from '@/components/Card'
+import * as partService from "@/services/partService";
+import StatusBadge from "@/components/StatusBadge";
+import DataTable from "@/components/DataTable";
 
 export default {
   name: 'MaterialList',
   components: {
+    StatusBadge,
     Card,
+    DataTable,
   },
   data() {
     return {
-      error: null,
-      materials: [],
+      headers: [
+        {
+          key: 'name',
+          name: 'Name',
+          default: true,
+          sortable: true,
+        },
+        {
+          key: 'description',
+          name: 'Description',
+          default: true,
+        },
+        {
+          key: 'created_at',
+          name: 'Created At',
+          default: true,
+          sortable: true,
+        },
+        {
+          key: 'updated_at',
+          name: 'Updated At',
+          sortable: true,
+        },
+      ]
     }
   },
-  async mounted() {
-    materialService.list()
-        .then((res) => {
-          this.materials = res.items
-        })
-        .catch((error) => {
-          this.error = error
-        })
+  methods: {
+    fetch({ query, page, perPage, sortBy, sortDesc }) {
+      return materialService.list({ query, page, perPage, sortBy, sortDesc }).then((res) => ({
+        currentPage: res.current_page,
+        lastPage: res.last_page,
+        items: res.items,
+        perPage,
+        query,
+        sortBy,
+        sortDesc,
+      }))
+    },
   },
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!error">
+  <div>
     <div class="flex items-center justify-between mb-6">
       <div class="display-1">
         Parts from MagnetDB
