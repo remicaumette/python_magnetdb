@@ -1,5 +1,6 @@
 from fastapi import Request, HTTPException
 
+from .database import db
 from .models.user import User
 from .security import parse_user_token
 
@@ -29,3 +30,7 @@ def get_user(action=False):
         return user
 
     return handler
+
+
+def get_db():
+    return db

@@ -41,6 +41,6 @@ export default {
 
 <style scoped>
 .config-container {
-  @apply font-sans rounded-md bg-gray-400 border border-gray-500 text-gray-700 px-4 py-2;
+  @apply font-sans rounded-md bg-gray-200 border border-gray-500 text-gray-700 px-4 py-2;
 }
 </style>

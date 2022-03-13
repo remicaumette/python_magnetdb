@@ -1,3 +1,5 @@
+import { Chart, registerables } from 'chart.js'
+import zoomPlugin from 'chartjs-plugin-zoom'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import VueReactiveProvide from 'vue-reactive-provide'
@@ -5,6 +7,8 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import './main.css'
+
+Chart.register(...registerables, zoomPlugin)
 
 Vue.config.productionTip = false
 Vue.use(VueReactiveProvide)

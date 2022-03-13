@@ -106,7 +106,7 @@ export default {
     },
   },
   async mounted() {
-    const sitesRes = await siteService.list({})
+    const sitesRes = await siteService.list()
     this.siteOptions = sitesRes.items.map(site => ({
       name: site.name,
       value: site.id,

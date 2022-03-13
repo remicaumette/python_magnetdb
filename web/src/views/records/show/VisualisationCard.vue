@@ -40,16 +40,13 @@
 </template>
 
 <script>
-import { Chart, registerables } from 'chart.js'
-import zoomPlugin from 'chartjs-plugin-zoom'
+import { Chart } from 'chart.js'
 import Alert from "@/components/Alert";
 import Card from "@/components/Card";
 import Form from "@/components/Form";
 import FormField from "@/components/FormField";
 import FormSelect from "@/components/FormSelect";
 import * as recordService from '@/services/recordService'
-
-Chart.register(...registerables, zoomPlugin)
 
 export default {
   name: 'VisualisationCard',
