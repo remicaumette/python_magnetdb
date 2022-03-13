@@ -34,6 +34,7 @@
             name="role"
             :component="FormSelect"
             :required="true"
+            :clearable="false"
             :options="[
               {
                 name: 'Guest',
@@ -53,6 +54,7 @@
               },
             ]"
             :disabled="true"
+            :default-value="$store.state.user.role"
         />
         <Button type="submit" class="btn btn-primary">
           Save

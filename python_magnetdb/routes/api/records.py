@@ -85,8 +85,8 @@ def visualize(id: int, user=Depends(get_user('read')),
                 data = data[(data[y_value] >= y_min) & (data[y_value] <= y_max)]
 
         # compute if sampling is required
-        sampling_enabled = auto_sampling is True and len(data) > 1000
-        sampling_factor = round(data['timestamp'].count() / 1500) if sampling_enabled else 1
+        sampling_enabled = auto_sampling is True and len(data) > 500
+        sampling_factor = round(data['timestamp'].count() / 500) if sampling_enabled else 1
 
         # rendering values and applying sampling factor is needed
         for (index, values) in enumerate(data[[x] + y].values):

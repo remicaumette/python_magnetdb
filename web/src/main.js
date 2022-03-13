@@ -35,6 +35,13 @@ Vue.filter('statusName', (status) => ({
   defunct: 'Defunct',
 }[status]))
 
+Vue.filter('roleName', (role) => ({
+  guest: 'Guest',
+  user: 'User',
+  designer: 'Designer',
+  admin: 'Admin',
+}[role]))
+
 new Vue({
   render: h => h(App),
   router,

@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import { debounce } from "lodash"
+import { debounce, isEqual } from "lodash"
 import { ChevronLeftIcon, ChevronRightIcon, ArrowUpIcon, ChevronDownIcon } from "@vue-hero-icons/solid"
 import Alert from "@/components/Alert"
 import FormInput from "@/components/FormInput"
@@ -241,7 +241,10 @@ export default {
       if (query?.trim()) {
         queryPayload.query = query
       }
-      if (headers.some(header => !header.default)) {
+      if (!isEqual(
+        this.headers.filter(header => header.default).map(header => header.key),
+        headers.map(header => header.key)
+      )) {
         queryPayload.headers = headers.map(header => header.key).join(',')
       }
       if (Object.entries(queryPayload).length > 0 || Object.entries(this.$route.query).length > 0) {
