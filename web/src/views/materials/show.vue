@@ -141,7 +141,9 @@
                 <template v-if="part.description">{{ part.description }}</template>
                 <span v-else class="text-gray-500 italic">Not available</span>
               </td>
-              <td>{{ part.status }}</td>
+              <td>
+                <StatusBadge :status="part.status"></StatusBadge>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -161,10 +163,12 @@ import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
 import Button from "@/components/Button";
 import Alert from "@/components/Alert";
+import StatusBadge from "@/components/StatusBadge";
 
 export default {
   name: 'MaterialShow',
   components: {
+    StatusBadge,
     Alert,
     Button,
     FormField,
@@ -193,7 +197,7 @@ export default {
     validate() {
       return Yup.object().shape({
         name: Yup.string().required(),
-        rpe: Yup.string().required(),
+        rpe: Yup.number().required(),
       })
     },
     fetch() {

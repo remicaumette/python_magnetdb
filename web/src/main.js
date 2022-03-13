@@ -28,7 +28,12 @@ Vue.filter('datetime', (date) => {
   }).format(date instanceof Date ? date : new Date(date))
 })
 
-Vue.filter('statusName', (status) => status)
+Vue.filter('statusName', (status) => ({
+  in_stock: 'In stock',
+  in_study: 'In study',
+  in_operation: 'In operation',
+  defunct: 'Defunct',
+}[status]))
 
 new Vue({
   render: h => h(App),

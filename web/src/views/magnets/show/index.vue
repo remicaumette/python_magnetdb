@@ -1,8 +1,11 @@
 <template>
   <div v-if="magnet">
     <div class="flex items-center justify-between mb-6">
-      <div class="display-1">
-        Magnet Definition: {{ magnet.name }} ({{ magnet.status }})
+      <div class="flex items-center space-x-4">
+        <div class="display-1">
+          Magnet Definition: {{ magnet.name }}
+        </div>
+        <StatusBadge :status="magnet.status"></StatusBadge>
       </div>
       <Button v-if="magnet.status === 'in_stock'" class="btn btn-danger" type="button" @click="defunct">
         Defunct
@@ -92,7 +95,9 @@
                 <template v-if="magnetPart.part.description">{{ magnetPart.part.description }}</template>
                 <span v-else class="text-gray-500 italic">Not available</span>
               </td>
-              <td>{{ magnetPart.part.status }}</td>
+              <td>
+                <StatusBadge :status="magnetPart.part.status"></StatusBadge>
+              </td>
               <td>{{ magnetPart.commissioned_at | datetime }}</td>
               <td>{{ magnetPart.decommissioned_at | datetime }}</td>
             </tr>
@@ -138,7 +143,9 @@
                 <template v-if="siteMagnet.site.description">{{ siteMagnet.site.description }}</template>
                 <span v-else class="text-gray-500 italic">Not available</span>
               </td>
-              <td>{{ siteMagnet.site.status }}</td>
+              <td>
+                <StatusBadge :status="siteMagnet.site.status"></StatusBadge>
+              </td>
               <td>{{ siteMagnet.commissioned_at }}</td>
               <td>{{ siteMagnet.decommissioned_at }}</td>
             </tr>
@@ -174,10 +181,12 @@ import Button from "@/components/Button";
 import Alert from "@/components/Alert";
 import AddPartToMagnetModal from "@/views/magnets/show/AddPartToMagnetModal";
 import AttachMagnetToSiteModal from "@/views/magnets/show/AttachMagnetToSiteModal";
+import StatusBadge from "@/components/StatusBadge";
 
 export default {
   name: 'MagnetShow',
   components: {
+    StatusBadge,
     AttachMagnetToSiteModal,
     AddPartToMagnetModal,
     Alert,

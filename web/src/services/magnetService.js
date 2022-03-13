@@ -21,7 +21,9 @@ export function find({ id }) {
 export function create(values) {
   const form = new FormData()
   for (const [key, value] of Object.entries(values)) {
-    form.append(key, value)
+    if (value) {
+      form.append(key, value)
+    }
   }
   return client.post(`/api/magnets`, form)
     .then((res) => res.data)
@@ -30,7 +32,9 @@ export function create(values) {
 export function update({ id, ...values }) {
   const form = new FormData()
   for (const [key, value] of Object.entries(values)) {
-    form.append(key, value)
+    if (value) {
+      form.append(key, value)
+    }
   }
   return client.patch(`/api/magnets/${id}`, form)
     .then((res) => res.data)

@@ -1,8 +1,11 @@
 <template>
   <div v-if="part">
     <div class="flex items-center justify-between mb-6">
-      <div class="display-1">
-        Part Definition: {{ part.name }} ({{ part.status }})
+      <div class="flex items-center space-x-4">
+        <div class="display-1">
+          Part Definition: {{ part.name }}
+        </div>
+        <StatusBadge :status="part.status"></StatusBadge>
       </div>
       <Button v-if="part.status === 'in_stock'" class="btn btn-danger" type="button" @click="defunct">
         Defunct
@@ -35,32 +38,8 @@
             name="type"
             :component="FormSelect"
             :required="true"
-            :options="[
-              {
-                name: 'Helix',
-                value: 'helix'
-              },
-              {
-                name: 'Ring',
-                value: 'ring'
-              },
-              {
-                name: 'Lead',
-                value: 'lead'
-              },
-              {
-                name: 'Bitter',
-                value: 'bitter'
-              },
-              {
-                name: 'Supra',
-                value: 'supra'
-              },
-              {
-                name: 'Screen',
-                value: 'screen'
-              },
-            ]"
+            :options="typeOptions"
+            :default-value="part.type.toLowerCase()"
         />
         <FormField
             label="Design Office Reference"
@@ -121,7 +100,9 @@
                 <template v-if="magnetPart.magnet.description">{{ magnetPart.magnet.description }}</template>
                 <span v-else class="text-gray-500 italic">Not available</span>
               </td>
-              <td>{{ magnetPart.magnet.status }}</td>
+              <td>
+                <StatusBadge :status="magnetPart.magnet.status"></StatusBadge>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -143,10 +124,12 @@ import FormSelect from "@/components/FormSelect";
 import FormUpload from "@/components/FormUpload";
 import Button from "@/components/Button";
 import Alert from "@/components/Alert";
+import StatusBadge from "@/components/StatusBadge";
 
 export default {
   name: 'PartShow',
   components: {
+    StatusBadge,
     Alert,
     Button,
     FormField,
@@ -161,6 +144,32 @@ export default {
       error: null,
       part: null,
       materialOptions: [],
+      typeOptions: [
+        {
+          name: 'Helix',
+          value: 'helix'
+        },
+        {
+          name: 'Ring',
+          value: 'ring'
+        },
+        {
+          name: 'Lead',
+          value: 'lead'
+        },
+        {
+          name: 'Bitter',
+          value: 'bitter'
+        },
+        {
+          name: 'Supra',
+          value: 'supra'
+        },
+        {
+          name: 'Screen',
+          value: 'screen'
+        },
+      ],
     }
   },
   methods: {

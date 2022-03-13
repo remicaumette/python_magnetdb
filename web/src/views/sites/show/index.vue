@@ -1,8 +1,11 @@
 <template>
   <div v-if="site">
     <div class="flex items-center justify-between mb-6">
-      <div class="display-1">
-        Site Definition: {{ site.name }} ({{ site.status }})
+      <div class="flex items-center space-x-4">
+        <div class="display-1">
+          Site Definition: {{ site.name }}
+        </div>
+        <StatusBadge :status="site.status"></StatusBadge>
       </div>
       <Button v-if="site.status === 'in_study'" class="btn btn-success" type="button" @click="putInOperation">
         Put in operation
@@ -81,7 +84,9 @@
                 <template v-if="siteMagnet.magnet.description">{{ siteMagnet.magnet.description }}</template>
                 <span v-else class="text-gray-500 italic">Not available</span>
               </td>
-              <td>{{ siteMagnet.magnet.status }}</td>
+              <td>
+                <StatusBadge :status="siteMagnet.magnet.status"></StatusBadge>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -109,10 +114,12 @@ import FormUpload from "@/components/FormUpload";
 import Button from "@/components/Button";
 import Alert from "@/components/Alert";
 import AttachMagnetToSiteModal from "@/views/sites/show/AttachMagnetToSiteModal";
+import StatusBadge from "@/components/StatusBadge";
 
 export default {
   name: 'SiteShow',
   components: {
+    StatusBadge,
     AttachMagnetToSiteModal,
     Alert,
     Button,

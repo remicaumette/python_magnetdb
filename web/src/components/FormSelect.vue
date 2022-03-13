@@ -26,7 +26,7 @@ export default {
       this.$emit('value', event)
     },
   },
-  mounted() {
+  created() {
     if (this.defaultValue) {
       const option = this.options?.find(opt => opt.value === this.defaultValue)
       if (option) {
@@ -64,7 +64,7 @@ export default {
   padding: 0;
 }
 
-.vs__selected-options {
+.vs--multiple .vs__selected-options {
   @apply space-x-2;
 }
 

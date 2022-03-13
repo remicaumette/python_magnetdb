@@ -47,14 +47,13 @@ def show(id: int, user=Depends(get_user('read'))):
 
 @router.patch("/api/sites/{id}")
 def update(id: int, user=Depends(get_user('update')), name: str = Form(...), description: str = Form(None),
-           status: str = Form(...), config: UploadFile = File(None)):
+           config: UploadFile = File(None)):
     site = Site.find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
 
     site.name = name
     site.description = description
-    site.status = status
     if config:
         site.config().associate(Attachment.upload(config))
     site.save()

@@ -1,4 +1,7 @@
 import { get, set, cloneDeep } from 'lodash'
+import QueueRunner from "@/utils/QueueRunner";
+
+const queue = new QueueRunner()
 
 export function createFormField() {
   return {
@@ -8,9 +11,11 @@ export function createFormField() {
         this.setValue(this.fieldName, event.target.value)
       },
       setValue(name, value) {
-        const values = cloneDeep(this.form.values)
-        set(values, name, value)
-        this.form.setValues(values)
+        queue.run(() => {
+          const values = cloneDeep(this.form.values)
+          set(values, name, value)
+          this.form.setValues(values)
+        })
       },
     },
     computed: {

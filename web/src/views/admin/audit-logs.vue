@@ -33,14 +33,12 @@
 <script>
 import * as auditLogService from '@/services/admin/auditLogService'
 import Card from '@/components/Card'
-import Alert from "@/components/Alert";
 import DataTable from "@/components/DataTable";
 
 export default {
   name: 'AuditLogs',
   components: {
     DataTable,
-    Alert,
     Card,
   },
   data() {

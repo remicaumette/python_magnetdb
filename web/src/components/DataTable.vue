@@ -91,14 +91,12 @@
 import { debounce } from "lodash"
 import { ChevronLeftIcon, ChevronRightIcon, ArrowUpIcon, ChevronDownIcon } from "@vue-hero-icons/solid"
 import Alert from "@/components/Alert"
-import FormSelect from "@/components/FormSelect"
 import FormInput from "@/components/FormInput"
 
 export default {
   name: 'DataTable',
   components: {
     FormInput,
-    FormSelect,
     Alert,
     ChevronLeftIcon,
     ChevronRightIcon,

@@ -7,7 +7,9 @@ export function find() {
 export function update(values) {
   const form = new FormData()
   for (const [key, value] of Object.entries(values)) {
-    form.append(key, value)
+    if (value) {
+      form.append(key, value)
+    }
   }
   return client.patch('/api/user', form).then((res) => res.data)
 }

@@ -35,14 +35,11 @@
 <script>
 import * as materialService from '@/services/materialService'
 import Card from '@/components/Card'
-import * as partService from "@/services/partService";
-import StatusBadge from "@/components/StatusBadge";
 import DataTable from "@/components/DataTable";
 
 export default {
   name: 'MaterialList',
   components: {
-    StatusBadge,
     Card,
     DataTable,
   },
