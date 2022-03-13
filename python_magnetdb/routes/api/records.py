@@ -1,15 +1,14 @@
 from datetime import datetime
-from typing import List
 
-import numpy
-from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
 import pandas as pd
+from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
 
 from ...dependencies import get_user
 from ...models.attachment import Attachment
 from ...models.audit_log import AuditLog
 from ...models.record import Record
 from ...models.site import Site
+from ...utils.record_visualization import columns as columns_with_name
 
 router = APIRouter()
 
@@ -94,7 +93,11 @@ def visualize(id: int, user=Depends(get_user('read')),
             if index % sampling_factor == 0:
                 result[values[0]] = values[1:].tolist()
 
-    return {'result': result, 'columns': data.columns.tolist(), 'sampling_enabled': sampling_enabled}
+    columns = {}
+    for column in data.columns.tolist():
+        columns[column] = columns_with_name[column]
+
+    return {'result': result, 'columns': columns, 'sampling_enabled': sampling_enabled}
 
 
 @router.patch("/api/records/{id}")

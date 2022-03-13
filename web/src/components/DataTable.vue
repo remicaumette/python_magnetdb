@@ -108,13 +108,12 @@ export default {
   props: ['headers', 'itemKey'],
   data() {
     return {
-      arr: [],
       currentHeaders: [],
       isLoading: true,
       error: null,
       items: [],
-      perPage: 0,
-      currentPage: 0,
+      perPage: 10,
+      currentPage: 1,
       lastPage: 0,
       sortBy: null,
       sortDesc: false,
@@ -123,6 +122,21 @@ export default {
       columnsDropdownActive: false,
       rowsPerPageOptions: [10, 25, 50, 75, 100],
     }
+  },
+  watch: {
+    currentHeaders: {
+      deep: true,
+      handler(headers) {
+        this.writeQueryState({
+          page: this.currentPage,
+          perPage: this.perPage,
+          sortBy: this.sortBy,
+          sortDesc: this.sortDesc,
+          query: this.query,
+          headers,
+        })
+      },
+    },
   },
   methods: {
     getItemKey(item) {
@@ -147,6 +161,9 @@ export default {
         this.sortBy = res.sortBy
         this.sortDesc = res.sortDesc
         this.query = res.query
+        this.writeQueryState({
+          page, perPage, sortBy, sortDesc, query, headers: this.currentHeaders
+        })
       } catch (error) {
         this.error = error
       } finally {
@@ -209,6 +226,30 @@ export default {
     search: debounce(function (query) {
       this.fetch({ query, page: 1 })
     }, 2000),
+    writeQueryState({ page, perPage, sortBy, sortDesc, query, headers }) {
+      const queryPayload = {}
+      if (page !== 1) {
+        queryPayload.page = page
+      }
+      if (perPage !== 10) {
+        queryPayload.per_page = perPage
+      }
+      if (sortBy) {
+        queryPayload.sort_by = sortBy
+      }
+      if (sortDesc) {
+        queryPayload.sort_desc = sortDesc
+      }
+      if (query?.trim()) {
+        queryPayload.query = query
+      }
+      if (headers.some(header => !header.default)) {
+        queryPayload.headers = headers.map(header => header.key).join(',')
+      }
+      if (Object.entries(queryPayload).length > 0 || Object.entries(this.$route.query).length > 0) {
+        this.$router.replace({ ...this.$route, query: queryPayload })
+      }
+    },
   },
   computed: {
     dataVisible() {
@@ -221,9 +262,41 @@ export default {
       return this.currentPage < this.lastPage
     },
   },
+  created() {
+    try {
+      if (this.$route.query.page) {
+        this.currentPage = parseInt(this.$route.query.page, 10)
+      }
+      if (this.$route.query.per_page) {
+        this.perPage = parseInt(this.$route.query.per_page, 10)
+      }
+      if (this.$route.query.sort_by) {
+        this.sortBy = this.$route.query.sort_by
+      }
+      if (this.$route.query.sort_desc) {
+        this.sortDesc = true
+      }
+      if (this.$route.query.sort_desc) {
+        this.sortDesc = true
+      }
+      if (this.$route.query.query) {
+        this.query = this.$route.query.query
+      }
+      if (this.$route.query.headers) {
+        this.currentHeaders = this.$route.query.headers.split(',').map(
+          (key) => this.headers.find((header) => header.key === key.trim())
+        )
+      }
+    } catch (error) {
+      console.error(error)
+    }
+
+    if (this.currentHeaders.length === 0) {
+      this.currentHeaders = this.headers.filter((header) => header.default)
+    }
+  },
   mounted() {
-    this.currentHeaders = this.headers.filter((header) => header.default)
-    return this.fetch({ page: 1, perPage: 10 })
+    return this.fetch()
   }
 }
 </script>

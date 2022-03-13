@@ -130,15 +130,31 @@ export default {
             }
 
             return {
-              label: fieldName,
+              label: `${fieldName} (${data.columns[fieldName]})`,
               backgroundColor: this.colors[fieldName],
               borderColor: this.colors[fieldName],
               data: Object.values(data.result).map(value => value[index]),
             }
           })
+          this.chart.options.scales.x.title.text = `${this.xField} (${data.columns[this.xField]})`
           this.chart.update()
           this.dataSampled = data.sampling_enabled
-          this.columnOptions = data.columns
+          this.columnOptions = Object.keys(data.columns)
+
+          this.$router.replace({
+            ...this.$route,
+            query: {
+              chartState: window.btoa(JSON.stringify({
+                x: this.xField,
+                y: this.yField,
+                xMin: this.xMin,
+                xMax: this.xMax,
+                yMin: this.yMin,
+                yMax: this.yMax,
+                colors: this.colors,
+              }))
+            },
+          })
         })
         .catch((error) => {
           this.error = error
@@ -165,6 +181,22 @@ export default {
       this.chart.resetZoom()
     },
   },
+  created() {
+    if (this.$route.query.chartState) {
+      try {
+        const data = JSON.parse(window.atob(this.$route.query.chartState))
+        this.xField = data.x
+        this.yField = data.y
+        this.xMin = data.xMin
+        this.xMax = data.xMax
+        this.yMin = data.yMin
+        this.yMax = data.yMax
+        this.colors = data.colors
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  },
   async mounted() {
     this.chart = new Chart(this.$refs.chart, {
       type: 'line',
@@ -177,7 +209,7 @@ export default {
           x: {
             title: {
               display: true,
-              text: 'Your Title'
+              text: ''
             }
           },
         },
