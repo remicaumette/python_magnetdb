@@ -11,6 +11,9 @@
               <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'admin_config' }">
                 Config
               </router-link>
+              <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'admin_users' }">
+                Users
+              </router-link>
               <router-link class="topbar-link" active-class="topbar-link-active" :to="{ name: 'admin_audit_logs' }">
                 Audit Logs
               </router-link>

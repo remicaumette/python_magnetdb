@@ -5,7 +5,7 @@
     </div>
 
     <Card>
-      <Alert v-if="error" :error="error" />
+      <Alert v-if="error" :error="error" class="alert alert-danger" />
 
       <pre v-if="config" class="config-container">{{JSON.stringify(config, null, 4)}}</pre>
     </Card>

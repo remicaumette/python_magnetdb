@@ -11,7 +11,7 @@ def show(user=Depends(get_user('read'))):
 
 
 @router.patch("/api/user")
-def show(user=Depends(get_user('read')), name: str = Form(...)):
+def update(user=Depends(get_user('read')), name: str = Form(...)):
     user.name = name
     user.save()
     return user.serialize()

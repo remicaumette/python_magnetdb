@@ -13,6 +13,7 @@ from .routes.api.records import router as api_records_router
 from .routes.api.user import router as api_user_router
 from .routes.api.admin.config import router as api_admin_config_router
 from .routes.api.admin.audit_logs import router as api_admin_audit_logs_router
+from .routes.api.admin.users import router as api_admin_users_router
 from .routes.api.home import router as api_home_router
 
 app = FastAPI()
@@ -31,4 +32,5 @@ app.include_router(api_records_router)
 app.include_router(api_user_router)
 app.include_router(api_admin_config_router)
 app.include_router(api_admin_audit_logs_router)
+app.include_router(api_admin_users_router)
 app.include_router(api_home_router)

@@ -7,7 +7,7 @@ router = APIRouter()
 
 
 @router.get("/api/admin/audit_logs")
-def show(user=Depends(get_user('admin')), page: int = 1, per_page: int = Query(default=25, lte=100),
+def index(user=Depends(get_user('admin')), page: int = 1, per_page: int = Query(default=25, lte=100),
          query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False)):
     logs = AuditLog.with_('user')
     if query is not None and query.strip() != '':
