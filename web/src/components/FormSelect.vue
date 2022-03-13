@@ -7,6 +7,7 @@
     :options="options"
     :disabled="disabled"
     :clearable="clearable"
+    :multiple="multiple"
   />
 </template>
 
@@ -19,7 +20,7 @@ export default {
   components: {
     VueSelect,
   },
-  props: ['hasError', 'options', 'value', 'disabled', 'defaultValue', 'clearable'],
+  props: ['hasError', 'options', 'value', 'disabled', 'defaultValue', 'clearable', 'multiple'],
   methods: {
     onInput(event) {
       this.$emit('value', event)
@@ -61,6 +62,14 @@ export default {
 
 .vs__actions {
   padding: 0;
+}
+
+.vs__selected-options {
+  @apply space-x-2;
+}
+
+.vs--multiple .vs__selected {
+  @apply px-2 flex items-center space-x-2 text-xs leading-5 rounded-full whitespace-nowrap;
 }
 
 .form-select-error > .vs__dropdown-toggle {

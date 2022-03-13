@@ -18,8 +18,18 @@ export function find({ id }) {
     .then((res) => res.data)
 }
 
-export function visualize({ id, x, y }) {
-  return client.get(`/api/records/${id}/visualize`, { params: { x, y } })
+export function visualize({ id, x, y, autoSampling, xMin, xMax, yMin, yMax }) {
+  return client.get(`/api/records/${id}/visualize`, {
+    params: {
+      x,
+      y: y?.join(','),
+      x_min: xMin,
+      x_max: xMax,
+      y_min: yMin,
+      y_max: yMax,
+      auto_sampling: autoSampling
+    }
+  })
     .then((res) => res.data)
 }
 

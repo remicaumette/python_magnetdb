@@ -92,3 +92,28 @@ td {
 .link {
   @apply text-green-500 hover:underline;
 }
+
+.badge {
+  @apply px-2 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap;
+}
+
+.badge-success {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-primary {
+  @apply bg-blue-200 text-gray-800;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-danger {
+  @apply bg-red-100 text-red-800;
+}
+
+.badge-default {
+  @apply bg-gray-100 text-gray-800;
+}
+

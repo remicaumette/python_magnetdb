@@ -1,5 +1,7 @@
 from datetime import datetime
+from typing import List
 
+import numpy
 from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
 import pandas as pd
 
@@ -54,11 +56,15 @@ def show(id: int, user=Depends(get_user('read'))):
 
 
 @router.get("/api/records/{id}/visualize")
-def visualize(id: int, user=Depends(get_user('read')), x=Query(None), y=Query(None)):
+def visualize(id: int, user=Depends(get_user('read')),
+              x: str = Query(None), y: str = Query(None), auto_sampling: bool = Query(False),
+              x_min: float = Query(None), x_max: float = Query(None),
+              y_min: float = Query(None), y_max: float = Query(None)):
     record = Record.with_('attachment').find(id)
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
 
+    # data prep
     time_format = "%Y.%m.%d %H:%M:%S"
     data = pd.read_csv(record.attachment.download(), sep=r'\s+', skiprows=1)
     t0 = datetime.strptime(data['Date'].iloc[0] + " " + data['Time'].iloc[0], time_format)
@@ -67,12 +73,28 @@ def visualize(id: int, user=Depends(get_user('read')), x=Query(None), y=Query(No
         axis=1
     )
     data["timestamp"] = data.apply(lambda row: datetime.strptime(row.Date + " " + row.Time, time_format), axis=1)
-    # https://en.wikipedia.org/wiki/Curve_fitting
+
     result = {}
+    sampling_enabled = False
     if x is not None and y is not None:
-        for (x_value, y_value) in data[[x, y]].values:
-            result[x_value] = y_value
-    return {'result': result, 'columns': data.columns.tolist()}
+        y = y.split(',')
+
+        # to handle chart resizing
+        if x_min is not None and x_max is not None and y_min is not None and y_max is not None:
+            data = data[(data[x] >= x_min) & (data[x] <= x_max)]
+            for y_value in y:
+                data = data[(data[y_value] >= y_min) & (data[y_value] <= y_max)]
+
+        # compute if sampling is required
+        sampling_enabled = auto_sampling is True and len(data) > 1000
+        sampling_factor = round(data['timestamp'].count() / 1500) if sampling_enabled else 1
+
+        # rendering values and applying sampling factor is needed
+        for (index, values) in enumerate(data[[x] + y].values):
+            if index % sampling_factor == 0:
+                result[values[0]] = values[1:].tolist()
+
+    return {'result': result, 'columns': data.columns.tolist(), 'sampling_enabled': sampling_enabled}
 
 
 @router.patch("/api/records/{id}")
