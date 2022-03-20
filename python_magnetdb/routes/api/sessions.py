@@ -1,19 +1,14 @@
-import requests
-
 from urllib.parse import urlencode
-from fastapi import APIRouter, Form, HTTPException
+
+import requests
+from fastapi import APIRouter, Form
 
 from ...models.audit_log import AuditLog
-from ...security import generate_user_token, authorization_server, client_id, client_secret
 from ...models.user import User
+from ...security import generate_user_token, authorization_server, client_id, client_secret
 
 router = APIRouter()
 
-
-# http://auth.example.com/oauth2/authorize?client_id=testid&scope=openid&response_type=code&redirect_uri=http%3A%2F%2Flocalhost
-# https://openid.net/specs/openid-connect-core-1_0.html#AuthorizationEndpoint
-# https://lemonldap-ng.org/documentation/2.0/idpopenidconnect.html
-# https://lemonldap-ng.org/documentation/latest/webserviceprotection.html#oauth2-endpoints
 
 @router.post("/api/sessions/authorization_url")
 def generate_authorization_url(redirect_uri: str = Form(...)):
@@ -50,10 +45,3 @@ def create(code: str = Form(...), redirect_uri: str = Form(...)):
     user.save()
     AuditLog.log(user, "User logged", resource=user)
     return {"token": generate_user_token(user)}
-
-
-# if not authenticate(username, password):
-    #     raise HTTPException(status_code=404, detail="Invalid username or password.")
-    #
-    # user = User.first_or_create(username=username)
-    return {}

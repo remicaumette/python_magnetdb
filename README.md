@@ -1,68 +1,58 @@
-# Magnet Database
+# MagnetDB
 
 Tools for creating and manipulating a database designed for Magnet simulations.
-Data may be partly retreived from **Lncmi control and monitoringwebsite**.
+Data may be partly retreived from **Lncmi control and monitoring website**.
 See `python_magnetrun` for more details
 
-## Structure
+## Development setup
 
-Viewing the database: `sqlitebrowser`
+1. Install python dependencies:
+    ```shell
+    pip3 install -r requirements.txt
+    ```
 
-Note that you shall not perform any operations while viewing the database with `sqlitebrowser`
+2. Start dependencies with docker:
+    ```shell
+    docker-compose up
+    ```
 
-To generate a diagram:
+3. Setup Minio bucket:
+   1. Sign in to http://localhost:9080/ with minio/minio123
+   2. Create bucket on http://localhost:9080/add-bucket
 
-```
-java -jar schemaspy-6.1.0.jar -debug -t sqlite -o tutut -sso -cat magnets -s magnets -db magnets.db
-```
+4. Run migrations:
+    ```shell
+    orator migrate -c config.py
+    ```
 
-## Python
+5. Configure LemonLDAP (https://github.com/LemonLDAPNG/lemonldap-ng-docker):
+   1. Sign in to http://auth.example.com/ with dwho/dwho
+   2. Enable OpenID Connect in Administration > WebSSO Manager > General Parameters > Issuer modules > OpenID Connect
+   3. Create OpenID relying party in Administration > WebSSO Manager > OpenID Connect Relying Parties > Add OpenID Relying Party
+   4. Go in Administration > WebSSO Manager > OpenID Connect Relying Parties > "Name of the relying party" > Options > Basic
+   5. Set Client ID to `testid`
+   6. Set Client secret to `testsecret`
+   7. Set Allowed redirection addresses for login to `http://localhost:8080/sessions`
 
-Running the app to create the database
+6. Setup front-end:
+   ```shell
+    cd web
+    yarn install
+    ```
 
-```
-python3 -m python_magnetdb.app --createdb
-``` 
+7. Run seeds:
+   ```shell
+   python3 -m python_magnetdb.seeds
+   ```
 
-To populate the database with an exemple msite
+8. Start front-end:
+   ```shell
+   export API_ENDPOINT=http://localhost:8000
+   yarn serve
+   ```
 
-```
-python3 -m python_magnetdb.app --createsite
-```
-
-To see more
-
-```
-python3 -m python_magnetdb.app --help
-```
-
-## API
-
-Running the FastAPI Application:
-
-```
-uvicorn python_magnetdb.main:app --reload
-``` 
-
-To view the API interface
-
-```
-firefox http://localhost:8000/docs
-```
-
-## Requirements
-
-* sqlmodel
-* fastapi
-* uvicorn
-* sqlitebrowser
-
-```
-python -m pip install sqlmodel
-python -m pip install fastapi "uvicorn[standard]"
-export PATH=$PATH:$HOME/.local/bin
-```
-
-## References
-
-(sqlmodel)[https://sqlmodel.tiangolo.com/tutorial]
+9. Start back-end:
+   ```
+   export S3_ENDPOINT=localhost:9000 S3_ACCESS_KEY=minio S3_SECRET_KEY=minio123 S3_BUCKET=magnetdb
+   uvicorn python_magnetdb.main:app --reload --log-level=debug
+   ```

@@ -10,7 +10,5 @@ psycopg2
 orator
 pyjwt
 requests
-bokeh
-panel
 param
 pandas
