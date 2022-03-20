@@ -14,4 +14,7 @@ def generate_user_token(user):
 
 
 def parse_user_token(token):
-    return jwt.decode(token, secret, algorithms=["HS256"])
+    try:
+        return jwt.decode(token, secret, algorithms=["HS256"])
+    except Exception:
+        return None

@@ -56,6 +56,14 @@
             :disabled="true"
             :default-value="$store.state.user.role"
         />
+        <FormField
+            label="API Key"
+            name="api_key"
+            type="text"
+            :component="FormInput"
+            :required="true"
+            :disabled="true"
+        />
         <Button type="submit" class="btn btn-primary">
           Save
         </Button>

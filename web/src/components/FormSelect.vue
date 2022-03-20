@@ -79,4 +79,8 @@ export default {
 .form-select-disabled > .vs__dropdown-toggle {
   @apply bg-gray-100 cursor-not-allowed;
 }
+
+.vs--disabled .vs__search {
+  @apply bg-gray-100;
+}
 </style>

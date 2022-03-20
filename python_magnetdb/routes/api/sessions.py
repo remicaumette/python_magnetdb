@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 import requests
 from fastapi import APIRouter, Form
+from uuid import uuid4 as uuid
 
 from ...models.audit_log import AuditLog
 from ...models.user import User
@@ -39,7 +40,7 @@ def create(code: str = Form(...), redirect_uri: str = Form(...)):
 
     user = User.where('username', userinfo_data['sub']).first()
     if not user:
-        user = User(username=userinfo_data['sub'])
+        user = User(username=userinfo_data['sub'], api_key=str(uuid()).replace('-', ''))
     user.email = userinfo_data['email']
     user.name = userinfo_data['name']
     user.save()

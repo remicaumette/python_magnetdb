@@ -23,9 +23,8 @@ def get_user(action=False):
         if authorization is None:
             raise HTTPException(detail="Forbidden.", status_code=403)
         token = parse_user_token(authorization)
-        request.state.token = token
-        user = User.find(token['user_id'])
-        if not user and (action is False or is_authorize(user, action)):
+        user = User.find(token['user_id']) if token else User.where('api_key', authorization).first()
+        if not (user is not None and (action is False or is_authorize(user, action))):
             raise HTTPException(detail="Forbidden.", status_code=403)
         return user
 
