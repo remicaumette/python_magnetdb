@@ -47,12 +47,13 @@ See `python_magnetrun` for more details
 
 8. Start front-end:
    ```shell
+   cd web
    export API_ENDPOINT=http://localhost:8000
    yarn serve
    ```
 
 9. Start back-end:
-   ```
+   ```shell
    export S3_ENDPOINT=localhost:9000 S3_ACCESS_KEY=minio S3_SECRET_KEY=minio123 S3_BUCKET=magnetdb
    uvicorn python_magnetdb.main:app --reload --log-level=debug
    ```
