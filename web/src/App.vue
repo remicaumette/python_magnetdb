@@ -95,6 +95,7 @@ export default {
   methods: {
     logout() {
       this.$store.commit('setToken', null)
+      this.$router.push({ name: 'sign_in' })
     },
   },
   computed: {

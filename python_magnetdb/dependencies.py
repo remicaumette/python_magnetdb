@@ -19,7 +19,7 @@ def is_authorize(user: User, action: str) -> bool:
 
 def get_user(action=False):
     def handler(request: Request) -> User:
-        authorization = request.headers.get('authorization')
+        authorization = request.query_params.get('auth_token') or request.headers.get('authorization')
         if authorization is None:
             raise HTTPException(detail="Forbidden.", status_code=403)
         token = parse_user_token(authorization)

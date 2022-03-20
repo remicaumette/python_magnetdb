@@ -52,7 +52,7 @@ export default {
       this.$forceUpdate()
     },
     downloadFile() {
-      window.open(`${client.defaults.baseURL}/api/attachments/${this.defaultValue.id}/download`, '_blank')
+      window.open(`${client.defaults.baseURL}/api/attachments/${this.defaultValue.id}/download?auth_token=${this.$store.state.token}`, '_blank')
     },
   },
   mounted() {

@@ -32,7 +32,7 @@ See `python_magnetrun` for more details
    4. Go in Administration > WebSSO Manager > OpenID Connect Relying Parties > "Name of the relying party" > Options > Basic
    5. Set Client ID to `testid`
    6. Set Client secret to `testsecret`
-   7. Set Allowed redirection addresses for login to `http://localhost:8080/sessions`
+   7. Set Allowed redirection addresses for login to `http://localhost:8080/sign_in`
 
 6. Setup front-end:
    ```shell
