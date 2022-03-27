@@ -52,7 +52,7 @@ def show(id: int, user=Depends(get_user('read'))):
 
 @router.get("/api/magnets/{id}/config")
 def show(id: int):
-    magnet = Magnet.with_('magnet_parts.part.material', 'site_magnets.site', 'cao', 'geometry').find(id)
+    magnet = Magnet.with_('magnet_parts.part.geometry', 'magnet_parts.part.material', 'site_magnets.site', 'cao', 'geometry').find(id)
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
 
@@ -72,16 +72,17 @@ def show(id: int):
             "nuance": material.nuance
         }
 
-    payload = {'geom': "test.yaml"} #magnet.geometry.id
+    payload = {'geom': magnet.geometry.filename}
     insulator_payload = format_material(Material.where('name', 'MAT_ISOLANT').first())
 
     for magnet_part in magnet.magnet_parts:
         if not magnet_part.active:
             continue
 
-        payload[magnet_part.part.type.capitalize()] = []
+        if magnet_part.part.type.capitalize() not in payload:
+            payload[magnet_part.part.type.capitalize()] = []
         payload[magnet_part.part.type.capitalize()].append({
-            'geom': "HL-31_H1.yaml", #magnet_part.part.geometry_attachment_id,
+            'geom': magnet_part.part.geometry.filename,
             'material': format_material(magnet_part.part.material),
             'insulator': insulator_payload
         })
