@@ -1,23 +1,18 @@
 """Console script for linking python_magnetsetup and python_magnettoos."""
 
-from typing import List, Optional
-
-import sys
-import os
-import json
-import yaml
-import math
-
 import argparse
-from .objects import load_object, load_object_from_db
-from .config import appenv, loadconfig, loadtemplates
-
-from python_magnetgeo import Insert, MSite, Bitter, Supra, SupraStructure
-from python_magnetgeo import python_magnetgeo
-
-from .file_utils import MyOpen, findfile, search_paths
+import math
+import os
+import sys
 
 import MagnetTools.MagnetTools as mt
+import yaml
+
+from python_magnetgeo import Insert, Bitter, Supra, SupraStructure
+from .config import appenv, loadconfig
+from .file_utils import MyOpen, findfile, search_paths
+from .objects import load_object_from_api
+
 
 def HMagnet(MyEnv, struct: Insert, data: dict, debug: bool=False):
     """
@@ -69,12 +64,12 @@ def BMagnet(struct: Bitter, material: dict, fillingfactor: float=1, debug: bool=
 
     b=mt.BitterfMagnet(r2, r1, h, current_density, z_offset, fillingfactor, rho)
     """
-    
+
     BMagnets = mt.VectorOfBitters()
-    
+
     rho = 1/ material["ElectricalConductivity"]
     f = fillingfactor # 1/struct.get_Nturns() # struct.getFillingFactor()
-        
+
     r1 = struct.r[0]*1.e-3
     r2 = struct.r[1]*1.e-3
     z = -struct.axi.h*1.e-3
@@ -87,7 +82,7 @@ def BMagnet(struct: Bitter, material: dict, fillingfactor: float=1, debug: bool=
             j = 1 / (r1 * math.log(r2/r1) * dz)
         z_offset = z + dz/2.
         BMagnets.append( mt.BitterMagnet(r2, r1, dz, j, z_offset, f, rho) )
-                
+
         z += dz
 
     print("BMagnet:", struct.name, len(BMagnets))
@@ -107,7 +102,7 @@ def UMagnet(struct: Supra, debug: bool=False):
     for dp in struct.dblepancakes:
         nturns += 2 * dp.pancake.n
         j = nturns / struct.getArea()*1.e-6
-    
+
     print("UMagnets:", struct.name, 1)
     return mt.UnifMagnet(struct.r1*1.e-3, struct.r0*1.e-3, struct.h*1.e-3, j, struct.z0, f, rho)
 
@@ -172,7 +167,7 @@ def magnet_setup(MyEnv, confdata: str, debug: bool=False):
     Creating MagnetTools data struct for setup for magnet
     """
     print("magnet_setup", "debug=", debug)
-    
+
     yamlfile = confdata["geom"]
     if debug:
         print("magnet_setup:", yamlfile)
@@ -183,7 +178,7 @@ def magnet_setup(MyEnv, confdata: str, debug: bool=False):
     UMagnets = mt.VectorOfUnifs()
     BMagnets = mt.VectorOfBitters()
     Shims = mt.VectorOfShims()
-    
+
     if "Helix" in confdata:
         print("Load an insert")
         # Download or Load yaml file from data repository??
@@ -210,7 +205,7 @@ def magnet_setup(MyEnv, confdata: str, debug: bool=False):
                 cad = None
                 with MyOpen(obj['geom'], 'r', paths=search_paths(MyEnv, "geom")) as cfgdata:
                     cad = yaml.load(cfgdata, Loader = yaml.FullLoader)
-    
+
                 if isinstance(cad, Bitter.Bitter):
                     fillingfactor = 1/cad.axi.get_Nturns()
                     tmp = BMagnet(cad, obj["material"], fillingfactor, debug)
@@ -240,7 +235,7 @@ def magnet_setup(MyEnv, confdata: str, debug: bool=False):
         Ustacks = mt.create_Ustack(UMagnets)
         print("UStacks:", len(Ustacks))
     # print("\n")
-    
+
     return (Tubes,Helices,OHelices,BMagnets,UMagnets,Shims)
 
 
@@ -251,7 +246,7 @@ def msite_setup(MyEnv, confdata: str, debug: bool=False, session=None):
     print("msite_setup:", "debug=", debug)
     print("msite_setup:", "confdata=", confdata)
     print("miste_setup: confdata[magnets]=", confdata["magnets"])
-    
+
     Tubes = mt.VectorOfTubes()
     Helices = mt.VectorOfBitters()
     OHelices = mt.VectorOfBitters()
@@ -262,18 +257,14 @@ def msite_setup(MyEnv, confdata: str, debug: bool=False, session=None):
     for magnet in confdata["magnets"]:
         print("magnet:", magnet, "type(magnet)=", type(magnet), "debug=", debug)
         try:
-            mconfdata = load_object(MyEnv, magnet + "-data.json", magnet, debug)
+            mconfdata = load_object_from_api("magnets", magnet)
         except:
-            print("setup: failed to load %s, look into magnetdb" % (magnet + "-data.json") )
-            try:
-                mconfdata = load_object_from_db(MyEnv, "magnet", magnet, debug, session)
-            except:
-                raise Exception(f"setup: failed to load {magnet} from magnetdb")
-                    
+            raise Exception(f"setup: failed to load {magnet} from magnetdb")
+
         if debug:
             print("mconfdata[geom]:", mconfdata["geom"])
         tmp = magnet_setup(MyEnv, mconfdata, debug)
-        
+
         # pack magnets
         for item in tmp[0]:
             Tubes.append(item)
@@ -297,9 +288,9 @@ def msite_setup(MyEnv, confdata: str, debug: bool=False, session=None):
         Ustacks = mt.create_Ustack(UMagnets)
         print("\nUStacks:", len(Ustacks))
     print("\n")
-    
+
     return (Tubes,Helices,OHelices,BMagnets,UMagnets,Shims)
-    
+
 
 def setup(MyEnv, args, confdata, jsonfile, session=None):
     """
@@ -332,10 +323,10 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
             with open(confdata["name"] + ".yaml", "x") as out:
                 out.write("!<MSite>\n")
                 yaml.dump(confdata, out)
-        return msite_setup(MyEnv, confdata, args.debug or args.verbose, session)               
+        return msite_setup(MyEnv, confdata, args.debug or args.verbose, session)
 
     return 1
-     
+
 def main():
     # Manage Options
     command_line = None
@@ -351,7 +342,7 @@ def main():
 
     if args.debug:
         print("Arguments: " + str(args._))
-    
+
     # make datafile/[magnet|msite] exclusive one or the other
     if args.magnet != None and args.msite:
         raise Exception("cannot specify both magnet and msite")
@@ -364,20 +355,16 @@ def main():
     if args.debug: print(MyEnv.template_path())
 
     # Get Object
-    if args.datafile != None:
-        confdata = load_object(MyEnv, args.datafile, args.debug)
-        jsonfile = args.datafile.replace("-data.json","")
-
     if args.magnet != None:
-        confdata = load_object_from_db(MyEnv, "magnet", args.magnet, args.debug)
+        confdata = load_object_from_api("magnets", args.magnet)
         jsonfile = args.magnet
-    
+
     if args.msite != None:
-        confdata = load_object_from_db(MyEnv, "msite", args.msite, args.debug)
+        confdata = load_object_from_api("sites", args.msite)
         jsonfile = args.msite
 
 
-    setup(MyEnv, args, confdata, jsonfile)    
+    setup(MyEnv, args, confdata, jsonfile)
     return 0
 
 

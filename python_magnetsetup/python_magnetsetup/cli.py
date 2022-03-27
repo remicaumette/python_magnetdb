@@ -1,13 +1,13 @@
 """Console script for python_magnetsetup."""
 import argparse
+import os
+import sys
 from argparse import RawTextHelpFormatter
 
-import sys
-import os
-
-from .setup import setup, setup_cmds
-from .objects import load_object, load_object_from_db
 from .config import appenv, loadconfig, supported_methods, supported_models
+from .objects import load_object_from_api
+from .setup import setup, setup_cmds
+
 
 def fabric(machine: str, workingdir: str, args, cfgfile: str, jsonfile: str, meshfile: str, tarfilename:str, cmds: dict):
     """
@@ -16,7 +16,7 @@ def fabric(machine: str, workingdir: str, args, cfgfile: str, jsonfile: str, mes
     from fabric import Connection
 
     cwd = os.getcwd()
-    
+
     # test fabric
     # TODO inhibit auto mode for Transient and 3D cases
     if args.auto:
@@ -30,7 +30,7 @@ def fabric(machine: str, workingdir: str, args, cfgfile: str, jsonfile: str, mes
         homedir = result.stdout.strip()
         print(f"{machine}: homedir={homedir}")
         result = connection_.run(f'[ -d {homedir}/{workingdir} ] && echo 0 || echo 1')
-    
+
         if result.stdout.strip() == '1':
             connection_.run(f'mkdir -p {workingdir}')
             connection_.put(f'{tarfilename}', remote=f'{homedir}/{workingdir}')
@@ -40,7 +40,7 @@ def fabric(machine: str, workingdir: str, args, cfgfile: str, jsonfile: str, mes
                     connection_.run(f"cd {homedir}/{workingdir} && {cmds['Pre']} && {cmds[cmd]}")
 
             connection_.run(f'ls -lrth {homedir}/{workingdir}/data/geometries/{meshfile}')
-            
+
             # TODO change NP for cmds Run depending on method and meshfile size
             connection_.run(f"cd {homedir}/{workingdir} && {cmds['Run']}")
 
@@ -60,12 +60,12 @@ def fabric(machine: str, workingdir: str, args, cfgfile: str, jsonfile: str, mes
             os.unlink(os.path.join(cwd, f))
 
     return 0
-    
+
 def main():
 
     # TODO get available model from magnetsetup.json
 
-    #  
+    #
     # epilog = "The choice of model is actually linked with the choosen method following this table\n" \
     #          f"cfpdes (Axi, Static): {supported_models(MyEnv, 'cfpdes', 'Axi', 'static')}\n" \
     #          f"cfpdes (Axi, Transient): {supported_models(MyEnv, 'cfpdes', 'Axi', 'transient')}\n" \
@@ -74,11 +74,11 @@ def main():
     #          "CG (3D only): thelec\n" \
     #          "HDG (3D only): thelec\n" \
     #          "" \
-    #          "NB: for cfpdes you must use a linear case as a starting point for a nonlinear case"    
+    #          "NB: for cfpdes you must use a linear case as a starting point for a nonlinear case"
 
     # load appenv
     AppCfg = loadconfig()
-    
+
     comment = ""
     actual_models = []
     for m in supported_methods(AppCfg):
@@ -87,12 +87,12 @@ def main():
                 l_ = supported_models(AppCfg, m, g, t)
                 if l_:
                     actual_models += l_
-                    comment += f"{m} ({g}, {t}): {l_}\n"  
-    #  
+                    comment += f"{m} ({g}, {t}): {l_}\n"
+    #
     epilog = "The choice of model is actually linked with the choosen method following this table\n" \
              f"{comment}\n" \
              "" \
-             "NB: for cfpdes you must use a linear case as a starting point for a nonlinear case"    
+             "NB: for cfpdes you must use a linear case as a starting point for a nonlinear case"
 
 
     # Manage Options
@@ -125,7 +125,7 @@ def main():
 
     # if args.debug:
     #    print("Arguments: " + str(args._))
-    
+
     # Get current dir
     cwd = os.getcwd()
     if args.wd:
@@ -144,22 +144,17 @@ def main():
     MyEnv = appenv()
     if args.debug: print(MyEnv.template_path())
 
-    # Get Object
-    if args.datafile != None:
-        confdata = load_object(MyEnv, args.datafile, args.debug)
-        jsonfile = args.datafile.replace("-data.json","")
-
     if args.magnet != None:
-        confdata = load_object_from_db(MyEnv, "magnet", args.magnet, args.debug)
+        confdata = load_object_from_api("magnets", args.magnet)
         jsonfile = args.magnet
 
     if args.msite != None:
-        confdata = load_object_from_db(MyEnv, "msite", args.msite, args.debug)
+        confdata = load_object_from_api("sites", args.msite)
         jsonfile = args.msite
 
     (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename) = setup(MyEnv, args, confdata, jsonfile)
     cmds = setup_cmds(MyEnv, args, yamlfile, cfgfile, jsonfile, xaofile, meshfile)
-    
+
     # Print command to run
     machine = MyEnv.compute_server
 
@@ -191,7 +186,7 @@ def main():
     status = 0
     if args.auto:
         status = fabric(machine, workingdir, args, cfgfile, jsonfile, meshfile, tarfilename, cmds)
-        # TODO 
+        # TODO
         # print out some stats
         # start post-processing
         # what about jobmanager??

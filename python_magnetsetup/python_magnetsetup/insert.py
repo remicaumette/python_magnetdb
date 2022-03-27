@@ -43,7 +43,7 @@ def Insert_simfile(MyEnv, confdata: dict, cad: Insert, addAir: bool = False):
                 xaofile = hhelix.name + ".xao"
                 f = findfile(xaofile, paths=search_paths(MyEnv, 'cad'))
                 files.append(f)
-                
+
                 brepfile = hhelix.name + ".brep"
                 f = findfile(brepfile, paths=search_paths(MyEnv, "cad"))
                 files.append(f)
@@ -63,7 +63,7 @@ def Insert_simfile(MyEnv, confdata: dict, cad: Insert, addAir: bool = False):
                     xaofile = ring.name + ".xao"
                     f = findfile(xaofile, paths=search_paths(MyEnv, "cad"))
                     files.append(f)
-                
+
                     brepfile = ring.name + ".brep"
                     f = findfile(brepfile, paths=search_paths(MyEnv, "cad"))
                     files.append(f)
@@ -96,7 +96,7 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
     index_Helices = []
     index_Helices_e = []
     index_Insulators = []
-    
+
     boundary_meca = []
     boundary_maxwell = []
     boundary_electric = []
@@ -114,7 +114,7 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
             hhelix = yaml.load(f, Loader = yaml.FullLoader)
             pitch_h.append(hhelix.axi.pitch)
             turns_h.append(hhelix.axi.turns)
-        
+
         if method_data[2] == "Axi":
             for j in range(1, Nsections[i]+1):
                 part_electric.append("H{}_Cu{}".format(i+1,j))
@@ -124,7 +124,7 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
             for j in range(Nsections[i]):
                 index_Helices.append(["0:{}".format(Nsections[i]+2)])
                 index_Helices_e.append(["1:{}".format(Nsections[i]+1)])
-                
+
         else:
             part_electric.append("H{}".format(i+1))
             if 'th' in method_data[3]:
@@ -151,7 +151,7 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
             part_electric.append("oL2")
             boundary_electric.append(["Inner1_LV0", "iL1", "0"])
             boundary_electric.append(["OuterL2_LV0", "oL2", "V0:V0"])
-                
+
             if 'el' in method_data[3] and  method_data[3] != 'thelec':
                 boundary_meca.append("Inner1_LV0")
                 boundary_meca.append("OuterL2_LV0")
@@ -162,15 +162,15 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
         else:
             boundary_electric.append(["H1_V0", "H1", "0"])
             boundary_electric.append(["H%d_V0" % NHelices, "H%d" % NHelices, "V0:V0"])
-        
+
         if 'mag' in method_data[3]:
             boundary_maxwell.append("InfV1")
             boundary_maxwell.append("InfR1")
 
-    else:    
+    else:
         boundary_meca.append("H1_HP")
-        boundary_meca.append("H_HP")    
-                
+        boundary_meca.append("H_HP")
+
         if 'mag' in method_data[3]:
             boundary_maxwell.append("ZAxis")
             boundary_maxwell.append("Infty")
@@ -190,7 +190,7 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
     params_data = create_params_insert(gdata + (turns_h,), method_data, debug)
 
     # bcs section
-    bcs_data = create_bcs_insert(boundary_meca, 
+    bcs_data = create_bcs_insert(boundary_meca,
                           boundary_maxwell,
                           boundary_electric,
                           gdata, confdata, templates, method_data, debug) # merge all bcs dict
@@ -216,13 +216,13 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
 
     currentH_data.append( {"part_electric": part_electric } )
     power_data.append( {"part_electric": part_electric } )
-        
+
     # if method_data[3] != 'mag' and method_data[3] != 'mag_hcurl':
     if method_data[2] == "Axi":
         for i in range(NHelices) :
             meanT_data.append( {"header": "MeanT_H{}".format(i+1), "markers": { "name": "H{}_Cu%1%".format(i+1), "index1": index_Helices[i]} } )
             powerH_data.append( {"header": "Power_H{}".format(i+1), "markers": { "name": "H{}_Cu%1%".format(i+1), "index1": index_Helices_e[i]} } )
-        
+
         for i in range(NRings) :
             meanT_data.append( {"header": "MeanT_R{}".format(i+1), "markers": { "name": "R{}".format(i+1)} } )
 
@@ -248,15 +248,15 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
             powerH_data.append( {"header": "Power_R{}".format(i+1), "markers": { "name": "R{}".format(i+1)} } )
             meanT_data.append( {"header": "MeanT_R{}".format(i+1), "markers": { "name": "R{}".format(i+1)} } )
 
-    mpost = { 
+    mpost = {
         "power_H": powerH_data ,
-        "current_H": currentH_data        
-    } 
+        "current_H": currentH_data
+    }
     if 'th' in method_data[3]:
         mpost["flux"] = {'index_h': "0:%s" % str(NChannels)}
         mpost["meanT_H"] = meanT_data
 
-        
+
     # check mpost output
     # print(f"insert: mpost={mpost}")
     mmat = create_materials_insert(gdata, index_Insulators, confdata, templates, method_data, debug)
@@ -279,13 +279,13 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
                 mat = mmat[marker]
                 print(f"mat[{marker}]: {mat}")
                 # print("U=", params[index], mat['sigma'], R1[i], pitch_h[j])
-                sigma = float(mat['sigma0'])
+                sigma = float(mat['sigma'])
                 I_s = I0 * turns_h[i][j]
                 j1 = I_s / (math.log(R2[i]/R1[i]) * (R1[i] * 1.e-3) *(pitch[j]*1.e-3) * turns[j] )
-                U_s = 2 * math.pi * (R1[i] * 1.e-3) * j1 / sigma  
+                U_s = 2 * math.pi * (R1[i] * 1.e-3) * j1 / sigma
                 # print("U=", params[index]['name'], R1[i], R2[i], pitch[j], turns[j], mat['sigma'], "U_s=", U_s, "j1=", j1)
                 item = {"name": "U_" + marker, "value":str(U_s)}
                 params[index] = item
-                
-    
+
+
     return (mdict, mmat, mpost)

@@ -1,18 +1,14 @@
 [tool.poetry]
-name = "python_magnetsetup"
+name = "python_magnetgeo"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-python-magnetgeo = {path = "../python_magnetgeo"}
-fabric = "^2.7.0"
-Pint = "^0.18"
-numpy = "^1.22.3"
-python-decouple = "^3.6"
-requests = "^2.27.1"
-chevron = "^0.14.0"
+PyYAML = "^6.0"
+lxml = "^4.8.0"
+gmsh = "^4.9.5"
 
 [tool.poetry.dev-dependencies]
 
