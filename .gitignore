@@ -70,6 +70,6 @@ flask/*
 /.idea
 *.iml
 *.db
-
+.DS_Store
 data
 core
