@@ -377,19 +377,18 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
     import tarfile
     tarfilename = cfgfile.replace('cfg','tgz')
     if os.path.isfile(os.path.join(cwd, tarfilename)):
-        raise FileExistsError(f"{tarfilename} already exists")
-    else:
-        tar = tarfile.open(tarfilename, "w:gz")
-        for filename in sim_files:
-            if args.debug:
-                print(f"add {filename} to {tarfilename}")
-            tar.add(filename)
-            for mname in material_generic_def:
-                if mname in filename:
-                    if args.debug: print(f"remove {filename}")
-                    os.unlink(filename)
-        tar.add('flow_param.json')
-        tar.close()
+        os.remove(os.path.join(cwd, tarfilename))
+    tar = tarfile.open(tarfilename, "w:gz")
+    for filename in sim_files:
+        if args.debug:
+            print(f"add {filename} to {tarfilename}")
+        tar.add(filename)
+        for mname in material_generic_def:
+            if mname in filename:
+                if args.debug: print(f"remove {filename}")
+                os.unlink(filename)
+    tar.add('flow_param.json')
+    tar.close()
 
     return (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename)
 
