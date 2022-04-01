@@ -495,7 +495,7 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mpost: dict, templates: 
 
     mdata = json.dumps(data, indent = 4)
 
-    with open(jsonfile, "x") as out:
+    with open(jsonfile, "w+") as out:
         out.write(mdata)
     return
 

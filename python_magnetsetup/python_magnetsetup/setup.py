@@ -36,7 +36,7 @@ from .config import loadconfig, loadtemplates
 from .file_utils import MyOpen, findfile, search_paths
 from .insert import Insert_setup, Insert_simfile
 from .jsonmodel import create_json
-from .objects import load_object_from_api
+from .objects import load_object_from_api, load_attachment
 from .supra import Supra_setup, Supra_simfile
 from .utils import NMerge
 
@@ -103,15 +103,8 @@ def magnet_setup(MyEnv, confdata: str, method_data: List, templates: dict, debug
 
     if "Helix" in confdata:
         print("Load an insert")
-        yamlfile = confdata["geom"]
-        if debug:
-            print(f"magnet_setup: yamfile: {yamlfile}")
-
-        # Download or Load yaml file from data repository??
-        cad = None
-        with MyOpen(yamlfile, 'r', paths=search_paths(MyEnv, "geom")) as cfgdata:
-            cad = yaml.load(cfgdata, Loader = yaml.FullLoader)
-        # if isinstance(cad, Insert):
+        attachment = load_attachment(confdata["geom"])
+        cad = yaml.load(attachment, Loader=yaml.FullLoader)
         (mdict, mmat, mpost) = Insert_setup(MyEnv, confdata, cad, method_data, templates, debug)
 
     for mtype in ["Bitter", "Supra"]:
@@ -253,30 +246,9 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
     cad_basename = ""
     if "geom" in confdata:
         print(f"Load a magnet {jsonfile} ", f"debug: {args.debug}")
-        try :
-            with MyOpen(confdata["geom"], "r", paths=search_paths(MyEnv, "geom")) as f:
-                cad = yaml.load(f, Loader = yaml.FullLoader)
-                cad_basename = cad.name
-        except:
-            cad_basename = confdata["geom"].replace(".yaml","")
-            print("confdata:", confdata)
-            for mtype in ["Bitter", "Supra"]:
-                if mtype in confdata:
-                    # why do I need that???
-                    try:
-                        findfile(confdata["geom"], search_paths(MyEnv, "geom"))
-                    except FileNotFoundError as e:
-                        # print(f"try to create {MyEnv.yaml_repo + '/' + confdata['geom']}")
-                        # magnets = {}
-                        # magnets[mtype] = []
-                        # for obj in confdata[mtype]:
-                        #    magnets[mtype].append( obj["geom"] )
-
-                        # with open(MyEnv.yaml_repo + '/' + confdata["geom"], "x") as out:
-                        #    out.write(f"!<{mtype}>\n")
-                        #    yaml.dump(magnets, out)
-                        # print(f"try to create {confdata['geom']} done")
-                        pass
+        attachment = load_attachment(confdata["geom"])
+        cad = yaml.load(attachment, Loader=yaml.FullLoader)
+        cad_basename = cad.name
 
         (mdict, mmat, mpost) = magnet_setup(MyEnv, confdata, method_data, templates, args.debug or args.verbose)
     else:
@@ -375,21 +347,20 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
     if args.debug:
         print("List of simulations files:", sim_files)
     import tarfile
-    tarfilename = cfgfile.replace('cfg','tgz')
+    tarfilename = cfgfile.replace('cfg', 'tgz')
     if os.path.isfile(os.path.join(cwd, tarfilename)):
-        raise FileExistsError(f"{tarfilename} already exists")
-    else:
-        tar = tarfile.open(tarfilename, "w:gz")
-        for filename in sim_files:
-            if args.debug:
-                print(f"add {filename} to {tarfilename}")
-            tar.add(filename)
-            for mname in material_generic_def:
-                if mname in filename:
-                    if args.debug: print(f"remove {filename}")
-                    os.unlink(filename)
-        tar.add('flow_param.json')
-        tar.close()
+        os.remove(os.path.join(cwd, tarfilename))
+    tar = tarfile.open(tarfilename, "w:gz")
+    for filename in sim_files:
+        if args.debug:
+            print(f"add {filename} to {tarfilename}")
+        tar.add(filename)
+        for mname in material_generic_def:
+            if mname in filename:
+                if args.debug: print(f"remove {filename}")
+                os.unlink(filename)
+    tar.add('flow_param.json')
+    tar.close()
 
     return (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename)
 
