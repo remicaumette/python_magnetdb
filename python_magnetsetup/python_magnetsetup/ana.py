@@ -9,7 +9,7 @@ import MagnetTools.MagnetTools as mt
 import yaml
 
 from python_magnetgeo import Insert, Bitter, Supra, SupraStructure
-from .config import appenv, loadconfig
+from .config import appenv, load_internal_config
 from .file_utils import MyOpen, findfile, search_paths
 from .objects import load_object_from_api
 
@@ -303,7 +303,7 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
     }
 
     # loadconfig
-    AppCfg = loadconfig()
+    AppCfg = load_internal_config()
 
     # Get current dir
     cwd = os.getcwd()

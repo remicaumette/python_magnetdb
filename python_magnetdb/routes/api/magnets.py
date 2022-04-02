@@ -72,6 +72,12 @@ def show(id: int):
             "nuance": material.nuance
         }
 
+    def format_attachment(attachment):
+        return {
+            "id": attachment.id,
+            "filename": attachment.filename,
+        }
+
     payload = {'geom': magnet.geometry.id}
     insulator_payload = format_material(Material.where('name', 'MAT_ISOLANT').first())
 
@@ -82,7 +88,7 @@ def show(id: int):
         if magnet_part.part.type.capitalize() not in payload:
             payload[magnet_part.part.type.capitalize()] = []
         payload[magnet_part.part.type.capitalize()].append({
-            'geom': magnet_part.part.geometry.id,
+            'geom': format_attachment(magnet_part.part.geometry),
             'material': format_material(magnet_part.part.material),
             'insulator': insulator_payload
         })
