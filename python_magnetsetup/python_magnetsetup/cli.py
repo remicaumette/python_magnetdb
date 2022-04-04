@@ -4,9 +4,10 @@ import os
 import sys
 from argparse import RawTextHelpFormatter
 
-from .config import appenv, loadconfig, supported_methods, supported_models
+from .config import appenv, load_internal_config, supported_methods, supported_models
 from .objects import load_object_from_api
-from .setup import setup, setup_cmds
+from .generate_config import generate_config
+from .generate_commands import generate_commands
 
 
 def fabric(machine: str, workingdir: str, args, cfgfile: str, jsonfile: str, meshfile: str, tarfilename:str, cmds: dict):
@@ -77,7 +78,7 @@ def main():
     #          "NB: for cfpdes you must use a linear case as a starting point for a nonlinear case"
 
     # load appenv
-    AppCfg = loadconfig()
+    AppCfg = load_internal_config()
 
     comment = ""
     actual_models = []
@@ -152,8 +153,8 @@ def main():
         confdata = load_object_from_api("sites", args.msite)
         jsonfile = args.msite
 
-    (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename) = setup(MyEnv, args, confdata, jsonfile)
-    cmds = setup_cmds(MyEnv, args, yamlfile, cfgfile, jsonfile, xaofile, meshfile)
+    (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename) = generate_config(MyEnv, args, confdata, jsonfile)
+    cmds = generate_commands(MyEnv, args, yamlfile, cfgfile, jsonfile, xaofile, meshfile)
 
     # Print command to run
     machine = MyEnv.compute_server
