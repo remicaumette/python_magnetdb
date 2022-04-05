@@ -21,6 +21,7 @@ param = "^1.12.0"
 pandas = "^1.4.1"
 PyYAML = "^5"
 uvicorn = "^0.17.6"
+python-magnetsetup = {path = "python_magnetsetup"}
 
 [tool.poetry.dev-dependencies]
 
