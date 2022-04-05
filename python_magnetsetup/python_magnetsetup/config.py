@@ -1,13 +1,13 @@
 from typing import List, Optional
 
+import sys
 import os
 import json
 
 from .machines import load_machines
 
-
 class appenv():
-
+    
     def __init__(self, debug: bool = False):
         self.url_api: str = None
         self.yaml_repo: Optional[str] = None
@@ -67,14 +67,15 @@ class appenv():
         return repo
 
 
-def load_internal_config(path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'magnetsetup.json')):
+def loadconfig():
     """
     Load app config (aka magnetsetup.json)
     """
-    with open(path, 'r') as config:
-        return json.load(config)
-    raise Exception("Could not load magnetsetup.json")
 
+    default_path = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(default_path, 'magnetsetup.json'), 'r') as appcfg:
+        magnetsetup = json.load(appcfg)
+    return magnetsetup
 
 def loadmachine(server: str):
     """
@@ -88,6 +89,82 @@ def loadmachine(server: str):
         raise ValueError(f"loadmachine: {server} no such server defined")
     pass
 
+def loadtemplates(appenv: appenv, appcfg: dict , method_data: List[str], linear: bool=True, debug: bool=False):
+    """
+    Load templates into a dict
+
+    method_data:
+    method
+    time
+    geom
+    model
+    cooling
+
+    """
+    
+    [method, time, geom, model, cooling, units_def] = method_data
+    template_path = os.path.join(appenv.template_path(), method, geom, model)
+
+    cfg_model = appcfg[method][time][geom][model]["cfg"]
+    json_model = appcfg[method][time][geom][model]["model"]
+    if linear:
+        conductor_model = appcfg[method][time][geom][model]["conductor-linear"]
+    else:
+        if geom == "3D": 
+            json_model = appcfg[method][time][geom][model]["model-nonlinear"]
+        conductor_model = appcfg[method][time][geom][model]["conductor-nonlinear"]
+    insulator_model = appcfg[method][time][geom][model]["insulator"]
+    
+    fcfg = os.path.join(template_path, cfg_model)
+    if debug:
+        print("fcfg:", fcfg, type(fcfg))
+    fmodel = os.path.join(template_path, json_model)
+    fconductor = os.path.join(template_path, conductor_model)
+    finsulator = os.path.join(template_path, insulator_model)
+    if 'th' in model:
+        cooling_model = appcfg[method][time][geom][model]["cooling"][cooling]
+        flux_model = appcfg[method][time][geom][model]["cooling-post"][cooling]
+        stats_T_model = appcfg[method][time][geom][model]["stats_T"]
+    
+        fcooling = os.path.join(template_path, cooling_model)
+        frobin = os.path.join(template_path, appcfg[method][time][geom][model]["cooling"]["robin"])
+        fflux = os.path.join(template_path, flux_model)
+        fstats_T = os.path.join(template_path, stats_T_model)
+
+    #if model != 'mag' and model != 'mag_hcurl' and model != 'mqs' and model != 'mqs_hcurl':
+    stats_Power_model = appcfg[method][time][geom][model]["stats_Power"]
+    stats_Current_model = appcfg[method][time][geom][model]["stats_Current"]
+
+    fstats_Power = os.path.join(template_path, stats_Power_model)
+    fstats_Current = os.path.join(template_path, stats_Current_model)
+
+    material_generic_def = ["conductor", "insulator"]
+    if time == "transient":
+        material_generic_def.append("conduct-nosource") # only for transient with mqs
+
+    dict = {
+        "cfg": fcfg,
+        "model": fmodel,
+        "conductor": fconductor,
+        "insulator": finsulator,
+        "stats": [],
+        "material_def" : material_generic_def
+    }
+
+    if 'th' in model:
+        dict["cooling"] = fcooling
+        dict["robin"] = frobin
+        dict["flux"] = fflux
+        dict["stats"].append(fstats_T)
+    
+    #if model != 'mag' and model != 'mag_hcurl' and model != 'mqs' and model != 'mqs_hcurl':
+    dict["stats"].append(fstats_Power)
+    dict["stats"].append(fstats_Current)
+
+    if check_templates(dict):
+        pass
+
+    return dict    
 
 def check_templates(templates: dict):
     """
@@ -97,17 +174,15 @@ def check_templates(templates: dict):
     for key in templates:
         if isinstance(templates[key], str):
             print(key, templates[key])
-            with open(templates[key], "r") as f:
-                pass
+            with open(templates[key], "r") as f: pass
 
         elif isinstance(templates[key], str):
             for s in templates[key]:
                 print(key, s)
                 with open(s, "r") as f: pass
     print("==========================\n\n")
-
+    
     return True
-
 
 def supported_models(Appcfg, method: str, geom: str, time: str) -> List:
     """
@@ -122,7 +197,6 @@ def supported_models(Appcfg, method: str, geom: str, time: str) -> List:
                 models.append(key)
 
     return models
-
 
 def supported_methods(Appcfg) -> List:
     """

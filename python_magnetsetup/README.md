@@ -3,10 +3,6 @@
 To get a magnet from the magnetdb:
 
 ```bash
-apt get python3-decouple python3-chevron python3-requests python3-gmsh python3-yaml python3-lxml
-```
-
-```bash
 python -m python_magnetdb.app --displaymagnet HL-34
 ```
 
