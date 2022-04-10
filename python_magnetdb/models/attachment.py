@@ -10,7 +10,10 @@ class Attachment(Model):
     __table__ = "storage_attachments"
     __fillable__ = ['key', 'filename', 'content_type']
 
-    def download(self):
+    def download(self, path=None):
+        if path is not None:
+            return s3_client.fget_object(s3_bucket, self.key, path)
+
         return s3_client.get_object(s3_bucket, self.key)
 
     @classmethod

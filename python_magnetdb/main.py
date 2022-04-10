@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routes.api.attachments import router as api_attachments_router
+from .routes.api.simulations import router as api_simulations_router
 from .routes.api.magnet_parts import router as api_magnet_parts_router
 from .routes.api.magnets import router as api_magnets_router
 from .routes.api.materials import router as api_materials_router
@@ -21,6 +22,7 @@ app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_credentials=True,
                    allow_methods=["*"], allow_headers=["*"])
 app.include_router(api_materials_router)
+app.include_router(api_simulations_router)
 app.include_router(api_parts_router)
 app.include_router(api_magnets_router)
 app.include_router(api_sites_router)

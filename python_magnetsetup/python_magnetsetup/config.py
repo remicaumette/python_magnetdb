@@ -3,40 +3,43 @@ from typing import List, Optional
 import sys
 import os
 import json
+from decouple import Config, RepositoryEnv
 
 from .machines import load_machines
 
 class appenv():
     
-    def __init__(self, debug: bool = False):
-        self.url_api: str = None
-        self.yaml_repo: Optional[str] = None
-        self.cad_repo: Optional[str] = None
-        self.mesh_repo: Optional[str] = None
-        self.template_repo: Optional[str] = None
-        self.simage_repo: Optional[str] = None
-        self.mrecord_repo: Optional[str] = None
-        self.optim_repo: Optional[str] = None
+    def __init__(self, envfile: str = "settings.env", debug: bool = False, url_api: str = None,
+                 yaml_repo: str = None, cad_repo: str = None, mesh_repo: str = None, template_repo: str = None,
+                 simage_repo: str = None, mrecord_repo: str = None, optim_repo: str = None):
+        self.url_api: str = url_api
+        self.yaml_repo: Optional[str] = yaml_repo
+        self.cad_repo: Optional[str] = cad_repo
+        self.mesh_repo: Optional[str] = mesh_repo
+        self.template_repo: Optional[str] = template_repo
+        self.simage_repo: Optional[str] = simage_repo
+        self.mrecord_repo: Optional[str] = mrecord_repo
+        self.optim_repo: Optional[str] = optim_repo
 
-        from decouple import Config, RepositoryEnv
-        envdata = RepositoryEnv("settings.env")
-        data = Config(envdata)
-        if debug:
-            print("appenv:", RepositoryEnv("settings.env").data)
+        if envfile is not None:
+            envdata = RepositoryEnv(envfile)
+            data = Config(envdata)
+            if debug:
+                print("appenv:", RepositoryEnv("settings.env").data)
 
-        self.url_api = data.get('URL_API')
-        self.compute_server = data.get('COMPUTE_SERVER')
-        self.visu_server = data.get('VISU_SERVER')
-        if 'TEMPLATE_REPO' in envdata:
-            self.template_repo = data.get('TEMPLATE_REPO')
-        if 'SIMAGE_REPO' in envdata:
-            self.simage_repo = data.get('SIMAGE_REPO')
-        if 'DATA_REPO' in envdata:
-            self.yaml_repo = data.get('DATA_REPO') + "/geometries"
-            self.cad_repo = data.get('DATA_REPO') + "/cad"
-            self.mesh_repo = data.get('DATA_REPO') + "/meshes"
-            self.mrecord_repo = data.get('DATA_REPO') + "/mrecords"
-            self.optim_repo = data.get('DATA_REPO') + "/optims"
+            self.url_api = data.get('URL_API')
+            self.compute_server = data.get('COMPUTE_SERVER')
+            self.visu_server = data.get('VISU_SERVER')
+            if 'TEMPLATE_REPO' in envdata:
+                self.template_repo = data.get('TEMPLATE_REPO')
+            if 'SIMAGE_REPO' in envdata:
+                self.simage_repo = data.get('SIMAGE_REPO')
+            if 'DATA_REPO' in envdata:
+                self.yaml_repo = data.get('DATA_REPO') + "/geometries"
+                self.cad_repo = data.get('DATA_REPO') + "/cad"
+                self.mesh_repo = data.get('DATA_REPO') + "/meshes"
+                self.mrecord_repo = data.get('DATA_REPO') + "/mrecords"
+                self.optim_repo = data.get('DATA_REPO') + "/optims"
         print(f"DATA: {self.yaml_repo}")
 
     def template_path(self, debug: bool = False):
