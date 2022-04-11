@@ -1,3 +1,4 @@
+import orator
 from fastapi import APIRouter, Query, HTTPException, UploadFile, Depends
 from fastapi.params import File, Form
 
@@ -37,7 +38,10 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
     part = Part(name=name, description=description, status='in_study', type=type,
                 design_office_reference=design_office_reference)
     part.material().associate(material)
-    part.save()
+    try:
+        part.save()
+    except orator.exceptions.query.QueryException as e:
+        raise HTTPException(status_code=422, detail="Name already taken.") if e.message.find('parts_name_unique') != -1 else e
     AuditLog.log(user, "Part created", resource=part)
     return part.serialize()
 

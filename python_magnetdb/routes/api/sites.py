@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import orator
 from fastapi import Depends, APIRouter, HTTPException, Query, UploadFile, File, Form
 
 from ...dependencies import get_user
@@ -32,7 +33,10 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
            config: UploadFile = File(...)):
     site = Site(name=name, description=description, status='in_study')
     site.config().associate(Attachment.upload(config))
-    site.save()
+    try:
+        site.save()
+    except orator.exceptions.query.QueryException as e:
+        raise HTTPException(status_code=422, detail="Name already taken.") if e.message.find('sites_name_unique') != -1 else e
     AuditLog.log(user, "Site created", resource=site)
     return site.serialize()
 

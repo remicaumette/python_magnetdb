@@ -3,6 +3,7 @@ import os
 import subprocess
 import tempfile
 from argparse import Namespace
+from os.path import basename
 
 from fastapi import APIRouter, HTTPException, Depends, Form
 
@@ -10,6 +11,7 @@ from python_magnetsetup.config import appenv
 from python_magnetsetup.objects import load_object
 from python_magnetsetup.setup import setup
 from ...dependencies import get_user
+from ...models.attachment import Attachment
 from ...models.audit_log import AuditLog
 from ...models.magnet import Magnet
 from ...models.material import Material
@@ -69,7 +71,7 @@ def generate_config(simulation, directory):
 @router.post("/api/simulations")
 def create(resource_type: str = Form(...), resource_id: int = Form(...), method: str = Form(...),
            model: str = Form(...), geometry: str = Form(...), cooling: str = Form(...),
-           user=Depends(get_user('create'))):
+           static: bool = Form(...), non_linear: bool = Form(...), user=Depends(get_user('create'))):
     if resource_type == 'magnet':
         resource = Magnet.find(resource_id)
     elif resource_type == 'site':
@@ -78,7 +80,8 @@ def create(resource_type: str = Form(...), resource_id: int = Form(...), method:
     if not resource:
         raise HTTPException(status_code=404, detail="Resource not found")
 
-    simulation = Simulation(status="in_progress", method=method, model=model, geometry=geometry, cooling=cooling)
+    simulation = Simulation(status="in_progress", method=method, model=model, geometry=geometry, cooling=cooling,
+                            static=static, non_linear=non_linear)
     simulation.resource().associate(resource)
     simulation.save()
     AuditLog.log(user, "Simulation created", resource=simulation)
@@ -92,10 +95,10 @@ def create(resource_type: str = Form(...), resource_id: int = Form(...), method:
         args = Namespace(wd=tempdir,
                          datafile=f"{tempdir}/config.json",
                          method=simulation.method,
-                         time="static", # time ? arg
+                         time="static" if simulation.static else "transient",
                          geom=simulation.geometry,
                          model=simulation.model,
-                         nonlinear="", # nonlinear ? arg
+                         nonlinear=simulation.non_linear,
                          cooling=simulation.cooling,
                          flow_params=f"{os.getcwd()}/flow_params.json",
                          debug=False,
@@ -107,10 +110,9 @@ def create(resource_type: str = Form(...), resource_id: int = Form(...), method:
         with open(f"{tempdir}/config.json", "r") as config_file:
             config = json.load(config_file)
             (name, cfgfile, jsonfile, xaofile, meshfile, tarfile) = setup(env, args, config, f"{tempdir}/{resource.name}")
-            print(name)
-            print(cfgfile)
-            print(jsonfile)
-            print(xaofile)
-            print(meshfile)
-            print(tarfile)
+            attachment = Attachment.raw_upload(basename(tarfile), "application/x-tar", tarfile)
+            simulation.resource().associate(attachment)
+            simulation.status = "done"
+            simulation.save()
+
     return simulation

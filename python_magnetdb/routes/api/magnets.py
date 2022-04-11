@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import orator.exceptions.query
+import psycopg2.errors
 from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
 
 from ...dependencies import get_user
@@ -36,7 +38,12 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
         magnet.cao().associate(Attachment.upload(cao))
     if geometry:
         magnet.geometry().associate(Attachment.upload(geometry))
-    magnet.save()
+
+    try:
+        magnet.save()
+    except orator.exceptions.query.QueryException as e:
+        raise HTTPException(status_code=422, detail="Name already taken.") if e.message.find('magnets_name_unique') != -1 else e
+
     AuditLog.log(user, "Magnet created", resource=magnet)
     return magnet.serialize()
 
