@@ -1,61 +1,36 @@
 import json
 import os
+import subprocess
 import tempfile
 from argparse import Namespace
 from os.path import basename
 
+from python_magnetdb.actions.generate_simulation_config import generate_simulation_config
 from python_magnetdb.models.attachment import Attachment
 from python_magnetdb.models.magnet import Magnet
-from python_magnetdb.models.material import Material
 from python_magnetsetup.config import appenv
 from python_magnetsetup.setup import setup
 
 
-def generate_magnet_config(magnet, directory):
-    magnet = Magnet\
-        .with_('magnet_parts.part.geometry', 'magnet_parts.part.material', 'site_magnets.site', 'cao', 'geometry') \
-        .find(magnet.id)
-
-    def format_material(material):
-        return {
-            "Tref": material.t_ref,
-            "VolumicMass": material.volumic_mass,
-            "alpha": material.alpha,
-            "ElectricalConductivity": material.electrical_conductivity,
-            "MagnetPermeability": material.magnet_permeability,
-            "Poisson": material.poisson,
-            "Rpe": material.rpe,
-            "SpecificHeat": material.specific_heat,
-            "ThermalConductivity": material.thermal_conductivity,
-            "Young": material.young,
-            "CoefDilatation": material.expansion_coefficient,
-            "nuance": material.nuance
-        }
-
-    magnet.geometry.download(f"{directory}/data/{magnet.geometry.filename}")
-    payload = {'geom': magnet.geometry.filename}
-    insulator_payload = format_material(Material.where('name', 'MAT_ISOLANT').first())
-
+def prepare_directory(simulation, directory):
+    magnet = Magnet.with_('magnet_parts.part.geometry', 'magnet_parts.part.cao', 'magnet_parts.part.material',
+                          'site_magnets.site', 'cao', 'geometry').find(simulation.resource_id)
+    os.mkdir(f"{directory}/data")
+    os.mkdir(f"{directory}/data/geometries")
+    os.mkdir(f"{directory}/data/cad")
+    if magnet.geometry:
+        magnet.geometry.download(f"{directory}/data/geometries/{magnet.geometry.filename}")
+    if magnet.cao:
+        magnet.cao.download(f"{directory}/data/cad/{magnet.cao.filename}")
     for magnet_part in magnet.magnet_parts:
         if not magnet_part.active:
             continue
-
-        if magnet_part.part.type.capitalize() not in payload:
-            payload[magnet_part.part.type.capitalize()] = []
-        magnet_part.part.geometry.download(f"{directory}/data/{magnet_part.part.geometry.filename}")
-        payload[magnet_part.part.type.capitalize()].append({
-            'geom': magnet_part.part.geometry.filename,
-            'material': format_material(magnet_part.part.material),
-            'insulator': insulator_payload
-        })
-
+        if magnet_part.part.geometry:
+            magnet_part.part.geometry.download(f"{directory}/data/geometries/{magnet_part.part.geometry.filename}")
+        if magnet_part.part.cao:
+            magnet_part.part.cao.download(f"{directory}/data/cad/{magnet_part.part.cao.filename}")
     with open(f"{directory}/config.json", "w+") as file:
-        file.write(json.dumps(payload))
-
-
-def generate_config(simulation, directory):
-    os.mkdir(f"{directory}/data")
-    generate_magnet_config(simulation.resource, directory)
+        file.write(json.dumps(generate_simulation_config(simulation)))
 
 
 def run_simulation_setup(simulation):
@@ -63,9 +38,10 @@ def run_simulation_setup(simulation):
     simulation.save()
     with tempfile.TemporaryDirectory() as tempdir:
         print(f"generating config in {tempdir}...")
-        generate_config(simulation, tempdir)
+        prepare_directory(simulation, tempdir)
         print("generating config done")
         print("running setup...")
+        subprocess.run([f"ls -lR {tempdir}"], shell=True)
         data_dir = f"{tempdir}/data"
         args = Namespace(wd=tempdir,
                          datafile=f"{tempdir}/config.json",
@@ -80,12 +56,18 @@ def run_simulation_setup(simulation):
                          verbose=False)
 
         # todo: envfile=None
-        env = appenv(url_api=data_dir, yaml_repo=data_dir, cad_repo=data_dir, mesh_repo=data_dir,
-                     simage_repo=data_dir, mrecord_repo=data_dir, optim_repo=data_dir)
-        with open(f"{tempdir}/config.json", "r") as config_file:
-            config = json.load(config_file)
-            (name, cfgfile, jsonfile, xaofile, meshfile, tarfile) = setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
-            attachment = Attachment.raw_upload(basename(tarfile), "application/x-tar", tarfile)
-            simulation.result().associate(attachment)
-            simulation.status = "done"
-            simulation.save()
+        env = appenv(envfile=None, url_api=data_dir, yaml_repo=f"{data_dir}/geometries", cad_repo=f"{data_dir}/cad",
+                     mesh_repo=data_dir, simage_repo=data_dir, mrecord_repo=data_dir, optim_repo=data_dir)
+        current_dir = os.getcwd()
+        try:
+            with open(f"{tempdir}/config.json", "r") as config_file:
+                config = json.load(config_file)
+                (name, cfgfile, jsonfile, xaofile, meshfile, tarfile) = setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
+                attachment = Attachment.raw_upload(basename(tarfile), "application/x-tar", tarfile)
+                simulation.result().associate(attachment)
+                simulation.status = "done"
+        except Exception as e:
+            raise e
+            simulation.status = "failed"
+        os.chdir(current_dir)
+        simulation.save()

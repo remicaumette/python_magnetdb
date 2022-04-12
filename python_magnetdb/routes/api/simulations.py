@@ -23,12 +23,12 @@ def create(resource_type: str = Form(...), resource_id: int = Form(...), method:
     if not resource:
         raise HTTPException(status_code=404, detail="Resource not found")
 
-    simulation = Simulation(status="in_progress", method=method, model=model, geometry=geometry, cooling=cooling,
+    simulation = Simulation(status="pending", method=method, model=model, geometry=geometry, cooling=cooling,
                             static=static, non_linear=non_linear)
     simulation.resource().associate(resource)
     simulation.save()
     AuditLog.log(user, "Simulation created", resource=simulation)
-    return simulation
+    return simulation.serialize()
 
 
 @router.get("/api/simulations/{id}/config.json")
@@ -45,6 +45,16 @@ def run_setup(id: int, user=Depends(get_user('update'))):
     if not simulation:
         raise HTTPException(status_code=404, detail="Simulation not found")
 
-    AuditLog.log(user, "Simulation setup performed", resource=simulation)
+    AuditLog.log(user, "Simulation setup started", resource=simulation)
     run_simulation_setup(simulation)
-    return simulation
+    return simulation.serialize()
+
+
+@router.post("/api/simulations/{id}/run_simulation")
+def run_simulation(id: int, user=Depends(get_user('update'))):
+    simulation = Simulation.with_('resource').find(id)
+    if not simulation:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+
+    AuditLog.log(user, "Simulation started", resource=simulation)
+    raise Exception("Not implemented")

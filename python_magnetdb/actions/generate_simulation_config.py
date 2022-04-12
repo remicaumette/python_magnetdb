@@ -43,8 +43,8 @@ def generate_site_config(site_id):
 
 
 def generate_simulation_config(simulation):
-    if simulation.resource_type == 'magnet':
+    if simulation.resource_type == 'magnets':
         return generate_magnet_config(simulation.resource_id)
-    elif simulation.resource_type == 'site':
+    elif simulation.resource_type == 'sites':
         return generate_site_config(simulation.resource_id)
     raise Exception('Unsupported resource type')
