@@ -13,22 +13,24 @@ from python_magnetsetup.setup import setup
 
 
 def prepare_directory(simulation, directory):
-    magnet = Magnet.with_('magnet_parts.part.geometry', 'magnet_parts.part.cao', 'magnet_parts.part.material',
-                          'site_magnets.site', 'cao', 'geometry').find(simulation.resource_id)
+    magnet = Magnet.with_('magnet_parts.part.geometry', 'magnet_parts.part.cad_attachments', 'geometry',
+                          'magnet_parts.part.material', 'site_magnets.site', 'cad_attachments').find(simulation.resource_id)
     os.mkdir(f"{directory}/data")
     os.mkdir(f"{directory}/data/geometries")
     os.mkdir(f"{directory}/data/cad")
     if magnet.geometry:
         magnet.geometry.download(f"{directory}/data/geometries/{magnet.geometry.filename}")
-    if magnet.cao:
-        magnet.cao.download(f"{directory}/data/cad/{magnet.cao.filename}")
+    if magnet.cad_attachments:
+        for cad_attachment in magnet.cad_attachments:
+            cad_attachment.download(f"{directory}/data/cad/{cad_attachment.filename}")
     for magnet_part in magnet.magnet_parts:
         if not magnet_part.active:
             continue
         if magnet_part.part.geometry:
             magnet_part.part.geometry.download(f"{directory}/data/geometries/{magnet_part.part.geometry.filename}")
-        if magnet_part.part.cao:
-            magnet_part.part.cao.download(f"{directory}/data/cad/{magnet_part.part.cao.filename}")
+        if magnet_part.part.cad_attachments:
+            for cad_attachment in magnet_part.part.cad_attachments:
+                cad_attachment.download(f"{directory}/data/cad/{cad_attachment.filename}")
     with open(f"{directory}/config.json", "w+") as file:
         file.write(json.dumps(generate_simulation_config(simulation)))
 

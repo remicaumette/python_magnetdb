@@ -5,6 +5,7 @@ from orator import DatabaseManager, Schema, Model
 from os import getenv, path, listdir
 
 from .models.attachment import Attachment
+from .models.cad_attachment import CadAttachment
 from .models.magnet import Magnet
 from .models.magnet_part import MagnetPart
 from .models.material import Material
@@ -47,15 +48,20 @@ def create_material(obj):
 def create_part(obj):
     material = obj.pop('material', None)
     geometry = obj.pop('geometry', None)
-    cao = obj.pop('cao', None)
+    cad = obj.pop('cad', None)
     part = Part(obj)
     if material is not None:
         part.material().associate(material)
     if geometry is not None:
         part.geometry().associate(upload_attachment(path.join(data_directory, 'geometries', f"{geometry}.yaml")))
-    if cao is not None:
-        part.cao().associate(upload_attachment(path.join(data_directory, 'cad', f"{cao}.xao")))
     part.save()
+    if cad is not None:
+        def generate_cad_attachment(file):
+            cad_attachment = CadAttachment()
+            cad_attachment.resource().associate(part)
+            cad_attachment.attachment().associate(upload_attachment(path.join(data_directory, 'cad', file)))
+            return cad_attachment
+        part.cad().save_many(map(generate_cad_attachment, [f"{cad}.xao", f"{cad}.brep"]))
     return part
 
 
@@ -72,13 +78,18 @@ def create_magnet(obj):
     site = obj.pop('site', None)
     parts = obj.pop('parts', None)
     geometry = obj.pop('geometry', None)
-    cao = obj.pop('cao', None)
+    cad = obj.pop('cad', None)
     magnet = Magnet(obj)
     if geometry is not None:
         magnet.geometry().associate(upload_attachment(path.join(data_directory, 'geometries', f"{geometry}.yaml")))
-    if cao is not None:
-        magnet.cao().associate(upload_attachment(path.join(data_directory, 'cad', f"{cao}.xao")))
     magnet.save()
+    if cad is not None:
+        def generate_cad_attachment(file):
+            cad_attachment = CadAttachment()
+            cad_attachment.resource().associate(magnet)
+            cad_attachment.attachment().associate(upload_attachment(path.join(data_directory, 'cad', file)))
+            return cad_attachment
+        magnet.cad().save_many(map(generate_cad_attachment, [f"{cad}.xao", f"{cad}.brep"]))
     if site is not None:
         site_magnet = SiteMagnet(commissioned_at=datetime.now())
         site_magnet.site().associate(site)
@@ -380,7 +391,7 @@ H15101601 = create_part({
     'status': 'in_operation',
     'material': MA15101601,
     'geometry': 'HL-31_H1',
-    'cao': 'HL-31_H1',
+    'cad': 'HL-31_H1',
 })
 H15061703 = create_part({
     'name': 'H15061703',
@@ -388,7 +399,7 @@ H15061703 = create_part({
     'status': 'in_operation',
     'material': MA15061703,
     'geometry': 'HL-31_H2',
-    'cao': 'HL-31_H2',
+    'cad': 'HL-31_H2',
 })
 H15061801 = create_part({
     'name': 'H15061801',
@@ -396,7 +407,7 @@ H15061801 = create_part({
     'status': 'in_operation',
     'material': MA15061801,
     'geometry': 'HL-31_H3',
-    'cao': 'HL-31_H3',
+    'cad': 'HL-31_H3',
 })
 M19061901_R1 = create_part({
     'name': 'M19061901_R1',
@@ -404,7 +415,7 @@ M19061901_R1 = create_part({
     'status': 'in_operation',
     'material': MAT1_RING,
     'geometry': 'HL-31_H4',
-    'cao': 'HL-31_H4',
+    'cad': 'HL-31_H4',
 })
 M19061901_R2 = create_part({
     'name': 'M19061901_R2',
@@ -412,7 +423,7 @@ M19061901_R2 = create_part({
     'status': 'in_operation',
     'material': MAT1_RING,
     'geometry': 'HL-31_H5',
-    'cao': 'HL-31_H5',
+    'cad': 'HL-31_H5',
 })
 M19061901_iL1 = create_part({
     'name': 'M19061901_iL1',
@@ -420,7 +431,7 @@ M19061901_iL1 = create_part({
     'status': 'in_operation',
     'material': MAT_LEAD,
     'geometry': 'HL-31_H6',
-    'cao': 'HL-31_H6',
+    'cad': 'HL-31_H6',
 })
 M19061901_oL2 = create_part({
     'name': 'M19061901_oL2',
@@ -428,7 +439,7 @@ M19061901_oL2 = create_part({
     'status': 'in_operation',
     'material': MAT_LEAD,
     'geometry': 'HL-31_H7',
-    'cao': 'HL-31_H7',
+    'cad': 'HL-31_H7',
 })
 
 MAT_TEST1 = create_material({
@@ -512,7 +523,7 @@ HLtest = create_magnet({
     'site': MTest,
     'parts': [HLtestH1, HLtestH2, HLtestR1],
     'geometry': 'test',
-    'cao': 'HL-31',
+    'cad': 'HL-31',
     'design_office_reference': 'HL-34-001-A'
 })
 RINGtest = create_magnet({
@@ -521,7 +532,7 @@ RINGtest = create_magnet({
     'site': MTest,
     'parts': [M19061901_R1, M19061901_R2],
     'geometry': 'test',
-    'cao': 'HL-31',
+    'cad': 'HL-31',
 })
 LEADtest = create_magnet({
     'name': 'LEAD-test',
@@ -529,7 +540,7 @@ LEADtest = create_magnet({
     'site': M10,
     'parts': [M19061901_iL1, M19061901_oL2],
     'geometry': 'test',
-    'cao': 'HL-31',
+    'cad': 'HL-31',
 })
 
 for file in listdir(path.join(data_directory, 'mrecords')):

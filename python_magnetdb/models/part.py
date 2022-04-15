@@ -1,7 +1,8 @@
 from orator import Model
-from orator.orm import belongs_to, has_many, has_many_through
+from orator.orm import belongs_to, has_many, has_many_through, morph_many
 
 from .attachment import Attachment
+from .cad_attachment import CadAttachment
 from .magnet_part import MagnetPart
 from .material import Material
 
@@ -14,8 +15,12 @@ class Part(Model):
     def geometry(self):
         return Attachment
 
-    @belongs_to('cao_attachment_id')
-    def cao(self):
+    @morph_many('resource')
+    def cad(self):
+        return CadAttachment
+
+    @has_many_through(CadAttachment, 'attachment_id', 'id')
+    def cad_attachments(self):
         return Attachment
 
     @belongs_to('material_id')

@@ -21,7 +21,7 @@ def format_material(material):
 
 def generate_magnet_config(magnet_id):
     magnet = Magnet \
-        .with_('magnet_parts.part.geometry', 'magnet_parts.part.material', 'site_magnets.site', 'cao', 'geometry') \
+        .with_('magnet_parts.part.geometry', 'magnet_parts.part.material', 'site_magnets.site', 'geometry') \
         .find(magnet_id)
     payload = {'geom': magnet.geometry.filename}
     insulator_payload = format_material(Material.where('name', 'MAT_ISOLANT').first())
