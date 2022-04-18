@@ -19,10 +19,6 @@ class Magnet(Model):
     def cad(self):
         return CadAttachment
 
-    @has_many_through(CadAttachment, 'attachment_id', 'id')
-    def cad_attachments(self):
-        return Attachment
-
     @has_many
     def magnet_parts(self):
         return MagnetPart

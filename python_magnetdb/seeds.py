@@ -482,6 +482,7 @@ HLtestH1 = create_part({
     'status': 'in_operation',
     'material': MAT_TEST1,
     'geometry': 'HL-31_H1',
+    'cad': 'HL-31_H1',
 })
 HLtestH2 = create_part({
     'name': 'HL-34_H2',
@@ -490,6 +491,7 @@ HLtestH2 = create_part({
     'status': 'in_operation',
     'material': MAT_TEST2,
     'geometry': 'HL-31_H2',
+    'cad': 'HL-31_H2',
 })
 HLtestR1 = create_part({
     'name': 'Ring-H1H2',
@@ -498,6 +500,7 @@ HLtestR1 = create_part({
     'status': 'in_operation',
     'material': MAT_TEST2,
     'geometry': 'Ring-H1H2',
+    'cad': 'Ring-H1H2',
 })
 
 MTest = create_site({

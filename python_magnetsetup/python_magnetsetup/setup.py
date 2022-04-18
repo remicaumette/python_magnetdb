@@ -43,7 +43,7 @@ from .jsonmodel import create_json
 from .insert import Insert_setup, Insert_simfile
 from .bitter import Bitter_setup, Bitter_simfile
 from .supra import Supra_setup, Supra_simfile
-    
+
 from .file_utils import MyOpen, findfile, search_paths
 
 def magnet_simfile(MyEnv, confdata: str, addAir: bool = False):
@@ -346,7 +346,7 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
     # generate properly meshfile for cfg
     # generate solver section for cfg
     # here name is from args (aka name of magnet and/or msite if from db)
-    create_cfg(cfgfile, name, meshfile, args.nonlinear, jsonfile, templates["cfg"], method_data, args.debug)
+    create_cfg(cfgfile, os.path.basename(name), meshfile, args.nonlinear, jsonfile.replace(f"{os.path.dirname(name)}/", ""), templates["cfg"], method_data, args.debug)
             
     # create json
     create_json(jsonfile, mdict, mmat, mpost, templates, method_data, args.debug)
@@ -386,21 +386,22 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
 
     if args.debug:
         print("List of simulations files:", sim_files)
-    import tarfile
-    tarfilename = cfgfile.replace('cfg','tgz')
-    if os.path.isfile(os.path.join(cwd, tarfilename)):
-        os.remove(os.path.join(cwd, tarfilename))
-    tar = tarfile.open(tarfilename, "w:gz")
-    for filename in sim_files:
-        if args.debug:
-            print(f"add {filename} to {tarfilename}")
-        tar.add(filename)
-        for mname in material_generic_def:
-            if mname in filename:
-                if args.debug: print(f"remove {filename}")
-                os.unlink(filename)
-    tar.add(args.flow_params)
-    tar.close()
+    tarfilename = cfgfile.replace('cfg', 'tgz')
+    if args.skip_archive is not True:
+        import tarfile
+        if os.path.isfile(os.path.join(cwd, tarfilename)):
+            os.remove(os.path.join(cwd, tarfilename))
+        tar = tarfile.open(tarfilename, "w:gz")
+        for filename in sim_files:
+            if args.debug:
+                print(f"add {filename} to {tarfilename}")
+            tar.add(filename)
+            for mname in material_generic_def:
+                if mname in filename:
+                    if args.debug: print(f"remove {filename}")
+                    os.unlink(filename)
+        tar.add(args.flow_params)
+        tar.close()
 
     return (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename)
 

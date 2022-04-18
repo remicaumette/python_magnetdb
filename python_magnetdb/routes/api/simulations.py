@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Form
 
 from ...actions.generate_simulation_config import generate_simulation_config
+from ...actions.run_simulation import run_simulation
 from ...actions.run_simulation_setup import run_simulation_setup
 from ...dependencies import get_user
 from ...models.audit_log import AuditLog
@@ -23,7 +24,7 @@ def create(resource_type: str = Form(...), resource_id: int = Form(...), method:
     if not resource:
         raise HTTPException(status_code=404, detail="Resource not found")
 
-    simulation = Simulation(status="pending", method=method, model=model, geometry=geometry, cooling=cooling,
+    simulation = Simulation(method=method, model=model, geometry=geometry, cooling=cooling,
                             static=static, non_linear=non_linear)
     simulation.resource().associate(resource)
     simulation.save()
@@ -50,11 +51,12 @@ def run_setup(id: int, user=Depends(get_user('update'))):
     return simulation.serialize()
 
 
-@router.post("/api/simulations/{id}/run_simulation")
-def run_simulation(id: int, user=Depends(get_user('update'))):
+@router.post("/api/simulations/{id}/run")
+def run(id: int, user=Depends(get_user('update'))):
     simulation = Simulation.with_('resource').find(id)
     if not simulation:
         raise HTTPException(status_code=404, detail="Simulation not found")
 
     AuditLog.log(user, "Simulation started", resource=simulation)
-    raise Exception("Not implemented")
+    run_simulation(simulation)
+    return simulation.serialize()

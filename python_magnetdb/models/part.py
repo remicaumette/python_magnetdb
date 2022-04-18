@@ -19,10 +19,6 @@ class Part(Model):
     def cad(self):
         return CadAttachment
 
-    @has_many_through(CadAttachment, 'attachment_id', 'id')
-    def cad_attachments(self):
-        return Attachment
-
     @belongs_to('material_id')
     def material(self):
         return Material

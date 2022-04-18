@@ -117,6 +117,8 @@ def main():
     parser.add_argument("--cooling", help="choose cooling type", type=str,
                     choices=['mean', 'grad', 'meanH', 'gradH'], default='mean')
     parser.add_argument("--scale", help="scale of geometry", type=float, default=1e-3)
+    parser.add_argument("--flow_params", help="flow params file path", type=str)
+    parser.add_argument("--skip_archive", help="skip output archiving", type=bool, default=False)
 
     parser.add_argument("--auto", help="activate auto mode", action='store_true')
     parser.add_argument("--debug", help="activate debug", action='store_true')
