@@ -7,6 +7,7 @@ const router = new VueRouter({
     { name: 'sites', path: '/sites', component: () => import('./views/sites/list') },
     { name: 'new_site', path: '/sites/new', component: () => import('./views/sites/new') },
     { name: 'site', path: '/sites/:id', component: () => import('./views/sites/show') },
+    { name: 'simulations', path: '/simulations', component: () => import('./views/simulations/list') },
     { name: 'new_simulation', path: '/simulations/new', component: () => import('./views/simulations/new') },
     { name: 'magnets', path: '/magnets', component: () => import('./views/magnets/list') },
     { name: 'new_magnet', path: '/magnets/new', component: () => import('./views/magnets/new') },

@@ -52,7 +52,8 @@
             :class="{ 'cursor-pointer': $listeners['item-selected'] }" @click="$emit('item-selected', item)"
           >
             <td v-for="header in currentHeaders" :key="header.key">
-              <slot :name="`item.${header.key}`" :item="item" :items="items"></slot>
+              <slot v-if="$scopedSlots[`item.${header.key}`]" :name="`item.${header.key}`" :item="item" :items="items" />
+              <template v-else>{{ item[header.key] }}</template>
             </td>
           </tr>
         </tbody>

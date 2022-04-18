@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Form
+from fastapi import APIRouter, HTTPException, Depends, Form, Query
 
 from ...actions.generate_simulation_config import generate_simulation_config
 from ...actions.run_simulation import run_simulation
@@ -10,6 +10,21 @@ from ...models.simulation import Simulation
 from ...models.site import Site
 
 router = APIRouter()
+
+
+@router.get("/api/simulations")
+def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
+          sort_by: str = Query(None), sort_desc: bool = Query(False)):
+    simulations = Simulation.with_('resource')
+    if sort_by is not None:
+        simulations = simulations.order_by(sort_by, 'desc' if sort_desc else 'asc')
+    simulations = simulations.paginate(per_page, page)
+    return {
+        "current_page": simulations.current_page,
+        "last_page": simulations.last_page,
+        "total": simulations.total,
+        "items": simulations.serialize(),
+    }
 
 
 @router.post("/api/simulations")
