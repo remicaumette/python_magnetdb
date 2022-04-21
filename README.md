@@ -42,8 +42,7 @@ Then copy the conf files in the lemonldap-etc and lemonldap-var/conf directories
 
 4. Run migrations:
     ```shell
-    poetry shell
-    orator migrate -c config.py
+    poetry run orator migrate -c python_magnetdb/database.py
     ```
 
 
@@ -54,24 +53,28 @@ Then copy the conf files in the lemonldap-etc and lemonldap-var/conf directories
     cd ..
     ```
 
-8. Start front-end:
+7. Start front-end:
    ```shell
    cd web
    export API_ENDPOINT=http://localhost:8000
    yarn serve
    ```
 
-9. Start back-end:
+8. Start back-end:
    ```shell
    export S3_ENDPOINT=localhost:9000 S3_ACCESS_KEY=minio S3_SECRET_KEY=minio123 S3_BUCKET=magnetdb
-   uvicorn python_magnetdb.main:app --reload --log-level=debug
+   poetry run uvicorn python_magnetdb.web:app --reload --log-level=debug
    ```
 
-7. Run seeds:
-
-   need to define `DATA_DIR`
-   
+9. Start worker:
    ```shell
-   python3 -m python_magnetdb.seeds
+   export S3_ENDPOINT=localhost:9000 S3_ACCESS_KEY=minio S3_SECRET_KEY=minio123 S3_BUCKET=magnetdb
+   poetry run celery -A python_magnetdb.worker worker --loglevel=info
    ```
 
+10. Run seeds:
+
+    Need to define `DATA_DIR`
+    ```shell
+    poetry run python3 -m python_magnetdb.seeds
+    ```
