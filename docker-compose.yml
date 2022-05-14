@@ -1,5 +1,7 @@
 version: '3'
 services:
+#  magnetdb:
+#
   redis:
     image: redis
     ports:
