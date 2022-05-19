@@ -7,8 +7,10 @@ services:
     volumes:
       - .:/home/feelpp/test
       - ./poetry-cache:/home/feelpp/.cache/pypoetry
+      - ./data/:/data
     ports:
       - 8000:8000
+      - 5007:5007
     links:
       - redis
       - postgres
@@ -27,6 +29,7 @@ services:
     volumes:
       - .:/home/feelpp/test
       - ./poetry-cache:/home/feelpp/.cache/pypoetry
+      - ./data/:/data
     links:
       - redis
       - postgres
