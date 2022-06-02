@@ -30,7 +30,7 @@ def prepare_bmap_chart_params(data, i_h, i_b, i_s, n, r0, z0, r, z, pkey, comman
     icurrents = mt.get_currents(Tubes, Helices, BMagnets, UMagnets)
 
     return (
-        i_h if i_h is not None else icurrents[0],
+        i_h if i_h is not None else (icurrents[0] if len(icurrents) > 0 else 0),
         i_b if i_b is not None else (icurrents[1] if len(icurrents) > 1 else 0),
         i_s if i_s is not None else 0,
         n if n is not None else 80,
