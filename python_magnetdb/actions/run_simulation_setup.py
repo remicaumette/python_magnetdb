@@ -25,7 +25,6 @@ def run_simulation_setup(simulation):
     simulation.save()
 
     with tempfile.TemporaryDirectory() as tempdir:
-        tempdir = "/home/remi/test"
         subprocess.run([f"rm -rf {tempdir}"], shell=True)
         subprocess.run([f"mkdir -p {tempdir}"], shell=True)
 
@@ -58,7 +57,13 @@ def run_simulation_setup(simulation):
             with open(f"{tempdir}/config.json", "r") as config_file:
                 config = json.load(config_file)
                 setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
-            output_archive = f"{tempdir}/output.tar.gz"
+            config_file_path = None
+            for file in os.listdir(tempdir):
+                if file.endswith('.cfg'):
+                    config_file_path = f"{tempdir}/{file}"
+                    break
+            simulation_name = os.path.basename(os.path.splitext(config_file_path)[0])
+            output_archive = f"{tempdir}/setup-{simulation_name}.tar.gz"
             subprocess.run([f"tar cvzf {output_archive} *"], shell=True)
             attachment = Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
             simulation.setup_output_attachment().associate(attachment)

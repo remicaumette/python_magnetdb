@@ -38,7 +38,8 @@ def run_simulation(simulation):
             print("Running simulation...")
             subprocess.run([f"singularity exec ~/Downloads/feelpp-toolboxes-v0.110.0-alpha.3.sif mpirun -np 8 feelpp_toolbox_coefficientformpdes --directory {tempdir} --config-file {config_file_path}"], shell=True)
             print("Archiving results...")
-            output_archive = f"{tempdir}/output.tar.gz"
+            simulation_name = os.path.basename(os.path.splitext(config_file_path)[0])
+            output_archive = f"{tempdir}/{simulation_name}.tar.gz"
             subprocess.run([f"tar cvzf {output_archive} *"], shell=True)
             attachment = Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
             simulation.output_attachment().associate(attachment)

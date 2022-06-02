@@ -1,10 +1,5 @@
-FROM trophime/magnetdb
+FROM trophime/magnettools:poetry
 
-RUN apt-get update
-RUN apt-get install -y curl wget libpq-dev build-essential python3-minimal libpython3.8-dev python3-pip
-RUN python -m pip install --upgrade pip
-
-USER vscode
-
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
-#sudo  apt-get install libxft2 libglu1
+RUN sudo apt-get update
+RUN sudo apt-get install -y libxft2 libglu1
+RUN pip install watchdog

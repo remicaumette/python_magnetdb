@@ -1,7 +1,7 @@
 version: '3'
 services:
   web-api:
-    image: trophime/magnettools:poetry
+    build: .
     command: poetry run uvicorn python_magnetdb.web:app --reload --host 0.0.0.0
     working_dir: /home/feelpp/test
     network_mode: host
@@ -23,8 +23,8 @@ services:
       REDIS_ADDR: redis://localhost:6379/0
       DATABASE_HOST: localhost
   web-worker:
-    image: trophime/magnettools:poetry
-    command: poetry run celery -A python_magnetdb.worker worker --loglevel=info --reload
+    build: .
+    command: watchmedo auto-restart -d ./python_magnetdb/ -p '**/*.py' -- poetry run celery -A python_magnetdb.worker worker --loglevel=info
     working_dir: /home/feelpp/test
     volumes:
       - .:/home/feelpp/test
@@ -41,6 +41,14 @@ services:
       S3_BUCKET: magnetdb
       REDIS_ADDR: redis://redis:6379/0
       DATABASE_HOST: postgres
+  web-app:
+    image: node:16
+    command: yarn serve
+    working_dir: /app
+    volumes:
+      - ./web:/app
+    ports:
+      - 8080:8080
   redis:
     image: redis
     ports:
