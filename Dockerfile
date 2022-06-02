@@ -7,3 +7,4 @@ RUN python -m pip install --upgrade pip
 USER vscode
 
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+#sudo  apt-get install libxft2 libglu1

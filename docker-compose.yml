@@ -24,7 +24,7 @@ services:
       DATABASE_HOST: localhost
   web-worker:
     image: trophime/magnettools:poetry
-    command: poetry run celery -A python_magnetdb.worker worker --loglevel=info
+    command: poetry run celery -A python_magnetdb.worker worker --loglevel=info --reload
     working_dir: /home/feelpp/test
     volumes:
       - .:/home/feelpp/test

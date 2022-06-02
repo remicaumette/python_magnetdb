@@ -115,7 +115,7 @@ export default {
       currentPage: 1,
       lastPage: 0,
       sortBy: null,
-      sortDesc: false,
+      sortDesc: null,
       query: '',
       currentHeaderHover: '',
       columnsDropdownActive: false,

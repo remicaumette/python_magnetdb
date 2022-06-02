@@ -11,7 +11,6 @@ def run_simulation(simulation):
     simulation.save()
 
     with tempfile.TemporaryDirectory() as tempdir:
-        tempdir = "/home/remi/test"
         subprocess.run([f"rm -rf {tempdir}"], shell=True)
         subprocess.run([f"mkdir -p {tempdir}"], shell=True)
 
