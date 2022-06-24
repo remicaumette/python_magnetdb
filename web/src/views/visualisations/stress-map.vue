@@ -49,38 +49,11 @@
           </div>
           <div class="w-1/3">
             <FormField
-                label="R"
-                name="r"
-                :component="FormSlider"
-                :min="0"
-                :max="10"
-            />
-          </div>
-          <div class="w-1/3">
-            <FormField
                 label="Z"
                 name="z"
                 :component="FormSlider"
-                :min="-10"
-                :max="10"
-            />
-          </div>
-        </div>
-        <div class="flex items-center space-x-4">
-          <div class="w-1/3">
-            <FormField
-                label="R0"
-                name="r0"
-                type="number"
-                :component="FormInput"
-            />
-          </div>
-          <div class="w-1/3">
-            <FormField
-                label="Z0"
-                name="z0"
-                type="number"
-                :component="FormInput"
+                :min="-0.2"
+                :max="0.2"
             />
           </div>
         </div>
@@ -91,14 +64,6 @@
                 name="pkey"
                 :component="FormSelect"
                 :options="['A', 'Br', 'Bz', 'B']"
-            />
-          </div>
-          <div class="w-1/3">
-            <FormField
-                label="Command"
-                name="command"
-                :component="FormSelect"
-                :options="['1D_z', '1D_r']"
             />
           </div>
         </div>
@@ -122,7 +87,7 @@ import FormSelect from "@/components/FormSelect";
 import Alert from "@/components/Alert";
 
 export default {
-  name: 'BMapVisualisation',
+  name: 'StressMapVisualisation',
   components: {
     Alert,
     FormField,
@@ -146,16 +111,16 @@ export default {
     },
     async fetch(values) {
       try {
-        const { results: data, params, allowed_currents: allowedCurrents } = await visualisationService.bmap({
+        const { results: data, params, allowed_currents: allowedCurrents } = await visualisationService.stressMap({
           ...values,
           resource_id: this.$route.query.resource_id,
           resource_type: this.$route.query.resource_type,
         })
-        this.allowedCurrents = allowedCurrents
         this.params = params
+        this.allowedCurrents = allowedCurrents
         if (!this.chart) {
           this.chart = new Chart(this.$refs.chart, {
-            type: 'line',
+            type: 'bar',
             data: {},
             options: {
               scales: {
@@ -191,13 +156,13 @@ export default {
           labels: data.x,
           datasets: [
             {
-              label: `Y`,
+              label: `I`,
               backgroundColor: '#FF0000',
               borderColor: '#FF0000',
               data: data.y,
             },
             {
-              label: `Y`,
+              label: `I nominal`,
               backgroundColor: '#00FF00',
               borderColor: '#00FF00',
               data: data.ymax,
