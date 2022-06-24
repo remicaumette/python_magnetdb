@@ -30,6 +30,12 @@
               >
                 Stress map
               </router-link>
+              <router-link
+                  class="btn btn-default btn-block"
+                  :to="{ name: 'visualisation_bmap_2d', query: { resource_type: 'magnet', resource_id: magnet.id } }"
+              >
+                BMAP 2D
+              </router-link>
             </div>
           </template>
         </Popover>

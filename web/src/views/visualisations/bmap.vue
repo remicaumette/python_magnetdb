@@ -2,6 +2,10 @@
   <div class="space-y-4">
     <Alert :error="error" />
 
+    <div v-if="resource" class="display-1">
+      {{resource.name}}
+    </div>
+
     <Card v-if="params">
       <Form :initial-values="params" @change="handleChanges">
         <div class="flex items-center space-x-4">
@@ -112,6 +116,8 @@
 
 <script>
 import * as visualisationService from '@/services/visualisationService'
+import * as siteService from '@/services/siteService'
+import * as magnetService from '@/services/magnetService'
 import {Chart} from "chart.js";
 import Card from "@/components/Card";
 import FormSlider from "@/components/FormSlider";
@@ -137,6 +143,7 @@ export default {
       params: null,
       chart: null,
       error: null,
+      resource: null,
       allowedCurrents: [],
     }
   },
@@ -218,7 +225,20 @@ export default {
     },
   },
   async mounted() {
-    await this.fetch(this.$route.query)
+    await Promise.all([
+      this.fetch(this.$route.query),
+      (async () => {
+        const resourceId = this.$route.query.resource_id
+        switch (this.$route.query.resource_type) {
+          case 'site':
+            this.resource = await siteService.find({ id: resourceId })
+            break
+          case 'magnet':
+            this.resource = await magnetService.find({ id: resourceId })
+            break
+        }
+      })(),
+    ])
   }
 }
 </script>

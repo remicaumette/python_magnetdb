@@ -43,8 +43,30 @@
         <div class="flex items-center space-x-4">
           <div class="w-1/3">
             <FormField
-                label="N"
-                name="n"
+                label="NR"
+                name="nr"
+                :component="FormSlider"
+                :min="50"
+                :max="1000"
+                :step="1"
+            />
+          </div>
+          <div class="w-1/3">
+            <FormField
+                label="R"
+                name="r"
+                :component="FormSlider"
+                :min="0"
+                :max="1"
+                :step=".01"
+            />
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="w-1/3">
+            <FormField
+                label="NZ"
+                name="nz"
                 :component="FormSlider"
                 :min="50"
                 :max="1000"
@@ -56,8 +78,9 @@
                 label="Z"
                 name="z"
                 :component="FormSlider"
-                :min="-0.2"
-                :max="0.2"
+                :min="-1"
+                :max="1"
+                :step=".01"
             />
           </div>
         </div>
@@ -74,14 +97,16 @@
       </Form>
     </Card>
     <Card>
-      <canvas ref="chart"></canvas>
+      <div ref="chart"></div>
     </Card>
   </div>
 </template>
 
 <script>
 import * as visualisationService from '@/services/visualisationService'
-import {Chart} from "chart.js";
+import * as siteService from '@/services/siteService'
+import * as magnetService from '@/services/magnetService'
+import Plotly from "plotly.js";
 import Card from "@/components/Card";
 import FormSlider from "@/components/FormSlider";
 import Form from "@/components/Form";
@@ -89,11 +114,9 @@ import FormField from "@/components/FormField";
 import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
 import Alert from "@/components/Alert";
-import * as siteService from "@/services/siteService";
-import * as magnetService from "@/services/magnetService";
 
 export default {
-  name: 'StressMapVisualisation',
+  name: 'BMap2DVisualisation',
   components: {
     Alert,
     FormField,
@@ -118,65 +141,27 @@ export default {
     },
     async fetch(values) {
       try {
-        const { results: data, params, allowed_currents: allowedCurrents } = await visualisationService.stressMap({
+        const { results: data, params, allowed_currents: allowedCurrents } = await visualisationService.bmap2d({
           ...values,
+          z0: values.z?.[0],
+          z1: values.z?.[1],
+          r0: values.r?.[0],
+          r1: values.r?.[1],
           resource_id: this.$route.query.resource_id,
           resource_type: this.$route.query.resource_type,
         })
-        this.params = params
         this.allowedCurrents = allowedCurrents
-        if (!this.chart) {
-          this.chart = new Chart(this.$refs.chart, {
-            type: 'bar',
-            data: {},
-            options: {
-              scales: {
-                x: {
-                  title: {
-                    display: true,
-                    text: '[m]'
-                  },
-                },
-                y: {
-                  title: {
-                    display: true,
-                    text: ''
-                  },
-                },
-              },
-              plugins: {
-                zoom: {
-                  zoom: {
-                    drag: {
-                      enabled: true
-                    },
-                    mode: 'xy',
-                  },
-                }
-              },
-            },
-          })
-        }
+        this.params = params
 
-        this.chart.options.scales.y.title.text = data.yaxis
-        this.chart.data = {
-          labels: data.x,
-          datasets: [
-            {
-              label: `I`,
-              backgroundColor: '#FF0000',
-              borderColor: '#FF0000',
-              data: data.y,
-            },
-            {
-              label: `I nominal`,
-              backgroundColor: '#00FF00',
-              borderColor: '#00FF00',
-              data: data.ymax,
-            },
-          ],
-        }
-        this.chart.update()
+        Plotly.newPlot(this.$refs.chart, [
+          {
+            z: data.values,
+            x: data.x,
+            y: data.y,
+            type: 'contour'
+          }
+        ])
+
         this.$router.replace({
           name: this.$route.name,
           query: {
@@ -185,6 +170,7 @@ export default {
           },
         }).catch(() => {})
       } catch (error) {
+        console.error(error)
         this.error = error
       }
     },
