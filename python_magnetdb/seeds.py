@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from uuid import uuid4
 
@@ -103,448 +104,460 @@ def create_magnet(obj):
     return magnet
 
 
+def extract_date_from_filename(filename):
+    for match in re.finditer(r".+_(\d{4}).(\d{2}).(\d{2})---(\d{2})-(\d{2})-(\d{2}).+", filename):
+        return datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)),
+                        int(match.group(4)), int(match.group(5)), int(match.group(6)))
+    return None
+
+
 def create_record(file, site):
-    record = Record(name=path.basename(file))
+    created_at = extract_date_from_filename(path.basename(file))
+    if created_at is None:
+        created_at = datetime.now()
+
+    record = Record(name=path.basename(file), created_at=created_at)
     record.attachment().associate(upload_attachment(file))
     record.site().associate(site)
     record.save()
     return record
 
 
-MA15101601 = create_material({
-    'name': 'MA15101601',
-    'description': 'H1',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 52.4e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 481,
-})
-MA15061703 = create_material({
-    'name': 'MA15061703',
-    'description': 'H2',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 53.3e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 482,
-})
-MA15061801 = create_material({
-    'name': 'MA15061801',
-    'description': 'H3',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 52.6e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 496,
-})
-MA15100501 = create_material({
-    'name': 'MA15100501',
-    'description': 'H4',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 52.8e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 508,
-})
-MA15101501 = create_material({
-    'name': 'MA15101501',
-    'description': 'H5',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 53.1e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 506,
-})
-MA18060101 = create_material({
-    'name': 'MA18060101',
-    'description': 'H6',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 53.2e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 512,
-})
-MA18012501 = create_material({
-    'name': 'MA18012501',
-    'description': 'H7',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 53.1e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 500,
-})
-MA18051801 = create_material({
-    'name': 'MA18051801',
-    'description': 'H8',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 51.9e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 512,
-})
-MA18101201 = create_material({
-    'name': 'MA18101201',
-    'description': 'H9',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 53.7e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 500,
-})
-MA19012101 = create_material({
-    'name': 'MA19012101',
-    'description': 'H11',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 53.8e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 500,
-})
-MA19011601 = create_material({
-    'name': 'MA19011601',
-    'description': 'H12',
-    'nuance': 'CuAg5.5',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 53.2e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 500,
-})
-MA10061702 = create_material({
-    'name': 'MA10061702',
-    'description': 'H13',
-    'nuance': 'CuCrZr',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.4e-3,
-    'electrical_conductivity': 46.5e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 366,
-})
-MA10061703 = create_material({
-    'name': 'MA10061703',
-    'description': 'H14',
-    'nuance': 'CuCrZr',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.4e-3,
-    'electrical_conductivity': 50.25e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 373,
-})
-MAT1_RING = create_material({
-    'name': '',
-    'description': 'R1, R2',
-    'nuance': 'unknow',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.4e-3,
-    'electrical_conductivity': 41e+6,
-    'thermal_conductivity': 320,
-    'magnet_permeability': 1,
-    'young': 131e+9,
-    'poisson': 0.3,
-    'expansion_coefficient': 17e-6,
-    'rpe': 0,
-})
-MAT2_RING = create_material({
-    'name': 'MAT2_RING',
-    'description': 'R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13',
-    'nuance': 'unknow',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.4e-3,
-    'electrical_conductivity': 50e+6,
-    'thermal_conductivity': 320,
-    'magnet_permeability': 1,
-    'young': 131e+9,
-    'poisson': 0.3,
-    'expansion_coefficient': 17e-6,
-    'rpe': 0,
-})
-MAT_LEAD = create_material({
-    'name': 'MAT_LEAD',
-    'description': 'il1 ol2',
-    'nuance': 'unknow',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.4e-3,
-    'electrical_conductivity': 58.0e+6,
-    'thermal_conductivity': 390,
-    'magnet_permeability': 1,
-    'young': 131e+9,
-    'poisson': 0.3,
-    'expansion_coefficient': 17e-6,
-    'rpe': 0,
-})
-MAT_ISOLANT = create_material({
-    'name': 'MAT_ISOLANT',
-    'description': None,
-    'nuance': 'unknow',
-    't_ref': 20,
-    'volumic_mass': 2e+3,
-    'specific_heat': 0,
-    'alpha': 0,
-    'electrical_conductivity': 0,
-    'thermal_conductivity': 1.2,
-    'magnet_permeability': 1,
-    'young': 2.1e9,
-    'poisson': 0.21,
-    'expansion_coefficient': 9e-6,
-    'rpe': 0,
-})
+with Model.get_connection_resolver().transaction():
+    MA15101601 = create_material({
+        'name': 'MA15101601',
+        'description': 'H1',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 52.4e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 481,
+    })
+    MA15061703 = create_material({
+        'name': 'MA15061703',
+        'description': 'H2',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 53.3e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 482,
+    })
+    MA15061801 = create_material({
+        'name': 'MA15061801',
+        'description': 'H3',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 52.6e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 496,
+    })
+    MA15100501 = create_material({
+        'name': 'MA15100501',
+        'description': 'H4',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 52.8e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 508,
+    })
+    MA15101501 = create_material({
+        'name': 'MA15101501',
+        'description': 'H5',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 53.1e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 506,
+    })
+    MA18060101 = create_material({
+        'name': 'MA18060101',
+        'description': 'H6',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 53.2e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 512,
+    })
+    MA18012501 = create_material({
+        'name': 'MA18012501',
+        'description': 'H7',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 53.1e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 500,
+    })
+    MA18051801 = create_material({
+        'name': 'MA18051801',
+        'description': 'H8',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 51.9e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 512,
+    })
+    MA18101201 = create_material({
+        'name': 'MA18101201',
+        'description': 'H9',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 53.7e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 500,
+    })
+    MA19012101 = create_material({
+        'name': 'MA19012101',
+        'description': 'H11',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 53.8e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 500,
+    })
+    MA19011601 = create_material({
+        'name': 'MA19011601',
+        'description': 'H12',
+        'nuance': 'CuAg5.5',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 53.2e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 500,
+    })
+    MA10061702 = create_material({
+        'name': 'MA10061702',
+        'description': 'H13',
+        'nuance': 'CuCrZr',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.4e-3,
+        'electrical_conductivity': 46.5e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 366,
+    })
+    MA10061703 = create_material({
+        'name': 'MA10061703',
+        'description': 'H14',
+        'nuance': 'CuCrZr',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.4e-3,
+        'electrical_conductivity': 50.25e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 373,
+    })
+    MAT1_RING = create_material({
+        'name': '',
+        'description': 'R1, R2',
+        'nuance': 'unknow',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.4e-3,
+        'electrical_conductivity': 41e+6,
+        'thermal_conductivity': 320,
+        'magnet_permeability': 1,
+        'young': 131e+9,
+        'poisson': 0.3,
+        'expansion_coefficient': 17e-6,
+        'rpe': 0,
+    })
+    MAT2_RING = create_material({
+        'name': 'MAT2_RING',
+        'description': 'R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13',
+        'nuance': 'unknow',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.4e-3,
+        'electrical_conductivity': 50e+6,
+        'thermal_conductivity': 320,
+        'magnet_permeability': 1,
+        'young': 131e+9,
+        'poisson': 0.3,
+        'expansion_coefficient': 17e-6,
+        'rpe': 0,
+    })
+    MAT_LEAD = create_material({
+        'name': 'MAT_LEAD',
+        'description': 'il1 ol2',
+        'nuance': 'unknow',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.4e-3,
+        'electrical_conductivity': 58.0e+6,
+        'thermal_conductivity': 390,
+        'magnet_permeability': 1,
+        'young': 131e+9,
+        'poisson': 0.3,
+        'expansion_coefficient': 17e-6,
+        'rpe': 0,
+    })
+    MAT_ISOLANT = create_material({
+        'name': 'MAT_ISOLANT',
+        'description': None,
+        'nuance': 'unknow',
+        't_ref': 20,
+        'volumic_mass': 2e+3,
+        'specific_heat': 0,
+        'alpha': 0,
+        'electrical_conductivity': 0,
+        'thermal_conductivity': 1.2,
+        'magnet_permeability': 1,
+        'young': 2.1e9,
+        'poisson': 0.21,
+        'expansion_coefficient': 9e-6,
+        'rpe': 0,
+    })
 
 
-H15101601 = create_part({
-    'name': 'H15101601',
-    'type': 'helix',
-    'status': 'in_operation',
-    'material': MA15101601,
-    'geometry': 'HL-31_H1',
-    'cad': 'HL-31_H1',
-})
-H15061703 = create_part({
-    'name': 'H15061703',
-    'type': 'helix',
-    'status': 'in_operation',
-    'material': MA15061703,
-    'geometry': 'HL-31_H2',
-    'cad': 'HL-31_H2',
-})
-H15061801 = create_part({
-    'name': 'H15061801',
-    'type': 'helix',
-    'status': 'in_operation',
-    'material': MA15061801,
-    'geometry': 'HL-31_H3',
-    'cad': 'HL-31_H3',
-})
-M19061901_R1 = create_part({
-    'name': 'M19061901_R1',
-    'type': 'ring',
-    'status': 'in_operation',
-    'material': MAT1_RING,
-    'geometry': 'HL-31_H4',
-    'cad': 'HL-31_H4',
-})
-M19061901_R2 = create_part({
-    'name': 'M19061901_R2',
-    'type': 'ring',
-    'status': 'in_operation',
-    'material': MAT1_RING,
-    'geometry': 'HL-31_H5',
-    'cad': 'HL-31_H5',
-})
-M19061901_iL1 = create_part({
-    'name': 'M19061901_iL1',
-    'type': 'lead',
-    'status': 'in_operation',
-    'material': MAT_LEAD,
-    'geometry': 'HL-31_H6',
-    'cad': 'HL-31_H6',
-})
-M19061901_oL2 = create_part({
-    'name': 'M19061901_oL2',
-    'type': 'lead',
-    'status': 'in_operation',
-    'material': MAT_LEAD,
-    'geometry': 'HL-31_H7',
-    'cad': 'HL-31_H7',
-})
+    H15101601 = create_part({
+        'name': 'H15101601',
+        'type': 'helix',
+        'status': 'in_operation',
+        'material': MA15101601,
+        'geometry': 'HL-31_H1',
+        'cad': 'HL-31_H1',
+    })
+    H15061703 = create_part({
+        'name': 'H15061703',
+        'type': 'helix',
+        'status': 'in_operation',
+        'material': MA15061703,
+        'geometry': 'HL-31_H2',
+        'cad': 'HL-31_H2',
+    })
+    H15061801 = create_part({
+        'name': 'H15061801',
+        'type': 'helix',
+        'status': 'in_operation',
+        'material': MA15061801,
+        'geometry': 'HL-31_H3',
+        'cad': 'HL-31_H3',
+    })
+    M19061901_R1 = create_part({
+        'name': 'M19061901_R1',
+        'type': 'ring',
+        'status': 'in_operation',
+        'material': MAT1_RING,
+        'geometry': 'HL-31_H4',
+        'cad': 'HL-31_H4',
+    })
+    M19061901_R2 = create_part({
+        'name': 'M19061901_R2',
+        'type': 'ring',
+        'status': 'in_operation',
+        'material': MAT1_RING,
+        'geometry': 'HL-31_H5',
+        'cad': 'HL-31_H5',
+    })
+    M19061901_iL1 = create_part({
+        'name': 'M19061901_iL1',
+        'type': 'lead',
+        'status': 'in_operation',
+        'material': MAT_LEAD,
+        'geometry': 'HL-31_H6',
+        'cad': 'HL-31_H6',
+    })
+    M19061901_oL2 = create_part({
+        'name': 'M19061901_oL2',
+        'type': 'lead',
+        'status': 'in_operation',
+        'material': MAT_LEAD,
+        'geometry': 'HL-31_H7',
+        'cad': 'HL-31_H7',
+    })
 
-MAT_TEST1 = create_material({
-    'name': 'MAT_TEST1',
-    'description': 'R1, R2',
-    'nuance': 'Cu5Ag5,08',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 52.4e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 481,
-})
-MAT_TEST2 = create_material({
-    'name': 'MAT_TEST2',
-    'description': 'R1, R2',
-    'nuance': 'Cu5Ag5,08',
-    't_ref': 293,
-    'volumic_mass': 9e+3,
-    'specific_heat': 0,
-    'alpha': 3.6e-3,
-    'electrical_conductivity': 53.3e+6,
-    'thermal_conductivity': 380,
-    'magnet_permeability': 1,
-    'young': 117e+9,
-    'poisson': 0.33,
-    'expansion_coefficient': 18e-6,
-    'rpe': 482,
-})
+    MAT_TEST1 = create_material({
+        'name': 'MAT_TEST1',
+        'description': 'R1, R2',
+        'nuance': 'Cu5Ag5,08',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 52.4e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 481,
+    })
+    MAT_TEST2 = create_material({
+        'name': 'MAT_TEST2',
+        'description': 'R1, R2',
+        'nuance': 'Cu5Ag5,08',
+        't_ref': 293,
+        'volumic_mass': 9e+3,
+        'specific_heat': 0,
+        'alpha': 3.6e-3,
+        'electrical_conductivity': 53.3e+6,
+        'thermal_conductivity': 380,
+        'magnet_permeability': 1,
+        'young': 117e+9,
+        'poisson': 0.33,
+        'expansion_coefficient': 18e-6,
+        'rpe': 482,
+    })
 
-HLtestH1 = create_part({
-    'name': 'HL-34_H1',
-    'type': 'helix',
-    'design_office_reference': 'HL-34-001-A',
-    'status': 'in_operation',
-    'material': MAT_TEST1,
-    'geometry': 'HL-31_H1',
-    'cad': 'HL-31_H1',
-})
-HLtestH2 = create_part({
-    'name': 'HL-34_H2',
-    'type': 'helix',
-    'design_office_reference': 'HL-34-001-A',
-    'status': 'in_operation',
-    'material': MAT_TEST2,
-    'geometry': 'HL-31_H2',
-    'cad': 'HL-31_H2',
-})
-HLtestR1 = create_part({
-    'name': 'Ring-H1H2',
-    'type': 'ring',
-    'design_office_reference': 'HL-34-001-A',
-    'status': 'in_operation',
-    'material': MAT_TEST2,
-    'geometry': 'Ring-H1H2',
-    'cad': 'Ring-H1H2',
-})
+    HLtestH1 = create_part({
+        'name': 'HL-34_H1',
+        'type': 'helix',
+        'design_office_reference': 'HL-34-001-A',
+        'status': 'in_operation',
+        'material': MAT_TEST1,
+        'geometry': 'HL-31_H1',
+        'cad': 'HL-31_H1',
+    })
+    HLtestH2 = create_part({
+        'name': 'HL-34_H2',
+        'type': 'helix',
+        'design_office_reference': 'HL-34-001-A',
+        'status': 'in_operation',
+        'material': MAT_TEST2,
+        'geometry': 'HL-31_H2',
+        'cad': 'HL-31_H2',
+    })
+    HLtestR1 = create_part({
+        'name': 'Ring-H1H2',
+        'type': 'ring',
+        'design_office_reference': 'HL-34-001-A',
+        'status': 'in_operation',
+        'material': MAT_TEST2,
+        'geometry': 'Ring-H1H2',
+        'cad': 'Ring-H1H2',
+    })
 
-MTest = create_site({
-    'name': 'MTest',
-    'status': 'in_operation',
-    'config': 'HL-test2-cfpdes-thelec-Axi-sim',
-})
-MTest2 = create_site({
-    'name': 'MTest2',
-    'status': 'defunct',
-    'config': 'HL-test2-cfpdes-thelec-Axi-sim',
-})
-M10 = create_site({
-    'name': 'M10',
-    'status': 'in_operation',
-    'config': 'HL-test2-cfpdes-thelec-Axi-sim',
-})
+    MTest = create_site({
+        'name': 'MTest',
+        'status': 'in_operation',
+        'config': 'HL-test2-cfpdes-thelec-Axi-sim',
+    })
+    MTest2 = create_site({
+        'name': 'MTest2',
+        'status': 'defunct',
+        'config': 'HL-test2-cfpdes-thelec-Axi-sim',
+    })
+    M10 = create_site({
+        'name': 'M10',
+        'status': 'in_operation',
+        'config': 'HL-test2-cfpdes-thelec-Axi-sim',
+    })
 
 
-HLtest = create_magnet({
-    'name': 'HL-test',
-    'status': 'in_operation',
-    'site': MTest,
-    'parts': [HLtestH1, HLtestH2, HLtestR1],
-    'geometry': 'test',
-    'cad': 'HL-31',
-    'design_office_reference': 'HL-34-001-A'
-})
-RINGtest = create_magnet({
-    'name': 'RING-test',
-    'status': 'in_operation',
-    'site': MTest,
-    'parts': [M19061901_R1, M19061901_R2],
-    'geometry': 'test',
-    'cad': 'HL-31',
-})
-LEADtest = create_magnet({
-    'name': 'LEAD-test',
-    'status': 'in_operation',
-    'site': M10,
-    'parts': [M19061901_iL1, M19061901_oL2],
-    'geometry': 'test',
-    'cad': 'HL-31',
-})
+    HLtest = create_magnet({
+        'name': 'HL-test',
+        'status': 'in_operation',
+        'site': MTest,
+        'parts': [HLtestH1, HLtestH2, HLtestR1],
+        'geometry': 'test',
+        'cad': 'HL-31',
+        'design_office_reference': 'HL-34-001-A'
+    })
+    RINGtest = create_magnet({
+        'name': 'RING-test',
+        'status': 'in_operation',
+        'site': MTest,
+        'parts': [M19061901_R1, M19061901_R2],
+        'geometry': 'test',
+        'cad': 'HL-31',
+    })
+    LEADtest = create_magnet({
+        'name': 'LEAD-test',
+        'status': 'in_operation',
+        'site': M10,
+        'parts': [M19061901_iL1, M19061901_oL2],
+        'geometry': 'test',
+        'cad': 'HL-31',
+    })
 
-for file in listdir(path.join(data_directory, 'mrecords')):
-    create_record(path.join(data_directory, 'mrecords', file), M10)
+    for file in listdir(path.join(data_directory, 'mrecords')):
+        create_record(path.join(data_directory, 'mrecords', file), M10)
