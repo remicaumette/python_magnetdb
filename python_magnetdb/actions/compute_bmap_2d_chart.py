@@ -68,7 +68,7 @@ def compute_bmap_2d_chart(data, i_h, i_b, i_s, nr, r0, r1, nz, z0, z1, pkey):
     B_ = np.vectorize(plotmethod[pkey][0], excluded=[2, 3, 4, 5])
 
     values = []
-    for x_value in x:
-        for y_value in y:
+    for y_value in y:
+        for x_value in x:
             values.append(B_(x_value, y_value, Tubes, Helices, BMagnets, UMagnets).tolist())
     return dict(x=x.tolist(), y=y.tolist(), values=values, yaxis=plotmethod[pkey][1])
