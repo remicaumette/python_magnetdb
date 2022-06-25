@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-4">
-    <Alert :error="error" />
+    <Alert :error="error"/>
 
     <div v-if="resource" class="display-1">
-      {{resource.name}}
+      {{ resource.name }}
     </div>
 
     <Card v-if="params">
@@ -40,36 +40,38 @@
             />
           </div>
         </div>
-        <div class="flex items-center space-x-4">
-          <div class="w-1/3">
-            <FormField
-                label="N"
-                name="n"
-                :component="FormSlider"
-                :min="50"
-                :max="1000"
-                :step="1"
-            />
+        <FormValues v-slot="{ values }">
+          <div class="flex items-center space-x-4">
+            <div class="w-1/3">
+              <FormField
+                  label="N"
+                  name="n"
+                  :component="FormSlider"
+                  :min="50"
+                  :max="1000"
+                  :step="1"
+              />
+            </div>
+            <div v-if="values.command === '1D_r'" class="w-1/3">
+              <FormField
+                  label="R"
+                  name="r"
+                  :component="FormSlider"
+                  :min="0"
+                  :max="10"
+              />
+            </div>
+            <div v-if="values.command === '1D_z'" class="w-1/3">
+              <FormField
+                  label="Z"
+                  name="z"
+                  :component="FormSlider"
+                  :min="-10"
+                  :max="10"
+              />
+            </div>
           </div>
-          <div class="w-1/3">
-            <FormField
-                label="R"
-                name="r"
-                :component="FormSlider"
-                :min="0"
-                :max="10"
-            />
-          </div>
-          <div class="w-1/3">
-            <FormField
-                label="Z"
-                name="z"
-                :component="FormSlider"
-                :min="-10"
-                :max="10"
-            />
-          </div>
-        </div>
+        </FormValues>
         <div class="flex items-center space-x-4">
           <div class="w-1/3">
             <FormField
@@ -126,10 +128,12 @@ import FormField from "@/components/FormField";
 import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
 import Alert from "@/components/Alert";
+import FormValues from "@/components/FormValues";
 
 export default {
   name: 'BMapVisualisation',
   components: {
+    FormValues,
     Alert,
     FormField,
     Form,
@@ -153,7 +157,7 @@ export default {
     },
     async fetch(values) {
       try {
-        const { results: data, params, allowed_currents: allowedCurrents } = await visualisationService.bmap({
+        const {results: data, params, allowed_currents: allowedCurrents} = await visualisationService.bmap({
           ...values,
           resource_id: this.$route.query.resource_id,
           resource_type: this.$route.query.resource_type,
@@ -218,7 +222,8 @@ export default {
             ...this.$route.query,
             ...params,
           },
-        }).catch(() => {})
+        }).catch(() => {
+        })
       } catch (error) {
         this.error = error
       }
@@ -231,10 +236,10 @@ export default {
         const resourceId = this.$route.query.resource_id
         switch (this.$route.query.resource_type) {
           case 'site':
-            this.resource = await siteService.find({ id: resourceId })
+            this.resource = await siteService.find({id: resourceId})
             break
           case 'magnet':
-            this.resource = await magnetService.find({ id: resourceId })
+            this.resource = await magnetService.find({id: resourceId})
             break
         }
       })(),
