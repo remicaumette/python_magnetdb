@@ -24,27 +24,22 @@ mustache templates
 # TODO check for unit consistency
 # depending on Length base unit
 
-from typing import List, Optional
-
-import sys
 import os
-import json
+from typing import List
+
 import yaml
+from python_magnetgeo import Bitter, Supra
 
-from python_magnetgeo import Insert, MSite, Bitter, Supra
-from python_magnetgeo import python_magnetgeo
-
-from .config import appenv, loadconfig, loadtemplates
-from .objects import load_object, load_object_from_db
-from .utils import Merge, NMerge
+from .bitter import Bitter_setup
 from .cfg import create_cfg
-from .jsonmodel import create_json
-
-from .insert import Insert_setup, Insert_simfile
-from .bitter import Bitter_setup, Bitter_simfile
-from .supra import Supra_setup, Supra_simfile
-
+from .config import loadconfig, loadtemplates
 from .file_utils import MyOpen, findfile, search_paths
+from .insert import Insert_setup, Insert_simfile
+from .jsonmodel import create_json
+from .objects import load_object, load_object_from_db
+from .supra import Supra_setup, Supra_simfile
+from .utils import NMerge
+
 
 def magnet_simfile(MyEnv, confdata: str, addAir: bool = False):
     """
@@ -405,7 +400,7 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
 
     return (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename)
 
-def setup_cmds(MyEnv, args, name, cfgfile, jsonfile, xaofile, meshfile):
+def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, xaofile, meshfile, root_directory):
     """
     create cmds
 
@@ -421,18 +416,10 @@ def setup_cmds(MyEnv, args, name, cfgfile, jsonfile, xaofile, meshfile):
     if args.wd:
         os.chdir(args.wd)
     
-    # get server from MyEnv,
-    # get NP from server (with an heuristic from meshsize)
     # TODO adapt NP to the size of the problem
     # if server is SMP mpirun outside otherwise inside singularity
-    from .machines import load_machines
-
-    machines = load_machines()
-    if args.debug:
-        print(f"machine={MyEnv.compute_server} type={type(MyEnv.compute_server)}")
-    server = machines[MyEnv.compute_server]
-    NP = server.cores
-    if server.multithreading:
+    NP = node_spec.cores
+    if node_spec.multithreading:
         NP = int(NP/2)
     if args.debug:
         print(f"NP={NP} {type(NP)}")
@@ -449,23 +436,23 @@ def setup_cmds(MyEnv, args, name, cfgfile, jsonfile, xaofile, meshfile):
     pyfeel = ' -m workflows.cli' # commisioning, fixcooling
 
     if "mqs" in args.model or "mag" in args.model:
-        geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{name},--air,2,2,--wd,data/geometries"
-        meshcmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{name},--air,2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
+        geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,data/geometries"
+        meshcmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
     else:
-        geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{name},2,2,--wd,data/geometries"
-        meshcmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{name},2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
+        geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,data/geometries"
+        meshcmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
 
     gmshfile = meshfile.replace(".med", ".msh")
     meshconvert = ""
 
     if args.geom == "Axi" and args.method == "cfpdes" :
         if "mqs" in args.model or "mag" in args.model:
-            geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{name},--axi,--air,2,2,--wd,data/geometries"
+            geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--air,2,2,--wd,data/geometries"
         else:
-            geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{name},--axi,--wd,data/geometries"
+            geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--wd,data/geometries"
         
         # if gmsh:
-        meshcmd = f"python3 -m python_magnetgeo.xao {xaofile} --wd data/geometries mesh --group CoolingChannels --geo {name} --lc=1"
+        meshcmd = f"python3 -m python_magnetgeo.xao {xaofile} --wd data/geometries mesh --group CoolingChannels --geo {yamlfile} --lc=1"
     else:
         gmshfile = meshfile.replace(".med", ".msh")
         meshconvert = f"gmsh -0 {meshfile} -bin -o {gmshfile}"
@@ -486,8 +473,8 @@ def setup_cmds(MyEnv, args, name, cfgfile, jsonfile, xaofile, meshfile):
     
     # TODO add mount point for MeshGems if 3D otherwise use gmsh for Axi 
     # to be changed in the future by using an entry from magnetsetup.conf MeshGems or gmsh
-    MeshGems_licdir = server.mgkeydir
-    cmds["Mesh"] = f"singularity exec -B {MeshGems_licdir}:/opt/DISTENE/license:ro {simage_path}/{salome} {meshcmd}"
+    MeshGems_licdir = f"-B {node_spec.mgkeydir}:/opt/DISTENE/license:ro" if node_spec.mgkeydir is not None else ""
+    cmds["Mesh"] = f"singularity exec {MeshGems_licdir} {simage_path}/{salome} {meshcmd}"
     # if gmsh:
     #    cmds["Mesh"] = f"singularity exec -B /opt/MeshGems:/opt/DISTENE/license:ro {simage_path}/{salome} {meshcmd}"
         
@@ -509,11 +496,11 @@ def setup_cmds(MyEnv, args, name, cfgfile, jsonfile, xaofile, meshfile):
     if args.geom == "3D":
         cmds["Update_Partition"] = update_partition
 
-    if server.smp:
-        feelcmd = f"{exec} --config-file {cfgfile}"
+    if node_spec.smp:
+        feelcmd = f"{exec} --directory {root_directory} --config-file {cfgfile}"
         pyfeelcmd = f"python {pyfeel}"
-        cmds["Run"] = f"mpirun -np {NP} singularity exec {simage_path}/{feelpp} {feelcmd}"
-        cmds["Workflow"] = f"mpirun -np {NP} singularity exec {simage_path}/{feelpp} {pyfeelcmd} {cfgfile}"
+        cmds["Run"] = f"singularity exec {simage_path}/{feelpp} mpirun -np {NP} {feelcmd}"
+        cmds["Workflow"] = f"singularity exec {simage_path}/{feelpp} mpirun -np {NP} {pyfeelcmd} {cfgfile}"
     
     else:
         feelcmd = f"mpirun -np {NP} {exec} --config-file {cfgfile}"
@@ -521,7 +508,7 @@ def setup_cmds(MyEnv, args, name, cfgfile, jsonfile, xaofile, meshfile):
         cmds["Run"] = f"singularity exec {simage_path}/{feelpp} {feelcmd}"
         cmds["Workflow"] = f"singularity exec {simage_path}/{feelpp} {pyfeelcmd}"
     
-    # TODO jobmanager if server.manager != JobManagerType.none
+    # TODO jobmanager if node_spec.manager != JobManagerType.none
     # Need user email at this point
     # Template for oar and slurm
     

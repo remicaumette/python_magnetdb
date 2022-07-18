@@ -74,3 +74,4 @@ flask/*
 data
 core
 poetry-cache
+/images

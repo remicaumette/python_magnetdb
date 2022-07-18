@@ -1,11 +1,9 @@
+import json
+import os
 from typing import List, Optional
 
-import sys
-import os
-import json
 from decouple import Config, RepositoryEnv
 
-from .machines import load_machines
 
 class appenv():
     
@@ -79,18 +77,6 @@ def loadconfig():
     with open(os.path.join(default_path, 'magnetsetup.json'), 'r') as appcfg:
         magnetsetup = json.load(appcfg)
     return magnetsetup
-
-def loadmachine(server: str):
-    """
-    Load app server config (aka machines.json)
-    """
-
-    server_defs = load_machines()
-    if server in server_defs:
-        return server_defs[server]
-    else:
-        raise ValueError(f"loadmachine: {server} no such server defined")
-    pass
 
 def loadtemplates(appenv: appenv, appcfg: dict , method_data: List[str], linear: bool=True, debug: bool=False):
     """

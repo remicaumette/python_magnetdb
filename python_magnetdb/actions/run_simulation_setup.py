@@ -56,7 +56,15 @@ def run_simulation_setup(simulation):
         try:
             with open(f"{tempdir}/config.json", "r") as config_file:
                 config = json.load(config_file)
-                setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
+                (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename) = setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
+                simulation.setup_state = {
+                    'yamlfile': yamlfile,
+                    'cfgfile': cfgfile[len(tempdir) + 1:],
+                    'jsonfile': jsonfile[len(tempdir) + 1:],
+                    'xaofile': xaofile,
+                    'meshfile': meshfile,
+                    'tarfilename': tarfilename[len(tempdir):],
+                }
             config_file_path = None
             for file in os.listdir(tempdir):
                 if file.endswith('.cfg'):

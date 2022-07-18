@@ -1,23 +1,18 @@
 """Console script for linking python_magnetsetup and python_magnettoos."""
 
-from typing import List, Optional
-
-import sys
-import os
-import json
-import yaml
-import math
-
 import argparse
-from .objects import load_object, load_object_from_db
-from .config import appenv, loadconfig, loadtemplates
-
-from python_magnetgeo import Insert, MSite, Bitter, Supra, SupraStructure
-from python_magnetgeo import python_magnetgeo
-
-from .file_utils import MyOpen, findfile, search_paths
+import math
+import os
+import sys
 
 import MagnetTools.MagnetTools as mt
+import yaml
+from python_magnetgeo import Insert, Bitter, Supra, SupraStructure
+
+from .config import appenv, loadconfig
+from .file_utils import MyOpen, findfile, search_paths
+from .objects import load_object, load_object_from_db
+
 
 def HMagnet(MyEnv, struct: Insert, data: dict, debug: bool=False):
     """

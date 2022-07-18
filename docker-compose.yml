@@ -2,6 +2,7 @@ version: '3'
 services:
   web-api:
     build: .
+    privileged: true
     command: poetry run uvicorn python_magnetdb.web:app --reload --host 0.0.0.0
     working_dir: /home/feelpp/test
     network_mode: host
@@ -9,6 +10,7 @@ services:
       - .:/home/feelpp/test
       - ./poetry-cache:/home/feelpp/.cache/pypoetry
       - ./data/:/data
+      - ./images:/images
     links:
       - redis
       - postgres
@@ -22,14 +24,17 @@ services:
       S3_BUCKET: magnetdb
       REDIS_ADDR: redis://localhost:6379/0
       DATABASE_HOST: localhost
+      IMAGES_DIR: /images
   web-worker:
     build: .
+    privileged: true
     command: watchmedo auto-restart -d ./python_magnetdb/ -p '**/*.py' -- poetry run celery -A python_magnetdb.worker worker --loglevel=info
     working_dir: /home/feelpp/test
     volumes:
       - .:/home/feelpp/test
       - ./poetry-cache:/home/feelpp/.cache/pypoetry
       - ./data/:/data
+      - ./images:/images
     links:
       - redis
       - postgres
@@ -41,6 +46,7 @@ services:
       S3_BUCKET: magnetdb
       REDIS_ADDR: redis://redis:6379/0
       DATABASE_HOST: postgres
+      IMAGES_DIR: /images
   web-app:
     image: node:16
     command: yarn serve

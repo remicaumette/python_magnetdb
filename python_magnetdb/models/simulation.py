@@ -5,7 +5,10 @@ from orator.orm import belongs_to, morph_to
 class Simulation(Model):
     __table__ = "simulations"
     __fillable__ = ['resource_id', 'resource_type', 'method', 'model', 'geometry', 'cooling', 'static', 'non_linear',
-                    'setup_status', 'setup_attachment_id', 'status', 'output_attachment_id']
+                    'setup_status', 'setup_attachment_id', 'status', 'output_attachment_id', 'setup_state']
+    __casts__ = {
+        'setup_state': 'dict'
+    }
 
     @morph_to
     def resource(self):

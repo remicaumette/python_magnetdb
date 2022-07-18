@@ -1,9 +1,14 @@
 import os
 import subprocess
 import tempfile
+from argparse import Namespace
 from os.path import basename
 
 from python_magnetdb.models.attachment import Attachment
+from python_magnetsetup.config import appenv
+from python_magnetsetup.job import JobManager, JobManagerType
+from python_magnetsetup.node import NodeSpec, NodeType
+from python_magnetsetup.setup import setup_cmds
 
 
 def run_simulation(simulation):
@@ -16,29 +21,48 @@ def run_simulation(simulation):
 
         current_dir = os.getcwd()
         os.chdir(tempdir)
+
         try:
             print("Downloading setup archive...")
             simulation.setup_output_attachment.download(f"{tempdir}/setup.tar.gz")
             print("Extracting setup archive...")
             subprocess.run([f"tar xvf {tempdir}/setup.tar.gz -C {tempdir}"], shell=True)
-            print("Finding config file...")
-            config_file_path = None
-            for file in os.listdir(tempdir):
-                if file.endswith('.cfg'):
-                    config_file_path = f"{tempdir}/{file}"
-                    break
-            print("Updating configuration...")
-            subprocess.run([f"perl -pi -e 's|# mesh.scale =|mesh.scale =|' {config_file_path}"], shell=True)
-            subprocess.run([f"perl -pi -e 's|mesh.filename=.*|mesh.filename=\$cfgdir/data/geometries/test-Axi_withAir.msh|' {config_file_path}"], shell=True)
-            subprocess.run([f"singularity exec ~/Downloads/hifimagnet-salome-9.8.0.sif salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:test.yaml,--axi,--air,2,2,--wd,{tempdir}/data/geometries"],
-                           shell=True, env={"HIFIMAGNET": "/opt/SALOME-9.8.0-UB20.04/INSTALL/HIFIMAGNET/bin/salome"})
-            print("Generating Mesh...")
-            subprocess.run([f"singularity exec ~/Downloads/hifimagnet-salome-9.8.0.sif python3 -m python_magnetgeo.xao test-Axi_withAir.xao --wd {tempdir}/data/geometries mesh --group CoolingChannels --geo test.yaml --lc=1"],
-                           shell=True)
-            print("Running simulation...")
-            subprocess.run([f"singularity exec ~/Downloads/feelpp-toolboxes-v0.110.0-alpha.3.sif mpirun -np 8 feelpp_toolbox_coefficientformpdes --directory {tempdir} --config-file {config_file_path}"], shell=True)
+            print("Generating commands...")
+            data_dir = f"{tempdir}/data"
+            args = Namespace(wd=tempdir,
+                             datafile=f"{tempdir}/config.json",
+                             method=simulation.method,
+                             time="static" if simulation.static else "transient",
+                             geom=simulation.geometry,
+                             model=simulation.model,
+                             nonlinear=simulation.non_linear,
+                             cooling=simulation.cooling,
+                             flow_params=f"{tempdir}/flow_params.json",
+                             debug=False,
+                             verbose=False,
+                             skip_archive=True)
+            env = appenv(envfile=None, url_api=data_dir, yaml_repo=f"{data_dir}/geometries", cad_repo=f"{data_dir}/cad",
+                         mesh_repo=data_dir, simage_repo=os.getenv('IMAGES_DIR'), mrecord_repo=data_dir, optim_repo=data_dir)
+            node_spec = NodeSpec(name="local-node", otype=NodeType.compute, smp=True, dns="localhost", cores=8,
+                                 multithreading=True, manager=JobManager(otype=JobManagerType.none, queues=[]),
+                                 mgkeydir=None)
+            cmds = setup_cmds(env, args, node_spec, simulation.setup_state['yamlfile'],
+                              simulation.setup_state['cfgfile'], simulation.setup_state['xaofile'],
+                              simulation.setup_state['meshfile'], tempdir)
+
+            for (key, value) in cmds.items():
+                if key in ['Unpack', 'Pre']:
+                    continue
+                print(f"Performing {key}...")
+                if key in ['Update_cfg', 'Update_Mesh']:
+                    print(value)
+                    subprocess.run([value], shell=True)
+                else:
+                    print(f"sh -c '{cmds['Pre']} && {value}'")
+                    subprocess.run([f"sh -c \"{cmds['Pre']} && {value}\""], shell=True)
+
             print("Archiving results...")
-            simulation_name = os.path.basename(os.path.splitext(config_file_path)[0])
+            simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
             output_archive = f"{tempdir}/{simulation_name}.tar.gz"
             subprocess.run([f"tar cvzf {output_archive} *"], shell=True)
             attachment = Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
