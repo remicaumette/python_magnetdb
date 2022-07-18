@@ -160,7 +160,7 @@ export default {
             y: data.y,
             type: 'contour'
           }
-        ])
+        ], {}, { responsive: true })
 
         this.$router.replace({
           name: this.$route.name,
