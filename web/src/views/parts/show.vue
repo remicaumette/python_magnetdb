@@ -65,7 +65,6 @@
               Open
             </router-link>
           </FormValues>
-
         </div>
         <CadAttachmentEditor
             label="CAD"

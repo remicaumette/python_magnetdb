@@ -11,10 +11,6 @@ services:
       - ./poetry-cache:/home/feelpp/.cache/pypoetry
       - ./data/:/data
       - ./images:/images
-    links:
-      - redis
-      - postgres
-      - minio
     extra_hosts:
       - auth.example.com:127.0.0.1
     environment:
