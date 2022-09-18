@@ -58,8 +58,8 @@ def run_simulation(simulation):
                     print(value)
                     subprocess.run([value], shell=True)
                 else:
-                    print(f"sh -c '{cmds['Pre']} && {value}'")
-                    subprocess.run([f"sh -c \"{cmds['Pre']} && {value}\""], shell=True)
+                    print(f"bash -c '{cmds['Pre']} && {value}'")
+                    subprocess.run([f"bash -c \"{cmds['Pre']} && {value}\""], shell=True)
 
             print("Archiving results...")
             simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
