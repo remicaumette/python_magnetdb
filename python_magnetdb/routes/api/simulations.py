@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Form, Query
 
 from ... import worker
 from ...actions.generate_simulation_config import generate_simulation_config
+from ...actions.get_simulation_measures import get_simulation_measures
 from ...dependencies import get_user
 from ...models.audit_log import AuditLog
 from ...models.magnet import Magnet
@@ -97,3 +98,11 @@ def run(id: int, user=Depends(get_user('update'))):
     AuditLog.log(user, "Simulation scheduled", resource=simulation)
     worker.run_simulation.delay(simulation.id)
     return simulation.serialize()
+
+
+@router.get("/api/simulations/{id}/measures")
+def measures(id: int, user=Depends(get_user('read'))):
+    measures = get_simulation_measures(id)
+    if measures is None:
+        raise HTTPException(status_code=404, detail="Measures not found")
+    return measures

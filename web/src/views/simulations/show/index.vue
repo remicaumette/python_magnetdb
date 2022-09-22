@@ -103,7 +103,7 @@
       </Form>
     </Card>
 
-<!--    <VisualisationCard :simulationId="simulation.id"></VisualisationCard>-->
+    <MeasuresCard :simulation-id="simulation.id" />
   </div>
   <Alert v-else-if="error" class="alert alert-danger" :error="error"/>
 </template>
@@ -119,10 +119,12 @@ import FormUpload from "@/components/FormUpload";
 import Button from "@/components/Button";
 import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
+import MeasuresCard from "@/views/simulations/show/MeasuresCard";
 
 export default {
   name: 'SimulationShow',
   components: {
+    MeasuresCard,
     StatusBadge,
     Alert,
     Button,

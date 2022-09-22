@@ -16,9 +16,6 @@ def run_simulation(simulation):
     simulation.save()
 
     with tempfile.TemporaryDirectory() as tempdir:
-        subprocess.run([f"rm -rf {tempdir}"], shell=True)
-        subprocess.run([f"mkdir -p {tempdir}"], shell=True)
-
         current_dir = os.getcwd()
         os.chdir(tempdir)
 
@@ -58,8 +55,8 @@ def run_simulation(simulation):
                     print(value)
                     subprocess.run([value], shell=True)
                 else:
-                    print(f"sh -c '{cmds['Pre']} && {value}'")
-                    subprocess.run([f"sh -c \"{cmds['Pre']} && {value}\""], shell=True)
+                    print(f"bash -c '{cmds['Pre']} && {value}'")
+                    subprocess.run([f"bash -c \"{cmds['Pre']} && {value}\""], shell=True)
 
             print("Archiving results...")
             simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
