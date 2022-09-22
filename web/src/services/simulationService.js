@@ -43,3 +43,8 @@ export function create(values) {
   return client.post(`/api/simulations`, form)
     .then((res) => res.data)
 }
+
+export function getMeasures({ id }) {
+  return client.get(`/api/simulations/${id}/measures`)
+    .then((res) => res.data)
+}

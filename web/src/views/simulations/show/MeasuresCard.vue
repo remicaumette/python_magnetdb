@@ -1,0 +1,69 @@
+<template>
+  <Card>
+    <template #header>
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          Measures
+        </div>
+        <FormSelect :value="measure" :options="availableMeasures" @value="fetch" />
+      </div>
+    </template>
+
+    <div class="table-responsive">
+      <table v-if="rows.length > 0">
+        <thead>
+          <tr>
+            <th v-for="column in columns">
+              {{ column }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in rows">
+            <td v-for="value in row">
+              {{ value }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </Card>
+</template>
+
+<script>
+import Card from "@/components/Card";
+import * as simulationService from '@/services/simulationService'
+import FormSelect from "@/components/FormSelect";
+
+export default {
+  name: 'MeasuresCard',
+  props: ['simulationId'],
+  components: {
+    FormSelect,
+    Card,
+  },
+  data() {
+    return {
+      measure: '',
+      availableMeasures: [],
+      columns: [],
+      rows: [],
+    }
+  },
+  methods: {
+    async fetch(measure) {
+      simulationService.getMeasures({ id: this.simulationId, measure })
+          .then((data) => {
+            this.measure = data.measure
+            this.availableMeasures = data.available_measures
+            this.columns = data.columns
+            this.rows = data.rows
+          })
+          .catch(console.error)
+    }
+  },
+  async mounted() {
+    this.fetch(null)
+  },
+}
+</script>
