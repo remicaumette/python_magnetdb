@@ -478,7 +478,7 @@ tabulate = "*"
 
 [package.source]
 type = "file"
-url = "../magnettools-1.0.5/build/Python/dist/MagnetTools-0.1.0-py3-none-any.whl"
+url = "/home/feelpp/magnettools-1.0.6/build/Python/dist/MagnetTools-0.1.0-py3-none-any.whl"
 
 [[package]]
 name = "markupsafe"
