@@ -75,3 +75,8 @@ data
 core
 poetry-cache
 /images
+
+minio-data
+postgres-data
+lemonldap-ng-data
+certs
