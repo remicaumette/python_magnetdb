@@ -80,3 +80,4 @@ minio-data
 postgres-data
 lemonldap-ng-data
 certs
+*.orig
