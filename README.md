@@ -57,6 +57,8 @@ Eventually, run seeds to populate the database
 ```shell
 export DATA_DIR=/data
 poetry run python3 -m python_magnetdb.seeds
+poetry run python3 -m python_magnetdb.seed-again
+poetry run python3 -m python_magnetdb.seed-records
 ```
     
 3. Configure LemonLDAP (https://github.com/LemonLDAPNG/lemonldap-ng-docker):
