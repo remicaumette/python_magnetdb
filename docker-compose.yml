@@ -7,13 +7,18 @@ services:
       - /bin/bash
       - -c
       - |
+        whoami
+        id feelpp
+        cd python_magnetsetup
+        poetry update
+        cd ..
         poetry install
         poetry run uvicorn python_magnetdb.web:app --reload --host 0.0.0.0
     working_dir: /home/feelpp/test
     network_mode: host
     volumes:
       - .:/home/feelpp/test
-      - ./poetry-cache:/home/feelpp/.cache/pypoetry
+      - ../magnetdb-data/poetry-cache:/home/feelpp/.cache/pypoetry
       - ./data/:/data
       - ./images:/images
     extra_hosts:
@@ -26,6 +31,7 @@ services:
       REDIS_ADDR: redis://localhost:6379/0
       DATABASE_HOST: localhost
       IMAGES_DIR: /images
+
   web-worker:
     build: .
     privileged: true
@@ -33,12 +39,14 @@ services:
       - /bin/bash
       - -c
       - |
+        whoami
+        ls -alrth /home/feelpp/.cache/pypoetry
         poetry install
-         watchmedo auto-restart -d ./python_magnetdb/ -p '**/*.py' -- poetry run celery -A python_magnetdb.worker worker --loglevel=info
+        watchmedo auto-restart -d ./python_magnetdb/ -p '**/*.py' -- poetry run celery -A python_magnetdb.worker worker --loglevel=info
     working_dir: /home/feelpp/test
     volumes:
       - .:/home/feelpp/test
-      - ./poetry-cache:/home/feelpp/.cache/pypoetry
+      - ../magnetdb-data/poetry-cache:/home/feelpp/.cache/pypoetry
       - ./data/:/data
       - ./images:/images
     links:
@@ -53,12 +61,16 @@ services:
       REDIS_ADDR: redis://redis:6379/0
       DATABASE_HOST: postgres
       IMAGES_DIR: /images
+
   web-app:
     image: node:16
     command:
       - /bin/bash
       - -c
       - |
+        whoami
+        yarn add caniuse-lite
+        yarn remove caniuse-lite
         yarn install
         yarn serve
     working_dir: /app
@@ -68,8 +80,10 @@ services:
       - 8080:8080
   redis:
     image: redis
+    container_name: redis-app
     ports:
       - 6379:6379
+
   postgres:
     image: postgres:13
     container_name: postgres-app
@@ -79,7 +93,8 @@ services:
       POSTGRES_USER: magnetdb
       POSTGRES_PASSWORD: magnetdb
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ../magnetdb-data/postgres-data:/var/lib/postgresql/data
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin-app
@@ -88,7 +103,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
-      - ./pgadmin-data:/var/lib/pgadmin
+      - ../magnetdb-data/pgadmin-data:/var/lib/pgadmin
     depends_on:
       - postgres
     ports:
@@ -107,18 +122,18 @@ services:
       - 9000:9000
       - 9080:9080
     volumes:
-      - ./minio-data:/data
+      - ../magnetdb-data/minio-data:/data
 
   lemonldap-app:
     # image: tiredofit/lemonldap:latest
     image: tiredofit/lemonldap:2.0.24
     container_name: lemonldap-app
     volumes:
-    #- ./lemonldap-ng-data/etc/lemonldap-ng:/etc/lemonldap-ng
-    - ./lemonldap-ng-data/conf:/var/lib/lemonldap-ng/conf
-    #- ./lemonldap-ng-data/sessions:/var/lib/lemonldap-ng/sessions
-    #- ./lemonldap-ng-data/psessions:/var/lib/lemonldap-ng/psessions
-    - ./logs:/www/logs
+    #- ../magnetdb-data/lemonldap-ng-data/etc/lemonldap-ng:/etc/lemonldap-ng
+    - ../magnetdb-data/lemonldap-ng-data/conf:/var/lib/lemonldap-ng/conf
+    #- ../magnetdb-data/lemonldap-ng-data/sessions:/var/lib/lemonldap-ng/sessions
+    #- ../magnetdb-data/lemonldap-ng-data/psessions:/var/lib/lemonldap-ng/psessions
+    - ../magnetdb-data/logs:/www/logs
     #- ./assets/custom:/assets/custom
     environment:
     - VIRTUAL_HOST=sso.grenoble.lncmi.local,manager.sso.grenoble.lncmi.local,handler.sso.grenoble.lncmi.local

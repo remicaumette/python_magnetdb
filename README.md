@@ -77,4 +77,30 @@ add a server for magnetdb
    
 Check magnetdb ip server with: `docker inspect postgres-app  | grep IPAddress`
 
+Note: This may be needed to update the magnetdb IP after each restart of docker-compose
 
+6. Custom LemonLDAP settings
+
+```shell
+docker exec -it lemonldap-app bash
+```
+
+7. To test
+
+To change Lemonldap settings
+
+```shell
+firefox -private http://sso.grenoble.lncmi.local
+```
+
+To change user role:
+
+```shell
+firefox -private http://localhost:5050/
+```
+
+To start magnetdb:
+
+```shell
+firefox -private http://localhost:8080/
+```
