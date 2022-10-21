@@ -1,18 +1,23 @@
 """Console script for linking python_magnetsetup and python_magnettoos."""
 
-import argparse
-import math
-import os
+from typing import List, Optional
+
 import sys
+import os
+import json
+import yaml
+import math
+
+import argparse
+from .objects import load_object, load_object_from_db
+from .config import appenv, loadconfig, loadtemplates
+
+from python_magnetgeo import Insert, MSite, Bitter, Supra, SupraStructure
+from python_magnetgeo import python_magnetgeo
+
+from .file_utils import MyOpen, findfile, search_paths
 
 import MagnetTools.MagnetTools as mt
-import yaml
-from python_magnetgeo import Insert, Bitter, Supra, SupraStructure
-
-from .config import appenv, loadconfig
-from .file_utils import MyOpen, findfile, search_paths
-from .objects import load_object, load_object_from_db
-
 
 def HMagnet(MyEnv, struct: Insert, data: dict, debug: bool=False):
     """
@@ -62,13 +67,17 @@ def BMagnet(struct: Bitter, material: dict, fillingfactor: float=1, debug: bool=
     """
     create view of this insert as a Bitter Magnet
 
-    b=mt.BitterfMagnet(r2, r1, h, current_density, z_offset, fillingfactor, rho)
+    struct: geometry of the bitter stack
+    material: physical properties of copper alloy
+    fillingfactor: ratio of copper alloy volume over total volume
+
+    b=mt.BitterfMagnet(r2, r1, h, current_density, z_offset, 1/float(n), rho)
     """
     
     BMagnets = mt.VectorOfBitters()
     
     rho = 1/ material["ElectricalConductivity"]
-    f = fillingfactor # 1/struct.get_Nturns() # struct.getFillingFactor()
+    # f = fillingfactor # 1/struct.get_Nturns() # struct.getFillingFactor()
         
     r1 = struct.r[0]*1.e-3
     r2 = struct.r[1]*1.e-3
@@ -76,6 +85,7 @@ def BMagnet(struct: Bitter, material: dict, fillingfactor: float=1, debug: bool=
 
     for (n, pitch) in zip(struct.axi.turns, struct.axi.pitch):
         dz = n * pitch*1.e-3
+        f = 1/float(n) # struct.getFillingFactor()
         if f != 1:
             j = n / (r1 * math.log(r2/r1) * dz)
         else:
@@ -243,9 +253,9 @@ def msite_setup(MyEnv, confdata: str, debug: bool=False):
     """
     Creating MagnetTools data struct for setup for msite
     """
-    print("msite_setup:", "debug=", debug)
-    print("msite_setup:", "confdata=", confdata)
-    print("miste_setup: confdata[magnets]=", confdata["magnets"])
+    if debug:
+        print(f"msite_setup: confdata={confdata}")
+        print(f"msite_setup: confdata[magnets]={confdata['magnets']}")
     
     Tubes = mt.VectorOfTubes()
     Helices = mt.VectorOfBitters()
@@ -255,9 +265,9 @@ def msite_setup(MyEnv, confdata: str, debug: bool=False):
     Shims = mt.VectorOfShims()
 
     for magnet in confdata["magnets"]:
-        print("magnet:", magnet, "type(magnet)=", type(magnet), "debug=", debug)
+        print(f"magnet: {magnet}, type={type(magnet)}={type(magnet)} debug={debug}")
         if debug:
-            print("mconfdata[geom]:", magnet["geom"])
+            print(f"mconfdata[geom]: {magnet['geom']}")
         tmp = magnet_setup(MyEnv, magnet, debug)
         
         # pack magnets

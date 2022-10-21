@@ -436,20 +436,20 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, xaofile, meshfile, roo
     pyfeel = ' -m workflows.cli' # commisioning, fixcooling
 
     if "mqs" in args.model or "mag" in args.model:
-        geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,data/geometries"
-        meshcmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
+        geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,data/geometries"
+        meshcmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
     else:
-        geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,data/geometries"
-        meshcmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
+        geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,data/geometries"
+        meshcmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
 
     gmshfile = meshfile.replace(".med", ".msh")
     meshconvert = ""
 
     if args.geom == "Axi" and args.method == "cfpdes" :
         if "mqs" in args.model or "mag" in args.model:
-            geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--air,2,2,--wd,data/geometries"
+            geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--air,2,2,--wd,data/geometries"
         else:
-            geocmd = f"salome -w1 -t $HIFIMAGNET/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--wd,data/geometries"
+            geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--wd,data/geometries"
         
         # if gmsh:
         meshcmd = f"python3 -m python_magnetgeo.xao {xaofile} --wd data/geometries mesh --group CoolingChannels --geo {yamlfile} --lc=1"
@@ -466,7 +466,6 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, xaofile, meshfile, roo
     tarfile = cfgfile.replace("cfg", "tgz")
     # TODO if cad exist do not print CAD command
     cmds = {
-        "Pre": f"export HIFIMAGNET={hifimagnet}",
         "Unpack": f"tar zxvf {tarfile}",
         "CAD": f"singularity exec {simage_path}/{salome} {geocmd}"
     }

@@ -23,7 +23,7 @@ def run_simulation(simulation):
             print("Downloading setup archive...")
             simulation.setup_output_attachment.download(f"{tempdir}/setup.tar.gz")
             print("Extracting setup archive...")
-            subprocess.run([f"tar xvf {tempdir}/setup.tar.gz -C {tempdir}"], shell=True)
+            subprocess.run([f"tar xvf {tempdir}/setup.tar.gz -C {tempdir}"], shell=True, check=True)
             print("Generating commands...")
             data_dir = f"{tempdir}/data"
             args = Namespace(wd=tempdir,
@@ -48,15 +48,17 @@ def run_simulation(simulation):
                               simulation.setup_state['meshfile'], tempdir)
 
             for (key, value) in cmds.items():
-                if key in ['Unpack', 'Pre']:
+                if key in ['Unpack']:
                     continue
                 print(f"Performing {key}...")
                 if key in ['Update_cfg', 'Update_Mesh']:
                     print(value)
-                    subprocess.run([value], shell=True)
+                    subprocess.run([value], shell=True, check=True)
+                elif key in ['Workflow']:
+                    print(f'Ignore {key}: {value}')
                 else:
-                    print(f"bash -c '{cmds['Pre']} && {value}'")
-                    subprocess.run([f"bash -c \"{cmds['Pre']} && {value}\""], shell=True)
+                    print(f"bash -c '{value}'")
+                    subprocess.run([f"bash -c \"{value}\""], capture_output=True, shell=True, check=True)
 
             print("Archiving results...")
             simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
@@ -67,6 +69,7 @@ def run_simulation(simulation):
             print("Done!")
             simulation.status = "done"
         except Exception as e:
+            print(f"exception raised: {type(e).__name__}, {e.args}")
             simulation.status = "failed"
             raise e
         os.chdir(current_dir)
