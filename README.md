@@ -13,13 +13,19 @@ On your host:
 echo "127.0.0.1 handler.sso.grenoble.lncmi.local api.manager.sso.grenoble.lncmi.local manager.sso.grenoble.lncmi.local sso.grenoble.lncmi.local test.sso.grenoble.lncmi" | sudo tee -a /etc/hosts
 ```
 
-Create a self signed certificate for the magnetdb server:
+Create a self signed certificate for the magnetdb server
    
 ```shell
 mkdir -p certs
 openssl req -new -x509 -days 365 -nodes -out certs/cert.pem -keyout certs/cert.key
 chmod 600 certs/cert.perm certs.cert.key
 ```
+
+magnetdb.grenoble.lncmi.local
+redis.grenoble.lncmi.local
+postgres.grenoble.lncmi.local
+pgadmin.grenoble.lncmi.local
+minio.grenoble.lncmi.local
 
 ```shell
 docker network create nginx-proxy
