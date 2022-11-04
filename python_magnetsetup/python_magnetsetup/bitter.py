@@ -5,7 +5,7 @@ import yaml
 from python_magnetgeo import Bitter
 from python_magnetgeo import python_magnetgeo
 
-from .jsonmodel import create_params_bitter, create_bcs_bitter, create_materials_bitter
+from .jsonmodel import create_params_bitter, create_bcs_bitter, create_materials_bitter, create_models_bitter
 from .utils import Merge, NMerge
 
 import os
@@ -22,9 +22,9 @@ def Bitter_simfile(MyEnv, confdata: dict, cad: Bitter):
         return cfgdata
 
 def Bitter_setup(MyEnv, confdata: dict, cad: Bitter, method_data: List, templates: dict, debug: bool=False):
-    print("Bitter_setup: %s" % cad.name) #, "debug=", debug, "confdata:", confdata)
-    if debug: 
-        print("Bitter_setup/Bitter confdata: %s" % confdata)
+    print(f'Bitter_setup: {cad.name}') #, "debug=", debug, "confdata:", confdata)
+    if debug:
+        print(f'Bitter_setup/Bitter confdata: {confdata}')
 
     part_thermic = []
     part_electric = []
@@ -36,14 +36,14 @@ def Bitter_setup(MyEnv, confdata: dict, cad: Bitter, method_data: List, template
 
     yamlfile = confdata["geom"]
     if debug: 
-        print("Bitter_setup/Bitter yamlfile: %s" % yamlfile)
+        print(f'Bitter_setup/Bitter yamlfile: {yamlfile}')
 
-    print("cad:", cad, type(cad))
     NSections = len(cad.axi.turns)
-    if debug: print(cad)
+    if debug:
+        print(f"cad: {cad} tpe: {type(cad)}")
 
     snames = []
-    name = cad.name.replace('Bitter_','')
+    name = cad.name#.replace('Bitter_','')
     if method_data[2] == "Axi":
         for i in range(len(cad.axi.turns)):
             snames.append(name + "_B%d" % (i+1))
@@ -118,6 +118,20 @@ def Bitter_setup(MyEnv, confdata: dict, cad: Bitter, method_data: List, template
     # print(f"bitter {name}: mpost={mpost}")
     mmat = create_materials_bitter(gdata, confdata, templates, method_data, debug)
     
+    mmodels = {}
+    if 'th' in method_data[3]:
+        mmodels["heat"] = create_models_bitter(gdata, confdata, templates, method_data, "heat", debug)
+
+    if 'mag' in method_data[3] or 'mqs' in method_data[3] :
+        mmodels["magnetic"] = create_models_bitter(gdata, confdata, templates, method_data, "magnetic", debug)
+    
+    if 'magel' in method_data[3] :
+        mmodels["elastic"] = create_models_bitter(gdata, confdata, templates, method_data, "elastic", debug)
+
+    if 'mqsel' in method_data[3] :
+        mmodels["elastic1"] = create_models_bitter(gdata, confdata, templates, method_data, "elastic1", debug)
+        mmodels["elastic2"] = create_models_bitter(gdata, confdata, templates, method_data, "elastic2", debug)
+
     # update U and hw, dTw param
     print("Update U for I0=31kA")
     # print(f"insert: mmat: {mmat}")
@@ -145,4 +159,4 @@ def Bitter_setup(MyEnv, confdata: dict, cad: Bitter, method_data: List, template
             params[index] = item
                 
     
-    return (mdict, mmat, mpost)
+    return (mdict, mmat, mmodels, mpost)

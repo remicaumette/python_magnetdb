@@ -3,17 +3,23 @@
     "ShortName":"AxiThermoElectricStat",
     "Models":
     {
-		"equations":[
-	    {
-			"name":"heat",
-			"unknown":
-			{
-		    	"basis":"Pch1",
-		    	"name":"temperature",
-		    	"symbol":"T"
-			}
-	    }
-		]
+		"cfpdes":{
+			"equations":"heat"
+		},
+		"heat":{
+			"common":{
+				"setup":{
+					"unknown":{
+						"basis":"Pch1",
+						"name":"temperature",
+						"symbol":"T"
+					}
+				}
+			},
+			"models":[
+				
+			]
+		}
     },
     "Parameters":
     {
@@ -46,17 +52,19 @@
     },
     "InitialConditions":
     {
-        "temperature":
-        {
-            "Expression":
-            {
-                "myic":
-                {
-                    "markers": {{part_thermic}},
-                    "expr":"Tinit:Tinit"
-                }
-            }
-        }
+		"heat":{
+			"temperature":
+			{
+				"Expression":
+				{
+					"myic":
+					{
+						"markers": {{part_thermic}},
+						"expr":"Tinit:Tinit"
+					}
+				}
+			}
+		}
     },
     "PostProcess":
     {
@@ -105,7 +113,7 @@
         				"expr": "2*pi*materials_sigma*(materials_U/2/pi)*(materials_U/2/pi)/x:materials_sigma:materials_U:x",
         				"markers": {{part_electric}}
     				},
-				"MeanT": 
+					"MeanT": 
 		    		{
 						"type":["min","max","mean"], 
 						"field":"temperature" 

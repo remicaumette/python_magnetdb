@@ -4,12 +4,13 @@ from argparse import RawTextHelpFormatter
 
 import sys
 import os
+import re
 
 from .setup import setup, setup_cmds
 from .objects import load_object, load_object_from_db
 from .config import appenv, loadconfig, supported_methods, supported_models
 
-def fabric(machine: str, workingdir: str, args, cfgfile: str, jsonfile: str, meshfile: str, tarfilename:str, cmds: dict):
+def fabric(machine: str, workingdir: str, geodir: str, args, cfgfile: str, jsonfile: str, meshfile: str, tarfilename:str, cmds: dict):
     """
     run cmds on machine
     """
@@ -36,21 +37,11 @@ def fabric(machine: str, workingdir: str, args, cfgfile: str, jsonfile: str, mes
             connection_.put(f'{tarfilename}', remote=f'{homedir}/{workingdir}')
             connection_.run(f'cd {homedir}/{workingdir} && tar -zxvf {tarfilename}')
             for cmd in cmds:
-                if not cmd in ['Pre', 'Run', 'Python', 'Workflow']:
+                if not cmd in ['Pre', 'Python', 'Workflow']:
                     connection_.run(f"cd {homedir}/{workingdir} && {cmds['Pre']} && {cmds[cmd]}")
 
-            connection_.run(f'ls -lrth {homedir}/{workingdir}/data/geometries/{meshfile}')
-            
-            # TODO change NP for cmds Run depending on method and meshfile size
-            connection_.run(f"cd {homedir}/{workingdir} && {cmds['Run']}")
-
-            #
-            # could also do something like:
-            # if cmd in ['CAD', 'Mesh']:
-            #    connection_.run(f"cd {homedir}/{workingdir} && {cmds[cmd]}", env={'HIFIMAGNET': f'{hifimagnet}'})
-
-            # TODO some basic post operation
             # TODO store simu in db????
+            # connection_.run(f"cd {homedir}/{workingdir} && {cmds['Save']}")
         else:
             raise Exception(f'python_magnetsetup/cli: {workingdir} already exists on {machine}')
 
@@ -59,26 +50,24 @@ def fabric(machine: str, workingdir: str, args, cfgfile: str, jsonfile: str, mes
             print(f'Remove {f} ({type(f)}')
             os.unlink(os.path.join(cwd, f))
 
+        # get result_arch, pngs, csv (included in result_arch)
+        # result_arch = cfgfile.replace('.cfg', f'_res.tgz' 
+        # connection_.get(remote=f'{homedir}/{workingdir}/{result_arch}')
+        # connection_.get(remote=f'{homedir}/{workingdir}/\*.png')
+        # connection_.get(remote=f'{homedir}/{workingdir}/{csvs}')
+        
     return 0
     
 def main():
 
     # TODO get available model from magnetsetup.json
 
-    #  
-    # epilog = "The choice of model is actually linked with the choosen method following this table\n" \
-    #          f"cfpdes (Axi, Static): {supported_models(MyEnv, 'cfpdes', 'Axi', 'static')}\n" \
-    #          f"cfpdes (Axi, Transient): {supported_models(MyEnv, 'cfpdes', 'Axi', 'transient')}\n" \
-    #          f"cfpdes (3D, Static): {supported_models(MyEnv, 'cfpdes', '3D', 'transient')}\n" \
-    #          f"cfpdes (3D, Transient): {supported_models(MyEnv, 'cfpdes', 'Axi', 'transient')}\n" \
-    #          "CG (3D only): thelec\n" \
-    #          "HDG (3D only): thelec\n" \
-    #          "" \
-    #          "NB: for cfpdes you must use a linear case as a starting point for a nonlinear case"    
-
     # load appenv
     AppCfg = loadconfig()
     
+    # load appenv
+    MyEnv = appenv()
+
     comment = ""
     actual_models = []
     for m in supported_methods(AppCfg):
@@ -94,6 +83,8 @@ def main():
              "" \
              "NB: for cfpdes you must use a linear case as a starting point for a nonlinear case"    
 
+    from .node import loadmachine, load_machines
+    machines = [ key for key in load_machines()]
 
     # Manage Options
     command_line = None
@@ -117,13 +108,16 @@ def main():
     parser.add_argument("--cooling", help="choose cooling type", type=str,
                     choices=['mean', 'grad', 'meanH', 'gradH'], default='mean')
     parser.add_argument("--scale", help="scale of geometry", type=float, default=1e-3)
-    parser.add_argument("--flow_params", help="flow params file path", type=str)
-    parser.add_argument("--skip_archive", help="skip output archiving", type=bool, default=False)
+    parser.add_argument("--machine", help="choose cooling type", type=str,
+                    choices=machines, default=MyEnv.compute_server)
+    parser.add_argument("--np", help="choose number of cores (default is 0, would get max cores from machine)", type=int, default=0)
 
     parser.add_argument("--auto", help="activate auto mode", action='store_true')
     parser.add_argument("--debug", help="activate debug", action='store_true')
     parser.add_argument("--verbose", help="activate verbose", action='store_true')
     args = parser.parse_args()
+
+    if args.debug: print(MyEnv.template_path())
 
     # if args.debug:
     #    print("Arguments: " + str(args._))
@@ -142,10 +136,6 @@ def main():
             print("cannot specify both datafile and magnet or msite")
             sys.exit(1)
 
-    # load appenv
-    MyEnv = appenv()
-    if args.debug: print(MyEnv.template_path())
-
     # Get Object
     if args.datafile != None:
         confdata = load_object(MyEnv, args.datafile, args.debug)
@@ -159,40 +149,45 @@ def main():
         confdata = load_object_from_db(MyEnv, "msite", args.msite, args.debug)
         jsonfile = args.msite
 
-    (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename) = setup(MyEnv, args, confdata, jsonfile)
-    cmds = setup_cmds(MyEnv, args, yamlfile, cfgfile, jsonfile, xaofile, meshfile)
-    
     # Print command to run
-    machine = MyEnv.compute_server
+    machine = loadmachine(args.machine)
 
+    (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename) = setup(MyEnv, args, confdata, jsonfile)
+    cmds = setup_cmds(MyEnv, args, machine, yamlfile, cfgfile, jsonfile, xaofile, meshfile)
+    
     workingdir = cfgfile.replace(".cfg", "")
+    geodir = MyEnv.yaml_repo.replace('/','',1)
 
-    print("\n\n=== Guidelines for running a simu on {machine} ===")
+    print(f"\n\n=== Guidelines for running a simu on {args.machine} ===")
     print(f"Edit {cfgfile} to fix the meshfile, scale, partition and solver props")
     print(f"If you do change {cfgfile}, remember to include the new file in {tarfilename}")
     # TODO re-create a tgz archive if you modify cfgfile or jsonfile
-    print(f"Create a {workingdir} directory on {machine}: ssh {machine} mkdir -p {workingdir}")
-    print(f"Transfert {tarfilename} to {machine}: scp {tarfilename} {machine}:./{workingdir}")
-    print(f"Install worflow in {machine}: scp -r {os.path.dirname(os.path.abspath(__file__))}'/workflows {machine}:./{workingdir}")
-    print(f"Connect on {machine}: ssh -Y {machine}")
-    print(f"Once connected on {machine} run the following commands")
+    print(f"Create a {workingdir} directory on {args.machine}: ssh {args.machine} mkdir -p {workingdir}")
+    print(f"Transfert {tarfilename} to {machine.name}: scp {tarfilename} {args.machine}:./{workingdir}")
+    print(f"Install worflow in {args.machine}: scp -r {os.path.dirname(os.path.abspath(__file__))}/workflows {args.machine}:./{workingdir}")
+    print(f"Install postprocessing in {args.machine}: scp -r {os.path.dirname(os.path.abspath(__file__))}/postprocessing {args.machine}:./{workingdir}")
+    print(f"Connect on {args.machine}: ssh -Y {args.machine}")
+    print(f"Once connected on {args.machine} run the following commands")
     print(f"cd {workingdir}")
     for key in cmds:
         print(key, ':', cmds[key])
     print("==================================================")
 
     # post-processing
+    # TODO add automatic post-processing
+
     print("\n\n=== Guidelines for postprocessing a simu on your host ===")
-    print(f"Start pvdataserver on {machine}")
-    print(f"Connect on {machine}: ssh -Y -L 11111:{machine}:11111")
-    print(f"Start Paraview dataserver in {machine}: pvdataserver")
+    print(f"Start pvdataserver on {args.machine}")
+    print(f"Connect on {args.machine}: ssh -Y -L 11111:{args.machine}:11111")
+    print(f"Start Paraview dataserver in {args.machine}: pvdataserver")
     print("In a new terminal on your host, start Paraview render server: pvrenderserver")
     print("In a new terminal on your host, start Paraview: paraview")
     print("==================================================")
 
     status = 0
     if args.auto:
-        status = fabric(machine, workingdir, args, cfgfile, jsonfile, meshfile, tarfilename, cmds)
+        status = fabric(args.machine, workingdir, geodir, args, cfgfile, jsonfile, meshfile, tarfilename, cmds)
+
         # TODO 
         # print out some stats
         # start post-processing

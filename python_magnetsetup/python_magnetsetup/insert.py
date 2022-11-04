@@ -1,4 +1,3 @@
-from importlib.machinery import SOURCE_SUFFIXES
 import os
 from typing import List, Optional
 
@@ -7,7 +6,7 @@ import yaml
 from python_magnetgeo import Insert
 from python_magnetgeo import python_magnetgeo
 
-from .jsonmodel import create_params_insert, create_bcs_insert, create_materials_insert
+from .jsonmodel import create_params_insert, create_bcs_insert, create_materials_insert, create_models_insert
 from .utils import Merge, NMerge
 from .file_utils import MyOpen, findfile, search_paths
 
@@ -33,10 +32,12 @@ def Insert_simfile(MyEnv, confdata: dict, cad: Insert, addAir: bool = False):
         f = findfile(brepfile, paths=search_paths(MyEnv, "cad"))
         files.append(f)
     except:
-        for helix in cad.Helices:
-            with MyOpen(helix+".yaml", "r", paths=search_paths(MyEnv, "geom")) as f:
-                hhelix = yaml.load(f, Loader = yaml.FullLoader)
-                files.append(f.name)
+        pass
+
+    for helix in cad.Helices:
+        with MyOpen(helix+".yaml", "r", paths=search_paths(MyEnv, "geom")) as f:
+            hhelix = yaml.load(f, Loader = yaml.FullLoader)
+            files.append(f.name)
 
             # TODO: get xao and brep if they exist otherwise _salome.data
             try:
@@ -47,8 +48,11 @@ def Insert_simfile(MyEnv, confdata: dict, cad: Insert, addAir: bool = False):
                 brepfile = hhelix.name + ".brep"
                 f = findfile(brepfile, paths=search_paths(MyEnv, "cad"))
                 files.append(f)
-
             except:
+                pass
+            
+            # TODO: get _salome.data if they exist otherwise ??
+            try:
                 if hhelix.m3d.with_shapes:
                     with MyOpen(hhelix.name + str("_cut_with_shapes_salome.dat"), "r", paths=search_paths(MyEnv, "geom")) as fcut:
                         files.append(fcut.name)
@@ -57,35 +61,39 @@ def Insert_simfile(MyEnv, confdata: dict, cad: Insert, addAir: bool = False):
                 else:
                     with MyOpen(hhelix.name + str("_cut_salome.dat"), "r", paths=search_paths(MyEnv, "geom")) as fcut:
                         files.append(fcut.name)
+            except:
+                pass
 
-            for ring in cad.Rings:
-                try:
-                    xaofile = ring.name + ".xao"
-                    f = findfile(xaofile, paths=search_paths(MyEnv, "cad"))
-                    files.append(f)
+    for ring in cad.Rings:
+        with MyOpen(ring+".yaml", "r", paths=search_paths(MyEnv, "geom")) as f:
+            files.append(f.name)
+        try:
+            xaofile = ring.name + ".xao"
+            f = findfile(xaofile, paths=search_paths(MyEnv, "cad"))
+            files.append(f)
                 
-                    brepfile = ring.name + ".brep"
-                    f = findfile(brepfile, paths=search_paths(MyEnv, "cad"))
-                    files.append(f)
+            brepfile = ring.name + ".brep"
+            f = findfile(brepfile, paths=search_paths(MyEnv, "cad"))
+            files.append(f)
+        except:
+            pass
+        
 
-                except:
-                    with MyOpen(ring+".yaml", "r", paths=search_paths(MyEnv, "geom")) as f:
-                        files.append(f.name)
+    if cad.CurrentLeads:
+        for lead in cad.CurrentLeads:
+            with MyOpen(lead+".yaml", "r", paths=search_paths(MyEnv, "geom")) as f:
+                files.append(f.name)
+            try:
+                xaofile = lead.name + ".xao"
+                f = findfile(xaofile, paths=search_paths(MyEnv, "cad"))
+                files.append(f)
 
-        if cad.CurrentLeads:
-            for lead in cad.CurrentLeads:
-                try:
-                    xaofile = lead.name + ".xao"
-                    f = findfile(xaofile, paths=search_paths(MyEnv, "cad"))
-                    files.append(f)
-
-                    brepfile = lead.name + ".brep"
-                    f = findfile(brepfile, paths=search_paths(MyEnv, "cad"))
-                    files.append(f)
-
-                except:
-                    with MyOpen(lead+".yaml", "r", paths=search_paths(MyEnv, "geom")) as f:
-                        files.append(f.name)
+                brepfile = lead.name + ".brep"
+                f = findfile(brepfile, paths=search_paths(MyEnv, "cad"))
+                files.append(f)
+            except:
+                pass
+            
 
     return files
 
@@ -118,8 +126,8 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
         if method_data[2] == "Axi":
             for j in range(1, Nsections[i]+1):
                 part_electric.append("H{}_Cu{}".format(i+1,j))
-            if 'th' in method_data[3]:
-                for j in range(Nsections[i]+2):
+            for j in range(Nsections[i]+2):
+                if 'th' in method_data[3]:
                     part_thermic.append("H{}_Cu{}".format(i+1,j))
             for j in range(Nsections[i]):
                 index_Helices.append(["0:{}".format(Nsections[i]+2)])
@@ -260,7 +268,23 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
     # check mpost output
     # print(f"insert: mpost={mpost}")
     mmat = create_materials_insert(gdata, index_Insulators, confdata, templates, method_data, debug)
+    
+    mmodels = {}
+    if 'th' in method_data[3]:
+        mmodels["heat"] = create_models_insert(gdata, index_Insulators, confdata, templates, method_data, "heat", debug)
 
+    if 'mag' in method_data[3] or 'mqs' in method_data[3] :
+        mmodels["magnetic"] = create_models_insert(gdata, index_Insulators, confdata, templates, method_data, "magnetic", debug)
+    
+    if 'magel' in method_data[3] :
+        mmodels["elastic"] = create_models_insert(gdata, index_Insulators, confdata, templates, method_data, "elastic", debug)
+
+    if 'mqsel' in method_data[3] :
+        mmodels["elastic1"] = create_models_insert(gdata, index_Insulators, confdata, templates, method_data, "elastic1", debug)
+        mmodels["elastic2"] = create_models_insert(gdata, index_Insulators, confdata, templates, method_data, "elastic2", debug)
+
+
+    
     # update U and hw, dTw param
     print("Update U for I0=31kA")
     # print(f"insert: mmat: {mmat}")
@@ -288,4 +312,4 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
                 params[index] = item
                 
     
-    return (mdict, mmat, mpost)
+    return (mdict, mmat, mmodels, mpost)

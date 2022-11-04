@@ -35,6 +35,8 @@ def run_simulation(simulation):
                              nonlinear=simulation.non_linear,
                              cooling=simulation.cooling,
                              flow_params=f"{tempdir}/flow_params.json",
+                             machine='unknown',
+                             np=0,
                              debug=False,
                              verbose=False,
                              skip_archive=True)
@@ -44,7 +46,7 @@ def run_simulation(simulation):
                                  multithreading=True, manager=JobManager(otype=JobManagerType.none, queues=[]),
                                  mgkeydir=None)
             cmds = setup_cmds(env, args, node_spec, simulation.setup_state['yamlfile'],
-                              simulation.setup_state['cfgfile'], simulation.setup_state['xaofile'],
+                              simulation.setup_state['cfgfile'], simulation.setup_state['jsonfile'], simulation.setup_state['xaofile'],
                               simulation.setup_state['meshfile'], tempdir)
 
             for (key, value) in cmds.items():
@@ -70,6 +72,7 @@ def run_simulation(simulation):
             simulation.status = "done"
         except Exception as e:
             print(f"exception raised: {type(e).__name__}, {e.args}")
+            print(f"cmd output: {e.output}")
             simulation.status = "failed"
             raise e
         os.chdir(current_dir)

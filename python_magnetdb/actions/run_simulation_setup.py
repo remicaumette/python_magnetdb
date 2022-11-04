@@ -33,7 +33,7 @@ def run_simulation_setup(simulation):
         subprocess.run([f"ls -lR {tempdir}"], shell=True)
         print("generating config done")
 
-        print("running setup...")
+        print(f"running setup... non_linear={simulation.non_linear} type={type(simulation.non_linear)}")
         data_dir = f"{tempdir}/data"
         current_dir = os.getcwd()
         os.chdir(tempdir)
