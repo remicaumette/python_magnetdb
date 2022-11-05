@@ -3,6 +3,7 @@ import subprocess
 import tempfile
 from argparse import Namespace
 from os.path import basename
+from traceback import print_exception
 
 from python_magnetdb.models.attachment import Attachment
 from python_magnetsetup.config import appenv
@@ -80,6 +81,6 @@ def run_simulation(simulation):
             print(f"exception raised: {type(e).__name__}, {e.args}")
             print(f"cmd output: {e.output}")
             simulation.status = "failed"
-            raise e
+            print_exception(e)
         os.chdir(current_dir)
         simulation.save()

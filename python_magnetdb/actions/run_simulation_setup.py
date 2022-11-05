@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 from argparse import Namespace
 from os.path import basename
+from traceback import print_exception
 
 from python_magnetsetup.config import appenv
 from python_magnetsetup.setup import setup
@@ -88,8 +89,6 @@ def run_simulation_setup(simulation):
             simulation.setup_status = "done"
         except Exception as e:
             simulation.setup_status = "failed"
-            os.chdir(current_dir)
-            simulation.save()
-            raise e
+            print_exception(e)
         os.chdir(current_dir)
         simulation.save()

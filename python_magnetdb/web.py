@@ -11,6 +11,7 @@ from .routes.api.sessions import router as api_sessions_router
 from .routes.api.site_magnets import router as api_site_magnets_router
 from .routes.api.sites import router as api_sites_router
 from .routes.api.records import router as api_records_router
+from .routes.api.servers import router as api_servers_router
 from .routes.api.user import router as api_user_router
 from .routes.api.visualisations import router as api_visualisations_router
 from .routes.api.cad_attachments import router as api_cad_attachments
@@ -33,6 +34,7 @@ app.include_router(api_magnet_parts_router)
 app.include_router(api_site_magnets_router)
 app.include_router(api_sessions_router)
 app.include_router(api_records_router)
+app.include_router(api_servers_router)
 app.include_router(api_cad_attachments)
 app.include_router(api_user_router)
 app.include_router(api_visualisations_router)

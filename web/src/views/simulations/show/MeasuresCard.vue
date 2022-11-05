@@ -1,5 +1,5 @@
 <template>
-  <Card>
+  <Card v-if="measure">
     <template #header>
       <div class="flex justify-between items-center">
         <div class="flex items-center">
