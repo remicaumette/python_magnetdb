@@ -49,6 +49,9 @@
             <router-link class="topbar-dropdown-link" :to="{ name: 'profile' }">
               Profile
             </router-link>
+            <router-link class="topbar-dropdown-link" :to="{ name: 'servers' }">
+              Servers
+            </router-link>
             <router-link
                 v-if="$store.state.user.role === 'admin'"
                 class="topbar-dropdown-link" :to="{ name: 'admin_config' }"

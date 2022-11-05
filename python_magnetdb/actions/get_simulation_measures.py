@@ -23,7 +23,7 @@ def find_measures_files(path: str):
 
 def get_simulation_measures(simulation_id, measure_name: str = None):
     simulation = Simulation.find(simulation_id)
-    if simulation.output_attachment is None:
+    if simulation.output_attachment == None:
         return None
 
     with tempfile.TemporaryDirectory() as tempdir:

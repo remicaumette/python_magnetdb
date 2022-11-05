@@ -44,7 +44,7 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
 
 @router.get("/api/sites/{id}")
 def show(id: int, user=Depends(get_user('read'))):
-    site = Site.with_('config', 'site_magnets.magnet').find(id)
+    site = Site.with_('config', 'site_magnets.magnet', 'records').find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
     return site.serialize()
