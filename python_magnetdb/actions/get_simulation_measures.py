@@ -22,13 +22,15 @@ def find_measures_files(path: str):
 
 
 def get_simulation_measures(simulation_id, measure_name: str = None):
+    print("get_simulation_measures...")
     simulation = Simulation.find(simulation_id)
     if simulation.output_attachment is None:
         return None
 
     with tempfile.TemporaryDirectory() as tempdir:
+        print("Extracting output archive...")
         simulation.output_attachment.download(f"{tempdir}/output.tar.gz")
-        subprocess.run([f"tar xf {tempdir}/output.tar.gz -C {tempdir}"], shell=True)
+        subprocess.run([f"tar xvf {tempdir}/output.tar.gz -C {tempdir}"], shell=True, check=True)
 
         measures_files = find_measures_files(tempdir)
         measures_names = list(map(lambda file: file.split('/').pop()[:-9], measures_files))
@@ -43,4 +45,5 @@ def get_simulation_measures(simulation_id, measure_name: str = None):
                 'columns': csv.columns.tolist(),
                 'rows': csv.values.tolist(),
             }
+    print("Extracting output archive -- here ...")
     return None

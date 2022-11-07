@@ -20,6 +20,7 @@ def run_simulation(simulation):
         os.chdir(tempdir)
 
         try:
+            subprocess.run([f"echo $PWD"], shell=True, check=True)
             print("Downloading setup archive...")
             simulation.setup_output_attachment.download(f"{tempdir}/setup.tar.gz")
             print("Extracting setup archive...")
@@ -60,12 +61,12 @@ def run_simulation(simulation):
                     print(f'Ignore {key}: {value}')
                 else:
                     print(f"bash -c '{value}'")
-                    subprocess.run([f"bash -c \"{value}\""], capture_output=True, shell=True, check=True)
+                    subprocess.run([f"bash -c \"{value}\""], shell=True, check=True)
 
             print("Archiving results...")
             simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
             output_archive = f"{tempdir}/{simulation_name}.tar.gz"
-            subprocess.run([f"tar cvzf {output_archive} *"], shell=True)
+            subprocess.run([f"tar cvzf {output_archive} *"], shell=True, check=True)
             attachment = Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
             simulation.output_attachment().associate(attachment)
             print("Done!")
