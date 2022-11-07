@@ -86,7 +86,7 @@ testing = ["mock (>=2.0.0,<3.0)"]
 
 [[package]]
 name = "gmsh"
-version = "4.10.5"
+version = "4.11.0"
 description = "Gmsh is a three-dimensional finite element mesh generator with built-in pre- and post-processing facilities."
 category = "main"
 optional = false
@@ -143,7 +143,7 @@ pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 
 [[package]]
 name = "paramiko"
-version = "2.11.0"
+version = "2.12.0"
 description = "SSH2 protocol library"
 category = "main"
 optional = false
@@ -435,9 +435,10 @@ fabric = [
     {file = "fabric-2.7.1.tar.gz", hash = "sha256:76f8fef59cf2061dbd849bbce4fe49bdd820884385004b0ca59136ac3db129e4"},
 ]
 gmsh = [
-    {file = "gmsh-4.10.5-py2.py3-none-macosx_10_15_x86_64.whl", hash = "sha256:716c5c353f51b8b158f29588c48fb4a2a4faa4806f32333c4b9ad9f729cfa2fe"},
-    {file = "gmsh-4.10.5-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:6eb585863f5cd9ebb3f5c77225bb3945ab6c2da0437d03570d206c95442cee4b"},
-    {file = "gmsh-4.10.5-py2.py3-none-win_amd64.whl", hash = "sha256:1b945145e35a06bc90c8e7097a8c39da9024fc49d5cd592f4a94bd33d56a6b36"},
+    {file = "gmsh-4.11.0-py2.py3-none-macosx_10_15_x86_64.whl", hash = "sha256:b0bfc1f2b9664d5f41d2b24e6896c038e56d10d20caa513c25f72988c662f561"},
+    {file = "gmsh-4.11.0-py2.py3-none-macosx_12_0_arm64.whl", hash = "sha256:052cddd31b32e7b1372aa57a8009034f89014b83dfc90d639a10b2ab5330f3f6"},
+    {file = "gmsh-4.11.0-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:727b6a37593b2b33b080fb3518f37ae9ab1bb5bb11add358606f4aca5981c7db"},
+    {file = "gmsh-4.11.0-py2.py3-none-win_amd64.whl", hash = "sha256:5b01b8957ebc942fe7c8146041d6651d2ab1429559c5f2ad72bae7aa2bf3771e"},
 ]
 idna = [
     {file = "idna-3.4-py3-none-any.whl", hash = "sha256:90b77e79eaa3eba6de819a0c442c0b4ceefc341a7a2ab77d7562bf49f425c5c2"},
@@ -554,8 +555,8 @@ packaging = [
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
 ]
 paramiko = [
-    {file = "paramiko-2.11.0-py2.py3-none-any.whl", hash = "sha256:655f25dc8baf763277b933dfcea101d636581df8d6b9774d1fb653426b72c270"},
-    {file = "paramiko-2.11.0.tar.gz", hash = "sha256:003e6bee7c034c21fbb051bf83dc0a9ee4106204dd3c53054c71452cc4ec3938"},
+    {file = "paramiko-2.12.0-py2.py3-none-any.whl", hash = "sha256:b2df1a6325f6996ef55a8789d0462f5b502ea83b3c990cbb5bbe57345c6812c4"},
+    {file = "paramiko-2.12.0.tar.gz", hash = "sha256:376885c05c5d6aa6e1f4608aac2a6b5b0548b1add40274477324605903d9cd49"},
 ]
 pathlib2 = [
     {file = "pathlib2-2.3.7.post1-py2.py3-none-any.whl", hash = "sha256:5266a0fd000452f1b3467d782f079a4343c63aaa119221fbdc4e39577489ca5b"},
