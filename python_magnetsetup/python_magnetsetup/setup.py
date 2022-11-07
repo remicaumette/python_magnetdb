@@ -540,24 +540,24 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
 
     cmds["Update_Mesh"] = update_cfgmesh
 
+    feelcmd = f"{exec} --directory {root_directory} --config-file {cfgfile}"
+    pyfeelcmd = f"python {pyfeel} {cfgfile}"
     if node_spec.smp:
-        feelcmd = f"mpirun -np {NP} {exec} --config-file {cfgfile}"
-        pyfeelcmd = f"mpirun -np {NP} python {pyfeel} {cfgfile}"
+        feelcmd = f"mpirun -np {NP} {feelcmd}"
+        pyfeelcmd = f"mpirun -np {NP} {pyfeelcmd}"
         cmds["Run"] = f"singularity exec {simage_path}/{feelpp} {feelcmd}"
         cmds["Workflow"] = f"singularity exec {simage_path}/{feelpp} {pyfeelcmd}"
-
     else:
-        feelcmd = f"{exec} --config-file {cfgfile}"
-        pyfeelcmd = f"python {pyfeel}"
         cmds["Run"] = f"mpirun -np {NP} singularity exec {simage_path}/{feelpp} {feelcmd}"
-        cmds["Workflow"] = f"mpirun -np {NP} singularity exec {simage_path}/{feelpp} {pyfeelcmd} {cfgfile}"
+        cmds["Workflow"] = f"mpirun -np {NP} singularity exec {simage_path}/{feelpp} {pyfeelcmd}"
 
     # compute resultdir:
-    with open(cfgfile, 'r') as f:
-        directory = re.sub('directory=', '', f.readline(), flags=re.DOTALL)
-    home_env = 'HOME'
-    result_dir = f'{os.getenv(home_env)}/feelppdb/{directory.rstrip()}/np_{NP}'
-    result_arch = cfgfile.replace('.cfg', '_res.tgz')
+    # with open(cfgfile, 'r') as f:
+    #     directory = re.sub('directory=', '', f.readline(), flags=re.DOTALL)
+    # home_env = 'HOME'
+    # result_dir = f'{os.getenv(home_env)}/feelppdb/{directory.rstrip()}/np_{NP}'
+    # result_arch = cfgfile.replace('.cfg', '_res.tgz')
+    result_dir = f'{root_directory}/np_{NP}'
     print(f'result_dir={result_dir}')
 
     paraview = AppCfg["post"]["paraview"]
@@ -566,17 +566,15 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
     if "post" in AppCfg[args.method][args.time][args.geom][args.model]:
         postdata = AppCfg[args.method][args.time][args.geom][args.model]["post"]
 
-        # TODO: Get Path to pv-scalarfield.py valid only for poetry
-        python_installdir = f"poetry env info | grep Path | tr -s ' ' | cut -d ' ' -f2"
-        pyversion_maj = f"poetry env info | grep Python | head -1 | tr -s ' ' | cut -d ' ' -f2 | cut -d '.' -f1"
-        pyversion_min = f"poetry env info | grep Python | head -1 | tr -s ' ' | cut -d ' ' -f2 | cut -d '.' -f2"
+        # TODO: Get Path to pv-scalarfield.py:  /usr/lib/python3/dist-packages/python_magnetsetup/postprocessing/
         for key in postdata:
-            pyparaview = f'$({python_installdir})/lib/python$({pyversion_maj}).$({pyversion_maj})/site-packages/python_magnetsetup/postprocessing/pv-scalarfield.py --cfgfile {cfgfile}  --jsonfile {jsonfile} --expr {key} --exprlegend \"{postdata[key]}\" --resultdir {result_dir}'
+            pyparaview = f'/usr/lib/python3/dist-packages/python_magnetsetup/postprocessing//pv-scalarfield.py --cfgfile {cfgfile}  --jsonfile {jsonfile} --expr {key} --exprlegend \"{postdata[key]}\" --resultdir {result_dir}'
+            # pyparaview = f'pv-scalarfield.py --cfgfile {cfgfile}  --jsonfile {jsonfile} --expr {key} --exprlegend \"{postdata[key]}\" --resultdir {result_dir}'
             pyparaviewcmd = f"pvpython {pyparaview}"
             cmds["Postprocessing"] = f"singularity exec {simage_path}/{paraview} {pyparaviewcmd}"
 
 
-    cmds["Save"] = f"tmpdir=$(pwd) && pushd {result_dir}/.. && tar zcf $tmpdir/{result_arch} np_{NP} && popd"
+    # cmds["Save"] = f"pushd {result_dir}/.. && tar zcf {result_arch} np_{NP} && popd && mv {result_dir}/../{result_arch} ."
 
     # TODO jobmanager if node_spec.manager != JobManagerType.none
     # Need user email at this point

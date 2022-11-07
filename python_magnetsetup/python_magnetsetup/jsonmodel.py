@@ -617,6 +617,8 @@ def entry(template: str, rdata: List, debug: bool = False) -> str:
     corrected = re.sub(r'},\s+}\n', '}\n}\n', corrected)
     # corrected = re.sub(r'},\s+}\n', '}\n}\n', corrected)
     corrected = corrected.replace("&quot;", "\"")
+    corrected = corrected.replace("&lt;", "<")
+    corrected = corrected.replace("&gt;", ">")
     if debug:
         print(f"entry/jsonfile: {jsonfile}")
         print(f"corrected: {corrected}")
