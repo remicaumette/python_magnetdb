@@ -86,7 +86,7 @@ export default {
       FormSelect,
       error: null,
       methodOptions: ['cfpdes', 'CG', 'HDG', 'CRB'],
-      modelOptions: ['thelec', 'mag', 'thmag', 'thmagel'],
+      modelOptions: ['thelec', 'mag', 'thmag', 'thmagel', 'mag_hcurl', 'thmag_hcurl', 'thmagel_hcurl'],
       geometryOptions: ['Axi', '3D'],
       coolingOptions: ['mean', 'grad', 'meanH', 'gradH'],
       magnetOptions: [],
