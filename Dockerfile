@@ -5,6 +5,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-sel
 
 USER root
 RUN apt-get update \
+    && apt-get install -y wait-for-it \
     && apt-get install -y debconf-utils \
     && apt-get install -y libxft2 libglu1 wget build-essential libseccomp-dev pkg-config squashfs-tools cryptsetup runc \
     && apt-get install -y python3-watchdog \
