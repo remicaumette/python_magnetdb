@@ -257,7 +257,6 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
     """
     generate sim files
     """
-    print("setup/main")
 
     # loadconfig
     AppCfg = loadconfig()
@@ -266,6 +265,7 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
     cwd = os.getcwd()
     if args.wd:
         os.chdir(args.wd)
+    print(f"setup/main: {os.getcwd()}")
 
     # load appropriate templates
     # TODO force millimeter when args.method == "HDG"
@@ -296,22 +296,11 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
                     try:
                         findfile(confdata["geom"], search_paths(MyEnv, "geom"))
                     except FileNotFoundError as e:
-                        # print(f"try to create {MyEnv.yaml_repo + '/' + confdata['geom']}")
-                        # magnets = {}
-                        # magnets[mtype] = []
-                        # for obj in confdata[mtype]:
-                        #    magnets[mtype].append( obj["geom"] )
-
-                        # with open(MyEnv.yaml_repo + '/' + confdata["geom"], "x") as out:
-                        #    out.write(f"!<{mtype}>\n")
-                        #    yaml.dump(magnets, out)
-                        # print(f"try to create {confdata['geom']} done")
                         pass
 
         (mdict, mmat, mmodels, mpost) = magnet_setup(MyEnv, confdata, method_data, templates, args.debug or args.verbose)
     else:
         print("Load a msite %s" % confdata["name"], "debug:", args.debug)
-        # print("confdata:", confdata)
         cad_basename = confdata["name"]
 
         # why do I need that???
@@ -369,13 +358,18 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
     # create json
     create_json(jsonfile, mdict, mmat, mmodels, mpost, templates, method_data, args.debug)
 
+    if "geom" in confdata:
+        print(f'magnet geo: {confdata["geom"]}')
+        yamlfile = confdata["geom"]
+    else:
+        print(f'site geo: {confdata["name"]}')
+        yamlfile = confdata["name"] + ".yaml"
+
     # copy some additional json file
     material_generic_def = ["conductor", "insulator"]
     if args.time == "transient":
         material_generic_def.append("conduct-nosource") # only for transient with mqs
 
-    # create list of files to be archived
-    sim_files = [cfgfile, jsonfile]
     if args.method == "cfpdes":
         if args.debug:
             print("cwd=", cwd)
@@ -383,61 +377,12 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
         for jfile in material_generic_def:
             filename = AppCfg[args.method][args.time][args.geom][args.model]["filename"][jfile]
             src = os.path.join(MyEnv.template_path(), args.method, args.geom, args.model, filename)
-            dst = os.path.join(jfile + "-" + args.method + "-" + args.model + "-" + args.geom + ".json")
+            dst = os.path.join(os.getcwd(), f'{jfile}-{args.method}-{args.model}-{args.geom}.json')
             if args.debug:
                 print(jfile, "filename=", filename, "src=%s" % src, "dst=%s" % dst)
             copyfile(src, dst)
-            sim_files.append(dst)
 
-    # list files to be archived
-    try:
-        mesh = findfile(meshfile, search_paths(MyEnv, "mesh"))
-        sim_files.append(mesh)
-    except:
-        if "geom" in confdata:
-            print(f'magnet geo: {confdata["geom"]}')
-            yamlfile = confdata["geom"]
-            sim_files += magnet_simfile(MyEnv, confdata, addAir, args.debug, session)
-        else:
-            print(f'site geo: {confdata["name"]}')
-            yamlfile = confdata["name"] + ".yaml"
-            sim_files += msite_simfile(MyEnv, confdata, addAir, args.debug, session)
-
-    # TODO create a flow_params from records data per magnet/site
-    sdir = os.path.dirname(os.path.abspath(__file__))
-    src = os.path.join(sdir, 'flow_params.json')
-    print(f"flow_params.json: sdir={sdir} src={src}")
-    dst = 'flow_params.json'
-    copyfile(src, dst)
-
-    if args.debug:
-        print("List of simulations files:", sim_files)
-    import tarfile
-    tarfilename = cfgfile.replace('cfg','tgz')
-    if os.path.isfile(os.path.join(cwd, tarfilename)):
-        raise FileExistsError(f"{tarfilename} already exists")
-    else:
-        tar = tarfile.open(tarfilename, "w:gz")
-        for filename in sim_files:
-            # TODO skip xao and brep if Axi args.geom?
-            if args.geom == 'Axi' and ( filename.endswith('.xao') or filename.endswith('.brep') ) :
-                if args.debug:
-                    print(f"skip {filename}")  
-            else:
-                if args.debug:
-                    print(f"add {filename} to {tarfilename}")
-                print(f"add {filename} to {tarfilename}")
-                tar.add(filename)
-                for mname in material_generic_def:
-                    if mname in filename:
-                        if args.debug:
-                            print(f"remove {filename}")
-                        os.unlink(filename)
-        tar.add(args.flow_params)
-        os.unlink(args.flow_params)
-        tar.close()
-
-    return (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename)
+    return (yamlfile, cfgfile, jsonfile, xaofile, meshfile) #, tarfilename)
 
 def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, meshfile, root_directory):
     """
