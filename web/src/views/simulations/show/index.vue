@@ -10,11 +10,21 @@
         <Button class="btn btn-primary" @click="runSetup">
           Run Setup
         </Button>
-        <Button class="btn btn-primary" @click="runSimulation" :disabled="simulation.setup_status !== 'done'">
+        <Button
+          class="btn btn-primary"
+          @click="runSimulationModalOpen = true"
+          :disabled="simulation.setup_status !== 'done'"
+        >
           Run Simulation
         </Button>
       </div>
     </div>
+
+    <RunSimulationModal
+      v-model="runSimulationModalOpen"
+      :simulation-id="simulation.id"
+      @triggered="simulation.status = $event.status"
+    />
 
     <Alert v-if="error" class="alert alert-danger mb-6" :error="error"/>
 
@@ -120,10 +130,12 @@ import Button from "@/components/Button";
 import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 import MeasuresCard from "@/views/simulations/show/MeasuresCard";
+import RunSimulationModal from "@/views/simulations/show/RunSimulationModal";
 
 export default {
   name: 'SimulationShow',
   components: {
+    RunSimulationModal,
     MeasuresCard,
     StatusBadge,
     Alert,
@@ -139,6 +151,7 @@ export default {
       FormUpload,
       error: null,
       simulation: null,
+      runSimulationModalOpen: false,
       resourceOptions: [],
       methodOptions: ['cfpdes', 'CG', 'HDG', 'CRB'],
       modelOptions: ['thelec', 'mag', 'thmag', 'thmagel', 'mag_hcurl', 'thmag_hcurl', 'thmagel_hcurl'],
@@ -150,11 +163,6 @@ export default {
     deleteSimulation() {
       return simulationService.deleteSimulation({ id: this.simulation.id })
           .then(() => this.$router.push({ name: 'simulations' }))
-          .catch((err) => alert(err.message))
-    },
-    runSimulation() {
-      return simulationService.runSimulation({ id: this.simulation.id })
-          .then((res) => this.simulation.status = res.status)
           .catch((err) => alert(err.message))
     },
     runSetup() {

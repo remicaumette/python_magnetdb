@@ -54,13 +54,24 @@ export default {
           sortable: true,
         },
         {
+          key: 'host',
+          name: 'Host',
+          default: true,
+        },
+        {
           key: 'username',
           name: 'SSH username',
           default: true,
         },
         {
+          key: 'image_directory',
+          name: 'Image directory',
+          default: true,
+        },
+        {
           key: 'public_key',
           name: 'SSH public key',
+          default: true,
         },
         {
           key: 'created_at',

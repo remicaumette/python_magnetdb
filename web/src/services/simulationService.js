@@ -23,8 +23,10 @@ export function runSetup({ id }) {
     .then((res) => res.data)
 }
 
-export function runSimulation({ id }) {
-  return client.post(`/api/simulations/${id}/run`)
+export function runSimulation({ id, serverId }) {
+  const form = new FormData()
+  form.set('server_id', serverId)
+  return client.post(`/api/simulations/${id}/run`, form)
     .then((res) => res.data)
 }
 
@@ -41,6 +43,11 @@ export function create(values) {
     }
   }
   return client.post(`/api/simulations`, form)
+    .then((res) => res.data)
+}
+
+export function listModels() {
+  return client.get(`/api/simulations/models`)
     .then((res) => res.data)
 }
 

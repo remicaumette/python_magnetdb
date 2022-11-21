@@ -9,6 +9,7 @@ class CreateServersTable(Migration):
                 table.string('name')
                 table.big_integer('user_id')
                 table.string('username')
+                table.string('host')
                 table.text('private_key')
                 table.text('public_key')
                 table.timestamps()
