@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, Form, Query
+from python_magnetsetup.config import loadconfig, supported_methods, supported_models
 
 from ... import worker
 from ...actions.generate_simulation_config import generate_simulation_config
@@ -15,16 +16,38 @@ router = APIRouter()
 @router.get("/api/simulations")
 def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
           sort_by: str = Query(None), sort_desc: bool = Query(False)):
-    simulations = Simulation.with_('resource')
-    if sort_by is not None:
-        simulations = simulations.order_by(sort_by, 'desc' if sort_desc else 'asc')
-    simulations = simulations.paginate(per_page, page)
+    simulations = Simulation \
+        .with_('resource', 'owner') \
+        .order_by(sort_by or 'created_at', 'desc' if sort_desc else 'asc') \
+        .paginate(per_page, page)
+    items = simulations.serialize()
+    for item in items:
+        item["owner"] = {"name": item["owner"]["name"]}
+
     return {
         "current_page": simulations.current_page,
         "last_page": simulations.last_page,
         "total": simulations.total,
-        "items": simulations.serialize(),
+        "items": items,
     }
+
+
+@router.get("/api/simulations/models")
+def models():
+    app_config = loadconfig()
+
+    available_models = []
+    for method in supported_methods(app_config):
+        for geometry in ['Axi', '3D']:
+            for time in ['static', 'transient']:
+                for model in supported_models(app_config, method, geometry, time):
+                    available_models.append({
+                        "method": method,
+                        "geometry": geometry,
+                        "time": time,
+                        "model": model,
+                    })
+    return available_models
 
 
 @router.post("/api/simulations")
@@ -41,6 +64,7 @@ def create(resource_type: str = Form(...), resource_id: int = Form(...), method:
 
     simulation = Simulation(method=method, model=model, geometry=geometry, cooling=cooling,
                             static=static, non_linear=non_linear)
+    simulation.owner().associate(user)
     simulation.resource().associate(resource)
     simulation.save()
     AuditLog.log(user, "Simulation created", resource=simulation)
@@ -88,7 +112,7 @@ def run_setup(id: int, user=Depends(get_user('update'))):
 
 
 @router.post("/api/simulations/{id}/run")
-def run(id: int, user=Depends(get_user('update'))):
+def run(id: int, server_id: int = Form(None), user=Depends(get_user('update'))):
     simulation = Simulation.with_('resource').find(id)
     if not simulation:
         raise HTTPException(status_code=404, detail="Simulation not found")
@@ -96,7 +120,7 @@ def run(id: int, user=Depends(get_user('update'))):
     simulation.status = "scheduled"
     simulation.save()
     AuditLog.log(user, "Simulation scheduled", resource=simulation)
-    worker.run_simulation.delay(simulation.id)
+    worker.run_simulation.delay(simulation.id, server_id)
     return simulation.serialize()
 
 

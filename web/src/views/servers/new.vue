@@ -14,8 +14,22 @@
           :required="true"
         />
         <FormField
+            label="Host"
+            name="host"
+            type="text"
+            :component="FormInput"
+            :required="true"
+        />
+        <FormField
             label="SSH username"
             name="username"
+            type="text"
+            :component="FormInput"
+            :required="true"
+        />
+        <FormField
+            label="Image directory"
+            name="image_directory"
             type="text"
             :component="FormInput"
             :required="true"
@@ -62,6 +76,9 @@ export default {
     validate() {
       return Yup.object().shape({
         name: Yup.string().required(),
+        host: Yup.string().required(),
+        username: Yup.string().required(),
+        image_directory: Yup.string().required(),
       })
     },
   },

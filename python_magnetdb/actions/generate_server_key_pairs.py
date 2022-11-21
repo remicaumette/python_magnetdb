@@ -10,7 +10,7 @@ def generate_server_key_pairs():
         encryption_algorithm=serialization.NoEncryption()
     )
     public_key = private_key.public_key().public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
+        encoding=serialization.Encoding.OpenSSH,
+        format=serialization.PublicFormat.OpenSSH
     )
     return encrypted_private_key.decode(), public_key.decode()

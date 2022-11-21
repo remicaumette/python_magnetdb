@@ -11,6 +11,7 @@
 
     <div class="table-responsive">
       <table v-if="rows.length > 0">
+        <!-- eslint-disable vue/require-v-for-key, vue/valid-v-for -->
         <thead>
           <tr>
             <th v-for="column in columns">
@@ -25,6 +26,7 @@
             </td>
           </tr>
         </tbody>
+        <!-- eslint-enable vue/require-v-for-key, vue/valid-v-for -->
       </table>
     </div>
   </Card>

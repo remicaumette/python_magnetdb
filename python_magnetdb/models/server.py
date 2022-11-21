@@ -4,7 +4,7 @@ from orator.orm import belongs_to
 
 class Server(Model):
     __table__ = "servers"
-    __fillable__ = ['name', 'user_id', 'username', 'private_key', 'public_key']
+    __fillable__ = ['name', 'user_id', 'username', 'host', 'private_key', 'public_key', 'image_directory']
     __hidden__ = ['private_key']
 
     @belongs_to('user_id')

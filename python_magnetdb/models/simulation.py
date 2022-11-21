@@ -5,7 +5,7 @@ from orator.orm import belongs_to, morph_to
 class Simulation(Model):
     __table__ = "simulations"
     __fillable__ = ['resource_id', 'resource_type', 'method', 'model', 'geometry', 'cooling', 'static', 'non_linear',
-                    'setup_status', 'setup_attachment_id', 'status', 'output_attachment_id', 'setup_state']
+                    'setup_status', 'setup_attachment_id', 'status', 'output_attachment_id', 'setup_state', 'owner_id']
     __casts__ = {
         'setup_state': 'dict'
     }
@@ -23,6 +23,11 @@ class Simulation(Model):
     def output_attachment(self):
         from .attachment import Attachment
         return Attachment
+
+    @belongs_to('owner_id')
+    def owner(self):
+        from .user import User
+        return User
 
 
 class SimulationObserver(object):

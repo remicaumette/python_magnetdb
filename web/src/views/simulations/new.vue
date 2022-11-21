@@ -5,7 +5,7 @@
     </div>
 
     <Card>
-      <Form @submit="submit" @validate="validate">
+      <Form @submit="submit" @validate="validate" @change="computeModelOptions">
         <FormField
             label="Magnet"
             name="magnet"
@@ -19,13 +19,6 @@
             :component="FormSelect"
             :required="true"
             :options="methodOptions"
-        />
-        <FormField
-            label="Model"
-            name="model"
-            :component="FormSelect"
-            :required="true"
-            :options="modelOptions"
         />
         <FormField
             label="Geometry"
@@ -46,6 +39,13 @@
             name="static"
             :component="FormInput"
             type="checkbox"
+        />
+        <FormField
+            label="Model"
+            name="model"
+            :component="FormSelect"
+            :required="true"
+            :options="modelOptions"
         />
         <FormField
             label="Non-linear"
@@ -86,13 +86,22 @@ export default {
       FormSelect,
       error: null,
       methodOptions: ['cfpdes', 'CG', 'HDG', 'CRB'],
-      modelOptions: ['thelec', 'mag', 'thmag', 'thmagel'],
+      modelOptions: [],
       geometryOptions: ['Axi', '3D'],
       coolingOptions: ['mean', 'grad', 'meanH', 'gradH'],
       magnetOptions: [],
+      availableModels: [],
     }
   },
   methods: {
+    computeModelOptions(values) {
+      this.modelOptions = this.availableModels
+          .filter((model) =>
+            model.method === values.method && model.geometry === values.geometry &&
+            (model.time === 'static' || !values.static)
+          )
+          .map((model) => model.model)
+    },
     submit(values, {setRootError}) {
       return simulationService.create({
         ...values,
@@ -111,7 +120,7 @@ export default {
       return Yup.object().shape({
         magnet: Yup.mixed().required(),
         method: Yup.string().required(),
-        model: Yup.string().required(),
+        model: Yup.string().oneOf(this.modelOptions).required(),
         geometry: Yup.string().required(),
         cooling: Yup.string().required(),
       })
@@ -123,6 +132,7 @@ export default {
       name: magnet.name,
       value: magnet.id,
     }))
+    this.availableModels = await simulationService.listModels()
   },
 }
 </script>

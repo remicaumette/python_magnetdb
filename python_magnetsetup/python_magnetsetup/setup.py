@@ -411,11 +411,6 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, xaofile, meshfile, roo
     # loadconfig
     AppCfg = loadconfig()
 
-    # Get current dir
-    cwd = os.getcwd()
-    if args.wd:
-        os.chdir(args.wd)
-    
     # TODO adapt NP to the size of the problem
     # if server is SMP mpirun outside otherwise inside singularity
     NP = node_spec.cores
@@ -499,12 +494,12 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, xaofile, meshfile, roo
     if node_spec.smp:
         feelcmd = f"{exec} --directory {root_directory} --config-file {cfgfile}"
         pyfeelcmd = f"python {pyfeel}"
-        cmds["Run"] = f"singularity exec {simage_path}/{feelpp} mpirun -np {NP} {feelcmd}"
-        cmds["Workflow"] = f"singularity exec {simage_path}/{feelpp} mpirun -np {NP} {pyfeelcmd} {cfgfile}"
+        cmds["Run"] = f"singularity exec {simage_path}/{feelpp} mpirun --allow-run-as-root -np {NP} {feelcmd}"
+        cmds["Workflow"] = f"singularity exec {simage_path}/{feelpp} mpirun --allow-run-as-root -np {NP} {pyfeelcmd} {cfgfile}"
     
     else:
-        feelcmd = f"mpirun -np {NP} {exec} --config-file {cfgfile}"
-        pyfeelcmd = f"mpirun -np {NP} python {pyfeel} {cfgfile}"
+        feelcmd = f"mpirun --allow-run-as-root -np {NP} {exec} --config-file {cfgfile}"
+        pyfeelcmd = f"mpirun --allow-run-as-root -np {NP} python {pyfeel} {cfgfile}"
         cmds["Run"] = f"singularity exec {simage_path}/{feelpp} {feelcmd}"
         cmds["Workflow"] = f"singularity exec {simage_path}/{feelpp} {pyfeelcmd}"
     

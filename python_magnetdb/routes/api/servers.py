@@ -26,9 +26,11 @@ def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(d
 
 
 @router.post("/api/servers")
-def create(user=Depends(get_user('create')), name: str = Form(...), username: str = Form(...)):
+def create(user=Depends(get_user('create')), name: str = Form(...), host: str = Form(...), username: str = Form(...),
+           image_directory: str = Form(...)):
     private_key, public_key = generate_server_key_pairs()
-    server = Server(name=name, username=username, private_key=private_key, public_key=public_key)
+    server = Server(name=name, host=host, username=username, image_directory=image_directory,
+                    private_key=private_key, public_key=public_key)
     server.user().associate(user)
     server.save()
     AuditLog.log(user, "Server created", resource=server)
