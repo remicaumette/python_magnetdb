@@ -18,6 +18,10 @@ from .models.site import Site
 from .models.site_magnet import SiteMagnet
 from .storage import s3_client, s3_bucket
 
+from .crud import upload_attachment, extract_date_from_filename
+from .crud import create_material, create_part, create_site, create_magnet, create_record
+from .crud import query_part, query_material
+
 db = DatabaseManager({
     'postgres': {
         'driver': 'postgres',
@@ -32,108 +36,6 @@ schema = Schema(db)
 Model.set_connection_resolver(db)
 
 data_directory = getenv('DATA_DIR')
-
-
-def upload_attachment(file: str) -> Attachment:
-    """upload file as attachment in s3_bucket"""
-    attachment = Attachment.create({
-        "key": str(uuid4()),
-        "filename": path.basename(file),
-        "content_type": 'text/tsv',
-    })
-    s3_client.fput_object(s3_bucket, attachment.key, file, content_type=attachment.content_type)
-    return attachment
-
-
-def create_material(obj):
-    """create material"""
-    return Material.create(obj)
-
-
-def create_part(obj):
-    """create part"""
-    material = obj.pop('material', None)
-    geometry = obj.pop('geometry', None)
-    cad = obj.pop('cad', None)
-    part = Part(obj)
-    if material is not None:
-        part.material().associate(material)
-    if geometry is not None:
-        part.geometry().associate(upload_attachment(path.join(data_directory, 'geometries', f"{geometry}.yaml")))
-    part.save()
-    if cad is not None:
-        def generate_cad_attachment(file):
-            cad_attachment = CadAttachment()
-            cad_attachment.resource().associate(part)
-            cad_attachment.attachment().associate(upload_attachment(path.join(data_directory, 'cad', file)))
-            return cad_attachment
-        part.cad().save_many(map(generate_cad_attachment, [f"{cad}.xao", f"{cad}.brep"]))
-    return part
-
-
-def create_site(obj):
-    """create site"""
-    config = obj.pop('config', None)
-    site = Site(obj)
-    if config is not None:
-        site.config().associate(upload_attachment(path.join(data_directory, 'conf', f"{config}")))
-    site.save()
-    return site
-
-
-def create_magnet(obj):
-    """create magnet"""
-    site = obj.pop('site', None)
-    parts = obj.pop('parts', None)
-    geometry = obj.pop('geometry', None)
-    cad = obj.pop('cad', None)
-    magnet = Magnet(obj)
-    if geometry is not None:
-        magnet.geometry().associate(upload_attachment(path.join(data_directory, 'geometries', f"{geometry}.yaml")))
-    magnet.save()
-    if cad is not None:
-        def generate_cad_attachment(file):
-            cad_attachment = CadAttachment()
-            cad_attachment.resource().associate(magnet)
-            cad_attachment.attachment().associate(upload_attachment(path.join(data_directory, 'cad', file)))
-            return cad_attachment
-        magnet.cad().save_many(map(generate_cad_attachment, [f"{cad}.xao", f"{cad}.brep"]))
-    if site is not None:
-        site_magnet = SiteMagnet(commissioned_at=datetime.now())
-        site_magnet.site().associate(site)
-        magnet.site_magnets().save(site_magnet)
-    if parts is not None:
-        def generate_part(part):
-            magnet_part = MagnetPart(commissioned_at=datetime.now())
-            print('part:', part.name)
-            magnet_part.part().associate(part)
-            return magnet_part
-        magnet.magnet_parts().save_many(map(generate_part, parts))
-    return magnet
-
-
-def query_part(name: str):
-    """search a part object by name"""
-    selected = db.table('parts').where('name', name).get()
-    if selected.count() != 1:
-        raise(f'parts[name={name} returns more than one object ({selected.count()})')
-    elif selected.count() == 0:
-        print(f'parts[name={name} no such object)')
-        return None
-    else:
-        return Part.where('name', name).first()
-
-def query_material(name: str):
-    """search a material object by name"""
-    selected = db.table('materials').where('name', name).get()
-    if selected.count() != 1:
-        raise(f'materials[name={name} returns more than one object ({selected.count()})')
-    elif selected.count() == 0:
-        print(f'materials[name={name} no such object)')
-        return None
-    else:
-        return Material.where('name', name).first()
-
 
 with Model.get_connection_resolver().transaction():
     # Get parts from previous defs

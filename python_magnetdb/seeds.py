@@ -19,6 +19,9 @@ from .models.site import Site
 from .models.site_magnet import SiteMagnet
 from .storage import s3_client, s3_bucket
 
+from .crud import upload_attachment, extract_date_from_filename
+from .crud import create_material, create_part, create_site, create_magnet, create_record
+
 db = DatabaseManager({
     'postgres': {
         'driver': 'postgres',
@@ -34,99 +37,6 @@ Model.set_connection_resolver(db)
 
 data_directory = getenv('DATA_DIR')
 
-
-def upload_attachment(file: str) -> Attachment:
-    """upload file as attachment in s3_bucket"""
-    attachment = Attachment.create({
-        "key": str(uuid4()),
-        "filename": path.basename(file),
-        "content_type": 'text/tsv',
-    })
-    s3_client.fput_object(s3_bucket, attachment.key, file, content_type=attachment.content_type)
-    return attachment
-
-
-def create_material(obj):
-    """create material"""
-    return Material.create(obj)
-
-
-def create_part(obj):
-    """create part"""
-    material = obj.pop('material', None)
-    geometry = obj.pop('geometry', None)
-    cad = obj.pop('cad', None)
-    part = Part(obj)
-    if material is not None:
-        part.material().associate(material)
-    if geometry is not None:
-        part.geometry().associate(upload_attachment(path.join(data_directory, 'geometries', f"{geometry}.yaml")))
-    part.save()
-    if cad is not None:
-        def generate_cad_attachment(file):
-            cad_attachment = CadAttachment()
-            cad_attachment.resource().associate(part)
-            cad_attachment.attachment().associate(upload_attachment(path.join(data_directory, 'cad', file)))
-            return cad_attachment
-        part.cad().save_many(map(generate_cad_attachment, [f"{cad}.xao", f"{cad}.brep"]))
-    return part
-
-
-def create_site(obj):
-    """create site"""
-    config = obj.pop('config', None)
-    site = Site(obj)
-    if config is not None:
-        site.config().associate(upload_attachment(path.join(data_directory, 'cfg', f"{config}.cfg")))
-    site.save()
-    return site
-
-
-def create_magnet(obj):
-    """create magnet"""
-    site = obj.pop('site', None)
-    parts = obj.pop('parts', None)
-    geometry = obj.pop('geometry', None)
-    cad = obj.pop('cad', None)
-    magnet = Magnet(obj)
-    if geometry is not None:
-        magnet.geometry().associate(upload_attachment(path.join(data_directory, 'geometries', f"{geometry}.yaml")))
-    magnet.save()
-    if cad is not None:
-        def generate_cad_attachment(file):
-            cad_attachment = CadAttachment()
-            cad_attachment.resource().associate(magnet)
-            cad_attachment.attachment().associate(upload_attachment(path.join(data_directory, 'cad', file)))
-            return cad_attachment
-        magnet.cad().save_many(map(generate_cad_attachment, [f"{cad}.xao", f"{cad}.brep"]))
-    if site is not None:
-        site_magnet = SiteMagnet(commissioned_at=datetime.now())
-        site_magnet.site().associate(site)
-        magnet.site_magnets().save(site_magnet)
-    if parts is not None:
-        def generate_part(part):
-            magnet_part = MagnetPart(commissioned_at=datetime.now())
-            magnet_part.part().associate(part)
-            return magnet_part
-        magnet.magnet_parts().save_many(map(generate_part, parts))
-    return magnet
-
-def extract_date_from_filename(filename):
-    for match in re.finditer(r".+_(\d{4}).(\d{2}).(\d{2})---(\d{2})-(\d{2})-(\d{2}).+", filename):
-        return datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)),
-                        int(match.group(4)), int(match.group(5)), int(match.group(6)))
-    return None
-
-def create_record(file, site):
-    created_at = extract_date_from_filename(path.basename(file))
-    if created_at is None:
-        created_at = datetime.now()
-
-    record = Record(name=path.basename(file), created_at=created_at)
-    record.attachment().associate(upload_attachment(file))
-    record.site().associate(site)
-    record.save()
-    return record
 
 
 with Model.get_connection_resolver().transaction():
@@ -971,33 +881,4 @@ with Model.get_connection_resolver().transaction():
         'site':M8,
     })
 
-    HTS = create_material({
-    'name': "HTS",
-        'nuance': "HTS",
-        't_ref': 293,
-        'volumic_mass': 9e+3,
-        'specific_heat': 380,
-        'alpha': 3.6e-3,
-        'electrical_conductivity': 1.e+10,
-        'thermal_conductivity': 360,
-        'magnet_permeability': 1,
-        'young': 127e+9,
-        'poisson': 0.335,
-        'expansion_coefficient': 18e-6,
-        'rpe': 481000000.0
-    })
-
-    NOUGAT = create_part({
-    'name': 'Nougat',
-        'type': 'supra',
-        'geometry': 'Nougat',
-        'status': 'in_study',
-        'material': HTS
-    })
-
-    MNOUGAT = create_magnet({
-    'name': "NougatHTS",
-        'status': 'in_study',
-        'parts': [NOUGAT],
-    })
 
