@@ -45,6 +45,7 @@ def run_ssh_simulation(simulation, server):
                              nonlinear=simulation.non_linear,
                              cooling=simulation.cooling,
                              flow_params=f"{remote_temp_dir}/flow_params.json",
+                             np=0,
                              debug=False,
                              verbose=False,
                              skip_archive=True)
@@ -54,20 +55,25 @@ def run_ssh_simulation(simulation, server):
                                  multithreading=True, manager=JobManager(otype=JobManagerType.none, queues=[]),
                                  mgkeydir=None)
             cmds = setup_cmds(env, args, node_spec, simulation.setup_state['yamlfile'],
-                              simulation.setup_state['cfgfile'], simulation.setup_state['xaofile'],
+                              simulation.setup_state['cfgfile'], simulation.setup_state['jsonfile'], simulation.setup_state['xaofile'],
                               simulation.setup_state['meshfile'], remote_temp_dir)
+
+            # Save cmds in a file
+            with open("cmds.txt", "a") as f:
+                for (key, value) in cmds.items():
+                    f.write(f'{key}: {value}')
 
             with connection.cd(remote_temp_dir):
                 for (key, value) in cmds.items():
-                    if key in ['Unpack', 'Pre', 'Workflow']:
+                    if key in ['Unpack', 'Workflow']:
                         continue
                     print(f"Performing {key}...")
                     if key in ['Update_cfg', 'Update_Mesh']:
                         print(value)
                         connection.run(value)
                     else:
-                        print(f"bash -c '{cmds['Pre']} && {value}'")
-                        connection.run(f"bash -c '{cmds['Pre']} && {value}'")
+                        print(f"bash -c '{value}'")
+                        connection.run(f"bash -c '{value}'")
 
                 print("Archiving results...")
                 simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
@@ -81,6 +87,8 @@ def run_ssh_simulation(simulation, server):
             print("Done!")
             simulation.status = "done"
         except Exception as e:
+            print(f"exception raised: {type(e).__name__}, {e.args}")
+            print(f"cmd output: {e.output}")
             simulation.status = "failed"
             print_exception(e)
         os.chdir(current_dir)

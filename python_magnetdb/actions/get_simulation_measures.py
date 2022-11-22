@@ -36,10 +36,10 @@ def get_simulation_measures(simulation_id, measure_name: str=None):
         measures_names = list(map(lambda file: file.split('/').pop()[:-9], measures_files))
 
         for (index, measures_path) in enumerate(measures_files):
+            print(f"index:{index} csv:{measures_path}/values.csv measures_names:{measures_names}")
             if (measure_name is not None and not measures_path.endswith(f"{measure_name}.measures")) or index != 0:
                 continue
             csv = read_csv(f"{measures_path}/values.csv")
-            print(f"index:{index} csv:{measures_path}/values.csv measures_names:{measures_names}")
             return {
                 'measure': measures_path.split('/').pop()[:-9],
                 'available_measures': measures_names,
