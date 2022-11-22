@@ -146,6 +146,7 @@ services:
         cd ..
         poetry install
         wait-for-it magnetdb:8080 -t 120 -- poetry run uvicorn python_magnetdb.web:app --reload --host 0.0.0.0
+    # eventually perform a migration
     working_dir: /home/feelpp/test
     network_mode: host
     # extra_hosts:
@@ -186,7 +187,7 @@ services:
         poetry update
         cd ..
         poetry install
-        wait-for-it magnetdb-api:8000 -t 120 -- watchmedo auto-restart -d ./python_magnetdb/ -p '**/*.py' -- poetry run celery -A python_magnetdb.worker worker --loglevel=info
+        wait-for-it magnetdb-api:8000 -t 120 -- poetry run watchmedo auto-restart -d ./python_magnetdb/ -p '**/*.py' --recursive -- poetry run celery -A python_magnetdb.worker worker --loglevel=info
     working_dir: /home/feelpp/test
     volumes:
       - .:/home/feelpp/test

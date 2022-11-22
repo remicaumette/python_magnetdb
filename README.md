@@ -110,3 +110,17 @@ To start magnetdb:
 ```shell
 firefox -private http://localhost:8080/
 ```
+
+8. Eventually perform a DB migration
+
+Log into magnetdb-api
+
+```shell
+docker exec -it magnetdb-api bash
+```
+
+Run the migration
+
+```shell
+poetry run orator migrate -c python_magnetdb/database.py
+```
