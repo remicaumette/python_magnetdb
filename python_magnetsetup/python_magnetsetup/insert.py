@@ -221,15 +221,18 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
     powerH_data = []
     power_data = []
     meanT_data = []
+    meanStress_data = []
+    plot_data = { "Rinf": R2[-1], "Zinf": Zmax}
 
     currentH_data.append( {"part_electric": part_electric } )
     power_data.append( {"part_electric": part_electric } )
-        
+
     # if method_data[3] != 'mag' and method_data[3] != 'mag_hcurl':
     if method_data[2] == "Axi":
         for i in range(NHelices) :
             meanT_data.append( {"header": "MeanT_H{}".format(i+1), "markers": { "name": "H{}_Cu%1%".format(i+1), "index1": index_Helices[i]} } )
             powerH_data.append( {"header": "Power_H{}".format(i+1), "markers": { "name": "H{}_Cu%1%".format(i+1), "index1": index_Helices_e[i]} } )
+            meanT_data.append( {"header": "MeanStress_H{}".format(i+1), "markers": { "name": "H{}_Cu%1%".format(i+1), "index1": index_Helices[i]} } )
         
         for i in range(NRings) :
             meanT_data.append( {"header": "MeanT_R{}".format(i+1), "markers": { "name": "R{}".format(i+1)} } )
@@ -238,6 +241,7 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
         for i in range(NHelices) :
             powerH_data.append( {"header": "Power_H{}".format(i+1), "markers": { "name": "H{}_Cu".format(i+1)} } )
             meanT_data.append( {"header": "MeanT_H{}".format(i+1), "markers": { "name": "H{}_Cu".format(i+1)} } )
+            meanStress_data.append( {"header": "MeanStress_H{}".format(i+1), "markers": { "name": "H{}_Cu".format(i+1)} } )
 
         if cad.CurrentLeads:
             print("insert: 3D currentH, powerH, meanT for leads")
@@ -259,12 +263,17 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
     mpost = { 
         "power_H": powerH_data ,
         "current_H": currentH_data        
-    } 
+    }
     if 'th' in method_data[3]:
         mpost["flux"] = {'index_h': "0:%s" % str(NChannels)}
         mpost["meanT_H"] = meanT_data
 
+    if method_data[3].endswith("el"):
+        mpost["meanStress_H"] = meanStress_data
         
+    if 'mag' in method_data[3] or 'mqs' in method_data[3]:
+        mpost["plot_B"] = plotB_data
+
     # check mpost output
     # print(f"insert: mpost={mpost}")
     mmat = create_materials_insert(gdata, index_Insulators, confdata, templates, method_data, debug)

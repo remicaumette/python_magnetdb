@@ -136,11 +136,15 @@ def loadtemplates(appenv: appenv, appcfg: dict, method_data: List[str], debug: b
         fmagconductor = os.path.join(template_path, magnetic_conductor)
         fmaginsulator = os.path.join(template_path, magnetic_insulator)
 
+        plot_model = appcfg[method][time][geom][model]["plots_B"]
+        plots_B =  os.path.join(template_path, plot_model)
+
     if 'magel' in model :
         elastic_conductor = appcfg[method][time][geom][model]["models"]["elastic-conductor"]
         elastic_insulator = appcfg[method][time][geom][model]["models"]["elastic-insulator"]
         felasconductor = os.path.join(template_path, elastic_conductor)
         felasinsulator = os.path.join(template_path, elastic_insulator)
+        stats_Stress_model = appcfg[method][time][geom][model]["stats_Stress"]
 
     if 'mqsel' in model :
         elastic1_conductor = appcfg[method][time][geom][model]["models"]["elastic1-conductor"]
@@ -152,6 +156,8 @@ def loadtemplates(appenv: appenv, appcfg: dict, method_data: List[str], debug: b
         felas1insulator = os.path.join(template_path, elastic1_insulator)
         felas2conductor = os.path.join(template_path, elastic2_conductor)
         felas2insulator = os.path.join(template_path, elastic2_insulator)
+
+        stats_Stress_model = appcfg[method][time][geom][model]["stats_Stress"]
 
     #if model != 'mag' and model != 'mag_hcurl' and model != 'mqs' and model != 'mqs_hcurl':
     stats_Power_model = appcfg[method][time][geom][model]["stats_Power"]
