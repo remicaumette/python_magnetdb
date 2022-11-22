@@ -2,7 +2,9 @@
 name = "python_magnetdb"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Christophe Trophime <christophe.trophime@lncmi.cnrs.fr>",
+           "Remi Caumette <remicaumette@icloud.com>" 
+          ]
 
 [tool.poetry.dependencies]
 python = "^3.8"
