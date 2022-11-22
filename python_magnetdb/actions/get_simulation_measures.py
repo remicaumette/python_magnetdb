@@ -21,16 +21,16 @@ def find_measures_files(path: str):
     return found_files
 
 
-def get_simulation_measures(simulation_id, measure_name: str = None):
-    print("get_simulation_measures...")
+def get_simulation_measures(simulation_id, measure_name: str=None):
+    print(f"get_simulation_measures... simulation_id:{simulation_id}, measure_name:{measure_name}")
     simulation = Simulation.find(simulation_id)
     if simulation.output_attachment is None:
         return None
 
     with tempfile.TemporaryDirectory() as tempdir:
-        print("Extracting output archive...")
+        # Can we rename output.tar.gz to  a more significant filename like in run_simulation_setup.py (aka simulation_name L83) ?
         simulation.output_attachment.download(f"{tempdir}/output.tar.gz")
-        subprocess.run([f"tar xvf {tempdir}/output.tar.gz -C {tempdir}"], shell=True, check=True)
+        subprocess.run([f"tar xf {tempdir}/output.tar.gz -C {tempdir}"], shell=True, check=True)
 
         measures_files = find_measures_files(tempdir)
         measures_names = list(map(lambda file: file.split('/').pop()[:-9], measures_files))
@@ -39,11 +39,11 @@ def get_simulation_measures(simulation_id, measure_name: str = None):
             if (measure_name is not None and not measures_path.endswith(f"{measure_name}.measures")) or index != 0:
                 continue
             csv = read_csv(f"{measures_path}/values.csv")
+            print(f"index:{index} csv:{measures_path}/values.csv measures_names:{measures_names}")
             return {
                 'measure': measures_path.split('/').pop()[:-9],
                 'available_measures': measures_names,
                 'columns': csv.columns.tolist(),
                 'rows': csv.values.tolist(),
             }
-    print("Extracting output archive -- here ...")
     return None

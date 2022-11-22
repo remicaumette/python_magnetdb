@@ -222,7 +222,7 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
     power_data = []
     meanT_data = []
     meanStress_data = []
-    plot_data = { "Rinf": R2[-1], "Zinf": Zmax}
+    plotB_data = { "Rinf": R2[-1], "Zinf": Zmax}
 
     currentH_data.append( {"part_electric": part_electric } )
     power_data.append( {"part_electric": part_electric } )

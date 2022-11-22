@@ -612,9 +612,9 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mmodels: dict, mpost: di
             print("plotB")
             print("section:", "magnetic")
             print("templates[plots]:", templates["plots"])
-        plotB_data = mpost["plotB"]
+        plotB_data = mpost["plot_B"]
         add = data["PostProcess"]["magnetic"]["Measures"]["Points"]
-        odata = entry(templates["plots"][index_post_], {'Rinf': plotB_data['Rinf'], 'Zinf': plotB_data['Zinf'], 'NR': 100, 'NZ': 100}, debug)
+        odata = entry(templates["plots"][0], {'Rinf': plotB_data['Rinf'], 'Zinf': plotB_data['Zinf'], 'NR': 100, 'NZ': 100}, debug)
 
     mdata = json.dumps(data, indent = 4)
 

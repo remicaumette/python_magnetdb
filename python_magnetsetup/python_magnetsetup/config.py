@@ -176,6 +176,7 @@ def loadtemplates(appenv: appenv, appcfg: dict, method_data: List[str], debug: b
         "conductor": fconductor,
         "insulator": finsulator,
         "stats": [],
+        "plots":[],
         "material_def" : material_generic_def
     }
 
@@ -190,6 +191,7 @@ def loadtemplates(appenv: appenv, appcfg: dict, method_data: List[str], debug: b
     if 'mag' in model or 'mqs' in model :
         dict["magnetic-conductor"] = fmagconductor
         dict["magnetic-insulator"] = fmaginsulator
+        dict["plots"].append(plots_B)
 
     if 'magel' in model :
         dict["elastic-conductor"] = felasconductor

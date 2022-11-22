@@ -50,6 +50,11 @@ def run_simulation(simulation):
                               simulation.setup_state['cfgfile'], simulation.setup_state['jsonfile'], simulation.setup_state['xaofile'],
                               simulation.setup_state['meshfile'], tempdir)
 
+            # Save cmds in a file
+            with open("cmds.txt", "a") as f:
+                for (key, value) in cmds.items():
+                    f.write(f'{key}: {value}')
+
             for (key, value) in cmds.items():
                 if key in ['Unpack']:
                     continue
