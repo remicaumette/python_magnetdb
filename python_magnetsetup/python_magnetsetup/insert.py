@@ -222,7 +222,13 @@ def Insert_setup(MyEnv, confdata: dict, cad: Insert, method_data: List, template
     power_data = []
     meanT_data = []
     meanStress_data = []
-    plotB_data = { "Rinf": R2[-1], "Zinf": Zmax}
+
+    
+    from .units import load_units, convert_data
+    unit_Length = method_data[5] # "meter"
+    units = load_units(unit_Length)
+    print(f"insert: R2 type:{type(R2)} type(R2[-1]):{type(R2[-1])}")
+    plotB_data = { "Rinf": convert_data(units, R2[-1], "Length"), "Zinf": convert_data(units, Zmax[-1], "Length")}
 
     currentH_data.append( {"part_electric": part_electric } )
     power_data.append( {"part_electric": part_electric } )

@@ -548,7 +548,7 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mmodels: dict, mpost: di
             odata = entry(templates["flux"], flux_data, debug)
             if debug: print(odata)
             for md in odata["Flux"]:
-                data["PostProcess"]["heat"]["Measures"]["Statistics"][md] = odata["Flux"][md]
+                add[md] = odata["Flux"][md]
     
     if "meanT_H" in mpost:
         if "heat" in data["PostProcess"]:
@@ -559,7 +559,7 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mmodels: dict, mpost: di
             odata = entry(templates["stats"][0], {'meanT_H': meanT_data}, debug)
             if debug: print("odata:", odata)
             for md in odata["Stats_T"]:
-                data["PostProcess"]["heat"]["Measures"]["Statistics"][md] = odata["Stats_T"][md]
+                add[md] = odata["Stats_T"][md]
 
     if "meanStress_H" in mpost:
         if "elastic" in data["PostProcess"]:
@@ -570,7 +570,7 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mmodels: dict, mpost: di
             odata = entry(templates["stats"][0], {'meanStress_H': meanStress_data}, debug)
             if debug: print("odata:", odata)
             for md in odata["Stats_Stress"]:
-                data["PostProcess"]["elastic"]["Measures"]["Statistics"][md] = odata["Stats_Stress"][md]
+                add[md] = odata["Stats_Stress"][md]
 
     index_post_ = 0
     section = "electric"
@@ -592,7 +592,7 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mmodels: dict, mpost: di
         odata = entry(templates["stats"][index_post_+1], {'Current_H': currentH_data}, debug)
         if debug: print(odata)
         for md in odata["Stats_Current"]:
-            data["PostProcess"][section]["Measures"]["Statistics"][md] = odata["Stats_Current"][md]
+            add[md] = odata["Stats_Current"][md]
     
     if "power_H" in mpost:
         if debug:
@@ -604,7 +604,7 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mmodels: dict, mpost: di
         odata = entry(templates["stats"][index_post_], {'Power_H': powerH_data}, debug)
         if debug: print(odata)
         for md in odata["Stats_Power"]:
-            data["PostProcess"][section]["Measures"]["Statistics"][md] = odata["Stats_Power"][md]
+            add[md] = odata["Stats_Power"][md]
 
     # TODO: add data for B plots, aka Rinf, Zinf, NR and Nz?
     if "plot_B" in mpost:
@@ -613,8 +613,16 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mmodels: dict, mpost: di
             print("section:", "magnetic")
             print("templates[plots]:", templates["plots"])
         plotB_data = mpost["plot_B"]
+        print(f"plotB_data:{plotB_data}")
         add = data["PostProcess"]["magnetic"]["Measures"]["Points"]
         odata = entry(templates["plots"][0], {'Rinf': plotB_data['Rinf'], 'Zinf': plotB_data['Zinf'], 'NR': 100, 'NZ': 100}, debug)
+        if debug: print("odata:", odata)
+        print(f"data[PostProcess][magnetic][Measures][Points]: {add}")
+        print(f"odata: {odata}")
+        for md in odata:
+            print(f"odata[{md}: {odata[md]}")
+            add[md] = odata[md]
+        print(f"data[PostProcess][magnetic][Measures][Points]: {add}")
 
     mdata = json.dumps(data, indent = 4)
 
