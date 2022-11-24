@@ -125,8 +125,8 @@ def run(id: int, server_id: int = Form(None), user=Depends(get_user('update'))):
 
 
 @router.get("/api/simulations/{id}/measures")
-def measures(id: int, user=Depends(get_user('read'))):
-    measures = get_simulation_measures(id)
+def measures(id: int, measure: str=None, user=Depends(get_user('read'))):
+    measures = get_simulation_measures(id, measure)
     if measures is None:
         raise HTTPException(status_code=404, detail="Measures not found")
     return measures
