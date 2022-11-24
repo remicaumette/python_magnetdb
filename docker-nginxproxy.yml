@@ -116,14 +116,12 @@ services:
       - /bin/bash
       - -c
       - |
-        yarn add caniuse-lite
+        npm install -g npm@9.1.2
+        mkdir -p /root/.config/yarn
         npx browserslist@latest --update-db
-        npm install -g npm@8.19.3
-        yarn remove caniuse-lite
         yarn install
-        yarn serve
+        yarn serve --public
     working_dir: /app
-    network_mode: host
     volumes:
       - ./web:/app
     depends_on:
@@ -145,15 +143,15 @@ services:
         poetry update
         cd ..
         poetry install
-        wait-for-it magnetdb:8080 -t 120 -- poetry run uvicorn python_magnetdb.web:app --reload --host 0.0.0.0
+        wait-for-it magnetdb.grenoble.lncmi.local:8080 -t 120 -- poetry run uvicorn python_magnetdb.web:app --reload --host 0.0.0.0
     # eventually perform a migration
     working_dir: /home/feelpp/test
     network_mode: host
     # extra_hosts:
     #   - sso.grenoble.lncmi.local:127.0.0.1
+    #   - magnetdb.grenoble.lncmi.local:127.0.0.1
     volumes:
       - .:/home/feelpp/test
-      - ./web/node_modules:/home/feelpp/test/web/node_modules
       - ../magnetdb-data/poetry-cache:/home/feelpp/.cache/pypoetry
       - ./images:/images
       - ./data/:/data_dir
@@ -169,7 +167,6 @@ services:
       S3_ACCESS_KEY: minio
       S3_SECRET_KEY: minio123
       S3_BUCKET: magnetdb
-      REDIS_ADDR: redis://redis.grenoble.lncmi.local:6379/0
       DATABASE_HOST: postgres.grenoble.lncmi.local
       IMAGES_DIR: /images
     ports:
@@ -187,8 +184,9 @@ services:
         poetry update
         cd ..
         poetry install
-        wait-for-it magnetdb-api:8000 -t 120 -- poetry run watchmedo auto-restart -d ./python_magnetdb/ -p '**/*.py' --recursive -- poetry run celery -A python_magnetdb.worker worker --loglevel=info
+        wait-for-it magnetdb-api.grenoble.lncmi.local:8000 -t 120 -- watchmedo auto-restart -d ./python_magnetdb/ -p '**/*.py' --recursive -- poetry run celery -A python_magnetdb.worker worker --loglevel=info
     working_dir: /home/feelpp/test
+    network_mode: host
     volumes:
       - .:/home/feelpp/test
       - ../magnetdb-data/poetry-cache-worker:/home/feelpp/.cache/pypoetry
@@ -201,12 +199,12 @@ services:
       - magnetdb-api
     environment:
       VIRTUAL_HOST: magnetdb-worker.grenoble.lncmi.local
-      S3_ENDPOINT: minio:9000
+      S3_ENDPOINT: minio.grenoble.lncmi.local:9000
       S3_ACCESS_KEY: minio
       S3_SECRET_KEY: minio123
       S3_BUCKET: magnetdb
-      REDIS_ADDR: redis://redis:6379/0
-      DATABASE_HOST: postgres
+      REDIS_ADDR: redis://redis.grenoble.lncmi.local:6379/0
+      DATABASE_HOST: postgres.grenoble.lncmi.local
       IMAGES_DIR: /images
 
 volumes:

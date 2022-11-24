@@ -11,6 +11,13 @@ See `python_magnetrun` for more details
 On your host:
 ```shell
 echo "127.0.0.1 handler.sso.grenoble.lncmi.local api.manager.sso.grenoble.lncmi.local manager.sso.grenoble.lncmi.local sso.grenoble.lncmi.local test.sso.grenoble.lncmi" | sudo tee -a /etc/hosts
+echo "127.0.0.1 magnetdb.grenoble.lncmi.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 magnetdb-api.grenoble.lncmi.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 magnetdb-worker.grenoble.lncmi.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 redis.grenoble.lncmi.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 postgres.grenoble.lncmi.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 pgadmin.grenoble.lncmi.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 minio.grenoble.lncmi.local" | sudo tee -a /etc/hosts
 ```
 
 Create a self signed certificate for the magnetdb server
@@ -21,16 +28,6 @@ openssl req -new -x509 -days 365 -nodes -out certs/cert.pem -keyout certs/cert.k
 chmod 600 certs/cert.perm certs.cert.key
 ```
 
-magnetdb.grenoble.lncmi.local
-redis.grenoble.lncmi.local
-postgres.grenoble.lncmi.local
-pgadmin.grenoble.lncmi.local
-minio.grenoble.lncmi.local
-
-```shell
-docker network create nginx-proxy
-docker run -d -p 80:80 -p 443:443 -v $PWD/certs:/etc/nginx/certs -v /var/run/docker.sock:/tmp/docker.sock:ro --name my-nginx-proxy --net nginx-proxy jwilder/nginx-proxy
-```
 
 1. Start the services
 
@@ -81,9 +78,9 @@ poetry run python3 -m python_magnetdb.seed-records
 Load `localhost:5050/` in your web browser
 add a server for magnetdb
    
-Check magnetdb ip server with: `docker inspect postgres-app  | grep IPAddress`
 
 Note: This may be needed to update the magnetdb IP after each restart of docker-compose
+Check magnetdb ip server with: `docker inspect postgres-app  | grep IPAddress`
 
 6. Custom LemonLDAP settings
 
