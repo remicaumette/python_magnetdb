@@ -21,7 +21,7 @@ def find_measures_files(path: str):
     return found_files
 
 
-def get_simulation_measures(simulation_id, measure_name: str=None):
+def get_simulation_measures(simulation_id: int, measure_name: str=None):
     print(f"get_simulation_measures... simulation_id:{simulation_id}, measure_name:{measure_name}")
     simulation = Simulation.find(simulation_id)
     if simulation.output_attachment == None:
@@ -35,10 +35,16 @@ def get_simulation_measures(simulation_id, measure_name: str=None):
         measures_files = find_measures_files(tempdir)
         measures_names = list(map(lambda file: file.split('/').pop()[:-9], measures_files))
 
-        for (index, measures_path) in enumerate(measures_files):
-            print(f"index:{index} csv:{measures_path}/values.csv measures_names:{measures_names}")
-            if (measure_name is not None and not measures_path.endswith(f"{measure_name}.measures")) or index != 0:
-                continue
+        if not measures_files:
+            return None
+
+        if measure_name is not None:
+            try:
+                index = measures_names.index(measure_name)
+            except ValueError:
+                index = 0
+
+            measures_path = measures_files[index]:
             csv = read_csv(f"{measures_path}/values.csv")
             return {
                 'measure': measures_path.split('/').pop()[:-9],
@@ -46,4 +52,3 @@ def get_simulation_measures(simulation_id, measure_name: str=None):
                 'columns': csv.columns.tolist(),
                 'rows': csv.values.tolist(),
             }
-    return None

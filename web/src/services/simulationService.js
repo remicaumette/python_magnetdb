@@ -51,7 +51,15 @@ export function listModels() {
     .then((res) => res.data)
 }
 
-export function getMeasures({ id }) {
+export function getMeasures({ id, measure }) {
+  // console.log('getMeasures: (id=' + id + ',measure=' + measure+')')
+  if (measure !== null) {
+    // console.log('getMeasures: measure defined')
+    const params = new URLSearchParams()
+    params.append('measure', measure)
+    return client.get(`/api/simulations/${id}/measures`, {params: params})
+      .then((res) => res.data)
+  }
   return client.get(`/api/simulations/${id}/measures`)
-    .then((res) => res.data)
+    .then((res) => res.data)  
 }
