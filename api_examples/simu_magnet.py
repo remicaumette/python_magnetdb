@@ -1,6 +1,8 @@
 import os
 import sys
 import datetime
+from datetime import timezone
+from datetime import datetime
 
 import requests
 
@@ -36,8 +38,11 @@ sim_data={
    
 print(sim_data)
 
-ct = datetime.datetime.now()
-print("current time: {ct}")
+ct = datetime.utcnow()
+print(f"current time: {datetime.now()}")
+print(f"current time (UTC): {datetime.utcnow()}")
+# print(f"current time: {ct.replace(tzinfo=timezone.utc)}")
+
 requests.post(
     f"{api_server}:8000/api/simulations",
     data=sim_data,
@@ -46,20 +51,35 @@ requests.post(
 
 # how to get simu_id
 r = requests.get(f"{api_server}:8000/api/simulations", headers={'Authorization': os.getenv('MAGNETDB_API_KEY')})
-for simu in r.json()['items']:
-    print(f"isimu_id={simu['id']}: create_at={simu['created_at']}, ct={ct}")
-    # ex:2022-10-21T13:13:23.593765
-    # t1 = datetime.strptime(simu['created_at'], "%Y-%m-%dT%X.%f")
-    # diff = t1 - ct
+print(f"result: type={type(r.json()['items'])}")
+result_list = r.json()['items']
+simu = result_list[-1]
+simu_id = simu['id']
+
+# however shall check timestamp and author
+print(f"simu_id={simu['id']}: create_at={simu['created_at']}, ct={ct}")
+t1 = datetime.strptime(simu['created_at'], "%Y-%m-%dT%X.%f")
+print(f"t1: {t1}")
+diff = t1 - ct
+print(f'tdiff: {diff} seconds: {diff.seconds}  milliseconds: {diff.microseconds/1000.}')    
+
+# # how to get user name?
+# from db result_list[-1]['owner']['name']:
     
-    # # how to get user name?
-    # if simu['owner']['name']:
-    #     simu_id = simu['id']
-    #     break
+# Run setup
+r = requests.post(
+    f"{api_server}:8000/api/simulations/{simu_id}/run_setup",
+    headers={'Authorization': os.getenv('MAGNETDB_API_KEY')}
+)
+
+# Run simu with ssh
+r = requests.get(f"{api_server}:8000/api/servers", headers={'Authorization': os.getenv('MAGNETDB_API_KEY')})
+print(f"result: type={type(r.json()['items'])}")
+result_list = r.json()['items']
+for server in result_list:
+    print(f'server: {server}')
     
-# # Run setup
 # r = requests.post(
-#     f"{api_server}:8000/api/simulations/{simu_id}",
-#     data=sim_data,
+#     f"{api_server}:8000/api/simulations/{simu_id}/run?server_id={server_id}",
 #     headers={'Authorization': os.getenv('MAGNETDB_API_KEY')}
 # )
