@@ -44,7 +44,7 @@ def get_simulation_measures(simulation_id: int, measure_name: str=None):
             except ValueError:
                 index = 0
 
-            measures_path = measures_files[index]:
+            measures_path = measures_files[index]
             csv = read_csv(f"{measures_path}/values.csv")
             return {
                 'measure': measures_path.split('/').pop()[:-9],
