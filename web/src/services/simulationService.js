@@ -24,8 +24,11 @@ export function runSetup({ id }) {
 }
 
 export function runSimulation({ id, serverId }) {
-  const form = new FormData()
-  form.set('server_id', serverId)
+  let form = null
+  if (serverId) {
+    form = new FormData()
+    form.set('server_id', serverId)
+  }
   return client.post(`/api/simulations/${id}/run`, form)
     .then((res) => res.data)
 }
@@ -51,7 +54,9 @@ export function listModels() {
     .then((res) => res.data)
 }
 
-export function getMeasures({ id }) {
-  return client.get(`/api/simulations/${id}/measures`)
+export function getMeasures({ id, measure }) {
+  return client.get(`/api/simulations/${id}/measures`, {
+    params: { measure_name: measure }
+  })
     .then((res) => res.data)
 }

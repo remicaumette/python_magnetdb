@@ -5,7 +5,8 @@ from orator.orm import belongs_to, morph_to
 class Simulation(Model):
     __table__ = "simulations"
     __fillable__ = ['resource_id', 'resource_type', 'method', 'model', 'geometry', 'cooling', 'static', 'non_linear',
-                    'setup_status', 'setup_attachment_id', 'status', 'output_attachment_id', 'setup_state', 'owner_id']
+                    'setup_status', 'setup_attachment_id', 'status', 'output_attachment_id', 'setup_state', 'owner_id',
+                    'log_attachment_id']
     __casts__ = {
         'setup_state': 'dict'
     }
@@ -21,6 +22,11 @@ class Simulation(Model):
 
     @belongs_to('output_attachment_id')
     def output_attachment(self):
+        from .attachment import Attachment
+        return Attachment
+
+    @belongs_to('log_attachment_id')
+    def log_attachment(self):
         from .attachment import Attachment
         return Attachment
 
@@ -42,6 +48,10 @@ class SimulationObserver(object):
             output_attachment = Attachment.find(simulation.output_attachment_id)
             if output_attachment is not None:
                 output_attachment.delete()
+        if simulation.log_attachment_id is not None:
+            log_attachment = Attachment.find(simulation.log_attachment_id)
+            if log_attachment is not None:
+                log_attachment.delete()
 
 
 Simulation.observe(SimulationObserver())

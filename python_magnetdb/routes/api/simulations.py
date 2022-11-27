@@ -73,7 +73,7 @@ def create(resource_type: str = Form(...), resource_id: int = Form(...), method:
 
 @router.get("/api/simulations/{id}")
 def show(id: int, user=Depends(get_user('read'))):
-    simulation = Simulation.with_('resource', 'setup_output_attachment', 'output_attachment').find(id)
+    simulation = Simulation.with_('resource', 'setup_output_attachment', 'output_attachment', 'log_attachment').find(id)
     if not simulation:
         raise HTTPException(status_code=404, detail="Simulation not found")
     return simulation.serialize()
@@ -125,8 +125,8 @@ def run(id: int, server_id: int = Form(None), user=Depends(get_user('update'))):
 
 
 @router.get("/api/simulations/{id}/measures")
-def measures(id: int, user=Depends(get_user('read'))):
-    measures = get_simulation_measures(id)
+def measures(id: int, measure_name: str = Query(None), user=Depends(get_user('read'))):
+    measures = get_simulation_measures(id, measure_name)
     if measures is None:
         raise HTTPException(status_code=404, detail="Measures not found")
     return measures
