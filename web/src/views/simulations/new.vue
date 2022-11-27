@@ -129,7 +129,7 @@ export default {
   },
   async mounted() {
     const magnetsRes = await magnetService.list()
-    const sitesRes = await magnetService.list()
+    const sitesRes = await siteService.list()
     this.resourceOptions = [
       ...sitesRes.items.map(site => ({
         name: `(Site) ${site.name}`,
