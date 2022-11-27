@@ -10,14 +10,15 @@ from python_magnetsetup.config import appenv
 from python_magnetsetup.setup import setup
 
 from python_magnetdb.actions.generate_magnet_directory import generate_magnet_directory
+from python_magnetdb.actions.generate_site_directory import generate_site_directory
 from python_magnetdb.models.attachment import Attachment
 
 
 def prepare_directory(simulation, directory):
     if simulation.resource_type == 'magnets':
         return generate_magnet_directory(simulation.resource_id, directory)
-    # elif simulation.resource_type == 'sites':
-    #     return generate_site_config(simulation.resource_id)
+    elif simulation.resource_type == 'sites':
+        return generate_site_directory(simulation.resource_id, directory)
     raise Exception('Unsupported resource type')
 
 
