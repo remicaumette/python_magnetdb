@@ -87,13 +87,21 @@
             :disabled="true"
             :default-value="simulation.setup_output_attachment"
         />
-        <FormField
-            label="Simulation Output"
-            name="output"
-            :component="FormUpload"
-            :disabled="true"
-            :default-value="simulation.output_attachment"
-        />
+        <div class="flex items-center space-x-4">
+          <FormField
+              label="Simulation Output"
+              name="output"
+              :component="FormUpload"
+              :disabled="true"
+              :default-value="simulation.output_attachment"
+              class="w-full"
+          />
+          <div v-if="simulation.log_attachment" class="whitespace-nowrap">
+            <a :href="logAttachmentUrl" class="btn btn-primary" target="_blank" style="margin-top: 12px; height: 38px">
+              View logs
+            </a>
+          </div>
+        </div>
         <FormField
             label="Static"
             name="static"
@@ -131,6 +139,7 @@ import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 import MeasuresCard from "@/views/simulations/show/MeasuresCard";
 import RunSimulationModal from "@/views/simulations/show/RunSimulationModal";
+import client from "@/services/client";
 
 export default {
   name: 'SimulationShow',
@@ -158,6 +167,11 @@ export default {
       geometryOptions: ['Axi', '3D'],
       coolingOptions: ['mean', 'grad', 'meanH', 'gradH'],
     }
+  },
+  computed: {
+    logAttachmentUrl() {
+      return `${client.defaults.baseURL}/api/attachments/${this.simulation.log_attachment_id}/download?auth_token=${this.$store.state.token}`
+    },
   },
   methods: {
     deleteSimulation() {
