@@ -7,11 +7,11 @@
     <Card>
       <Form @submit="submit" @validate="validate" @change="computeModelOptions">
         <FormField
-            label="Magnet"
-            name="magnet"
+            label="Resource"
+            name="resource"
             :component="FormSelect"
             :required="true"
-            :options="magnetOptions"
+            :options="resourceOptions"
         />
         <FormField
             label="Method"
@@ -64,6 +64,7 @@
 <script>
 import * as Yup from 'yup'
 import * as magnetService from '@/services/magnetService'
+import * as siteService from '@/services/siteService'
 import * as simulationService from '@/services/simulationService'
 import Card from '@/components/Card'
 import Form from "@/components/Form";
@@ -89,7 +90,7 @@ export default {
       modelOptions: [],
       geometryOptions: ['Axi', '3D'],
       coolingOptions: ['mean', 'grad', 'meanH', 'gradH'],
-      magnetOptions: [],
+      resourceOptions: [],
       availableModels: [],
     }
   },
@@ -105,9 +106,9 @@ export default {
     submit(values, {setRootError}) {
       return simulationService.create({
         ...values,
-        magnet: undefined,
-        resource_type: 'magnet',
-        resource_id: values.magnet.value,
+        resource: undefined,
+        resource_type: values.resource.value?.type,
+        resource_id: values.resource.value?.id,
         static: values.static === 'on',
         non_linear: values.non_linear === 'on',
       })
@@ -118,7 +119,7 @@ export default {
     },
     validate() {
       return Yup.object().shape({
-        magnet: Yup.mixed().required(),
+        resource: Yup.mixed().required(),
         method: Yup.string().required(),
         model: Yup.string().oneOf(this.modelOptions).required(),
         geometry: Yup.string().required(),
@@ -128,10 +129,17 @@ export default {
   },
   async mounted() {
     const magnetsRes = await magnetService.list()
-    this.magnetOptions = magnetsRes.items.map(magnet => ({
-      name: magnet.name,
-      value: magnet.id,
-    }))
+    const sitesRes = await magnetService.list()
+    this.resourceOptions = [
+      ...sitesRes.items.map(site => ({
+        name: `(Site) ${site.name}`,
+        value: { type: 'site', id: site.id },
+      })),
+      ...magnetsRes.items.map(magnet => ({
+        name: `(Magnet) ${magnet.name}`,
+        value: { type: 'magnet', id: magnet.id },
+      })),
+    ]
     this.availableModels = await simulationService.listModels()
   },
 }

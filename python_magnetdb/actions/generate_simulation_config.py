@@ -42,7 +42,7 @@ def generate_magnet_config(magnet_id):
 
 def generate_site_config(site_id):
     site = Site.with_('site_magnets').find(site_id)
-    payload = {'magnets': []}
+    payload = {'name': site.name, 'magnets': []}
     for site_magnet in site.site_magnets:
         if not site_magnet.active:
             continue
