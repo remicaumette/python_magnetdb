@@ -62,6 +62,7 @@ ENV/
 *.xao
 .yaml
 *~
+\#*\#
 pint/*
 fastapi/*
 team/*
