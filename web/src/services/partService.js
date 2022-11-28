@@ -44,3 +44,18 @@ export function defunct({ partId }) {
   return client.post(`/api/parts/${partId}/defunct`)
     .then((res) => res.data)
 }
+
+export function createGeometry({ partId, ...values }) {
+  const form = new FormData()
+  for (const [key, value] of Object.entries(values)) {
+    if (value) {
+      form.append(key, value)
+    }
+  }
+  return client.post(`/api/parts/${partId}/geometries`, form)
+    .then((res) => res.data)
+}
+
+export function deleteGeometry({ partId, type }) {
+  return client.delete(`/api/parts/${partId}/geometries/${type}`).then((res) => res.data)
+}

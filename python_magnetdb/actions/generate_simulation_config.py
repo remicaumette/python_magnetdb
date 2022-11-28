@@ -23,7 +23,7 @@ def format_material(material):
 
 def generate_magnet_config(magnet_id):
     magnet = Magnet \
-        .with_('magnet_parts.part.geometry', 'magnet_parts.part.material', 'site_magnets.site', 'geometry') \
+        .with_('magnet_parts.part.geometries.attachment', 'magnet_parts.part.material', 'site_magnets.site', 'geometry') \
         .find(magnet_id)
     payload = {'geom': magnet.geometry.filename}
     insulator_payload = format_material(Material.where('name', 'MAT_ISOLANT').first())
@@ -32,8 +32,12 @@ def generate_magnet_config(magnet_id):
             continue
         if magnet_part.part.type.capitalize() not in payload:
             payload[magnet_part.part.type.capitalize()] = []
+        geom = None
+        for geometry in magnet_part.part.geometries:
+            if geometry.type == 'default':
+                geom = geometry.attachment.filename
         payload[magnet_part.part.type.capitalize()].append({
-            'geom': magnet_part.part.geometry.filename,
+            'geom': geom,
             'material': format_material(magnet_part.part.material),
             'insulator': insulator_payload
         })

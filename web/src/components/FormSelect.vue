@@ -80,7 +80,8 @@ export default {
   @apply bg-gray-100 cursor-not-allowed;
 }
 
-.vs--disabled .vs__search {
-  @apply bg-gray-100;
+.vs--disabled .vs__search,
+.vs--disabled .vs__clear {
+  @apply hidden;
 }
 </style>

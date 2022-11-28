@@ -1,9 +1,8 @@
 import orator
-from fastapi import APIRouter, Query, HTTPException, UploadFile, Depends
-from fastapi.params import File, Form
+from fastapi import APIRouter, Query, HTTPException, Depends
+from fastapi.params import Form
 
 from ...dependencies import get_user
-from ...models.attachment import Attachment
 from ...models.audit_log import AuditLog
 from ...models.material import Material
 from ...models.part import Part
@@ -48,7 +47,7 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
 
 @router.get("/api/parts/{id}")
 def show(id: int, user=Depends(get_user('read'))):
-    part = Part.with_('material', 'cad.attachment', 'geometry', 'magnet_parts.magnet').find(id)
+    part = Part.with_('material', 'cad.attachment', 'geometries.attachment', 'magnet_parts.magnet').find(id)
     if not part:
         raise HTTPException(status_code=404, detail="Part not found")
     return part.serialize()
@@ -56,9 +55,8 @@ def show(id: int, user=Depends(get_user('read'))):
 
 @router.patch("/api/parts/{id}")
 def update(id: int, user=Depends(get_user('update')), name: str = Form(...), description: str = Form(None),
-           type: str = Form(...), material_id: str = Form(...), design_office_reference: str = Form(None),
-           geometry: UploadFile = File(None)):
-    part = Part.with_('material', 'cad.attachment', 'geometry').find(id)
+           type: str = Form(...), material_id: str = Form(...), design_office_reference: str = Form(None)):
+    part = Part.with_('material', 'cad.attachment', 'geometries.attachment').find(id)
     if not part:
         raise HTTPException(status_code=404, detail="Part not found")
 
@@ -71,8 +69,6 @@ def update(id: int, user=Depends(get_user('update')), name: str = Form(...), des
     part.type = type
     part.design_office_reference = design_office_reference
     part.material().associate(material)
-    if geometry:
-        part.geometry().associate(Attachment.upload(geometry))
     part.save()
     AuditLog.log(user, "Part updated", resource=part)
     return part.serialize()

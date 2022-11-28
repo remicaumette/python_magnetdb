@@ -11,6 +11,7 @@ from .models.magnet import Magnet
 from .models.magnet_part import MagnetPart
 from .models.material import Material
 from .models.part import Part
+from .models.part_geometry import PartGeometry
 from .models.record import Record
 from .models.site import Site
 from .models.site_magnet import SiteMagnet
@@ -53,9 +54,14 @@ def create_part(obj):
     part = Part(obj)
     if material is not None:
         part.material().associate(material)
-    if geometry is not None:
-        part.geometry().associate(upload_attachment(path.join(data_directory, 'geometries', f"{geometry}.yaml")))
     part.save()
+    if geometry is not None:
+        part_geometry = PartGeometry(type='default')
+        part_geometry.part().associate(part)
+        part_geometry.attachment().associate(
+            upload_attachment(path.join(data_directory, 'geometries', f"{geometry}.yaml"))
+        )
+        part.geometries().save_many([part_geometry])
     if cad is not None:
         def generate_cad_attachment(file):
             cad_attachment = CadAttachment()
