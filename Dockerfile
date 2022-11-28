@@ -1,9 +1,11 @@
 FROM trophime/magnettools:latest-poetry
 
-ENV DEBIAN_FRONTEND=noninteractive
+#ENV TZ=Europe/Paris
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 DEBIAN_FRONTEND=noninteractive
 RUN echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
 
 USER root
+#RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update \
     && apt-get install -y wait-for-it \
     && apt-get install -y debconf-utils \

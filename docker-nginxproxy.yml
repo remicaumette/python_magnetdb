@@ -10,10 +10,14 @@ services:
       - ./certs:/etc/nginx/certs
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./network_internal.conf:/etc/nginx/network_internal.conf
+    command:
+      - /bin/bash
+      - -c
+      - |
+        cp /usr/share/zoneinfo/Europe/Paris /etc/localtime
+        echo "Europe/Paris" > /etc/timezone
     environment:
     - NETWORK_ACCESS=internal
-    # networks:
-    #   - proxy-tier
 
   lemonldap-app:
     # image: tiredofit/lemonldap:latest
@@ -23,9 +27,14 @@ services:
     - ../magnetdb-data/lemonldap-ng-data/conf:/var/lib/lemonldap-ng/conf
     - ../magnetdb-data/logs:/www/logs
     #- ./assets/custom:/assets/custom
+    command:
+      - /bin/bash
+      - -c
+      - |
+        cp /usr/share/zoneinfo/Europe/Paris /etc/localtime
+        echo "Europe/Paris" > /etc/timezone
     environment:
     - VIRTUAL_HOST=sso.grenoble.lncmi.local,manager.sso.grenoble.lncmi.local,handler.sso.grenoble.lncmi.local
-    # - VIRTUAL_NETWORK=nginx-proxy
     # - VIRTUAL_PROTO=https
     - VIRTUAL_PORT=80
     - NETWORK_ACCESS=internal
@@ -40,6 +49,7 @@ services:
     - PORTAL_HOSTNAME=sso.grenoble.lncmi.local
     - HANDLER_HOSTNAME=handler.sso.grenoble.lncmi.local
     - LOG_LEVEL=debug
+    - TIMEZONE='Europe/Paris'
     depends_on:
       - nginx-proxy
       - magnetdb
@@ -47,15 +57,13 @@ services:
       - NET_ADMIN
     privileged: true
     restart: always
-    # ports:
-    #   - 80:80
-    # extra_hosts:
-    #   - magnetdb.grenoble.lncmi.local:127.0.0.1
       
 
   redis:
     image: redis
     container_name: redis-app
+    environment:
+      TZ: 'Europe/Paris'
     ports:
       - 6379:6379
     depends_on:
@@ -70,6 +78,8 @@ services:
       VIRTUAL_HOST: postgres.grenoble.lncmi.local
       POSTGRES_USER: magnetdb
       POSTGRES_PASSWORD: magnetdb
+      TZ: 'Europe/Paris'
+      PGTZ: 'Europe/Paris'
     volumes:
       - ../magnetdb-data/postgres-data:/var/lib/postgresql/data
     depends_on:
@@ -83,6 +93,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: christophe.trophime@lncmi.cnrs.fr
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+      TZ: 'Europe/Paris'
     volumes:
       - ../magnetdb-data/pgadmin-data:/var/lib/pgadmin
     depends_on:
@@ -101,6 +112,7 @@ services:
       VIRTUAL_HOST: minio.grenoble.lncmi.local
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
+      TZ: 'Europe/Paris'
     ports:
       - 9000:9000
       - 9080:9080
@@ -128,6 +140,7 @@ services:
       - nginx-proxy
     environment:
       VIRTUAL_HOST: magnetdb.grenoble.lncmi.local
+      TZ: 'Europe/Paris'
     ports:
       - 8080:8080
 
@@ -147,9 +160,6 @@ services:
     # eventually perform a migration
     working_dir: /home/feelpp/test
     network_mode: host
-    # extra_hosts:
-    #   - sso.grenoble.lncmi.local:127.0.0.1
-    #   - magnetdb.grenoble.lncmi.local:127.0.0.1
     volumes:
       - .:/home/feelpp/test
       - ../magnetdb-data/poetry-cache:/home/feelpp/.cache/pypoetry
@@ -169,6 +179,7 @@ services:
       S3_BUCKET: magnetdb
       DATABASE_HOST: postgres.grenoble.lncmi.local
       IMAGES_DIR: /images
+      TZ: 'Europe/Paris'
     ports:
       - 8000:8000
 
@@ -206,6 +217,7 @@ services:
       REDIS_ADDR: redis://redis.grenoble.lncmi.local:6379/0
       DATABASE_HOST: postgres.grenoble.lncmi.local
       IMAGES_DIR: /images
+      TZ: 'Europe/Paris'
 
 volumes:
   minio-data: {}
@@ -213,7 +225,3 @@ volumes:
   pgadmin-data: {}
   lemonldap-ng-data: {}
 
-# networks:
-#   proxy-tier:
-#     external:
-#       name: nginx-proxy
