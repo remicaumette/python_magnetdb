@@ -61,42 +61,15 @@ def run_simulation(simulation):
                                      multithreading=True, manager=JobManager(otype=JobManagerType.none, queues=[]),
                                      mgkeydir=None)
                 cmds = setup_cmds(env, args, node_spec, simulation.setup_state['yamlfile'],
-                                  simulation.setup_state['cfgfile'], simulation.setup_state['xaofile'],
+                                  simulation.setup_state['cfgfile'], simulation.setup_state['jsonfile'], simulation.setup_state['xaofile'],
                                   simulation.setup_state['meshfile'], tempdir)
 
-            # Save cmds in a file
-            with open("cmds.txt", "a") as f:
-                for (key, value) in cmds.items():
-                    f.write(f'{key}: {value}')
+                # Save cmds in a file
+                with open("cmds.txt", "a") as f:
+                    log_file.write("Saving commands...\n")
+                    for (key, value) in cmds.items():
+                        f.write(f'{key}: {value}')
 
-            for (key, value) in cmds.items():
-                if key in ['Unpack']:
-                    continue
-                print(f"Performing {key}...")
-                if key in ['Update_cfg', 'Update_Mesh']:
-                    print(value)
-                    subprocess.run([value], shell=True, check=True)
-                elif key in ['Workflow']:
-                    print(f'Ignore {key}: {value}')
-                else:
-                    print(f"bash -c '{value}'")
-                    subprocess.run([f"bash -c \"{value}\""], shell=True, check=True)
-
-            print("Archiving results...")
-            simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
-            output_archive = f"{tempdir}/{simulation_name}.tar.gz"
-            subprocess.run([f"tar cvzf {output_archive} *"], shell=True, check=True)
-            attachment = Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
-            simulation.output_attachment().associate(attachment)
-            print("Done!")
-            simulation.status = "done"
-        except Exception as e:
-            print(f"exception raised: {type(e).__name__}, {e.args}")
-            print(f"cmd output: {e.output}")
-            simulation.status = "failed"
-            print_exception(e)
-        os.chdir(current_dir)
-        simulation.save()
                 for (key, value) in cmds.items():
                     if key in ['Unpack', 'Workflow']:
                         continue
@@ -121,4 +94,3 @@ def run_simulation(simulation):
             simulation.log_attachment().associate(Attachment.raw_upload("debug.log", "text/plain", log_file_path))
             os.chdir(current_dir)
             simulation.save()
->>>>>>> dfe3212 (Add log to simulation + fix measure + example api call simulation)
