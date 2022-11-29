@@ -126,11 +126,9 @@ def run(id: int, server_id: int = Form(None), user=Depends(get_user('update'))):
     return simulation.serialize()
 
 
-@router.post("/api/simulations/{id}/measures")
-def measures(id: int, measure: str= Form(None), user=Depends(get_user('read'))):
-    print(f'routes/api/measures: {id}, {measure}')
-    measures = get_simulation_measures(id, measure)
+@router.get("/api/simulations/{id}/measures")
+def measures(id: int, measure_name: str = Query(None), user=Depends(get_user('read'))):
+    measures = get_simulation_measures(id, measure_name)
     if measures is None:
         raise HTTPException(status_code=404, detail="Measures not found")
     return measures
-

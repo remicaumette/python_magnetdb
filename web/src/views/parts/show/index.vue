@@ -72,13 +72,7 @@
             :resource-id="part.id"
             :default-attachments="part.cad"
         />
-        <FormField
-            label="Geometry"
-            name="geometry"
-            type="file"
-            :component="FormUpload"
-            :default-value="part.geometry"
-        />
+        <GeometryEditor :part="part" />
         <Button type="submit" class="btn btn-primary">
           Save
         </Button>
@@ -137,10 +131,12 @@ import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 import CadAttachmentEditor from "@/components/CadAttachmentEditor";
 import FormValues from "@/components/FormValues";
+import GeometryEditor from "@/views/parts/show/GeometryEditor";
 
 export default {
   name: 'PartShow',
   components: {
+    GeometryEditor,
     FormValues,
     CadAttachmentEditor,
     StatusBadge,

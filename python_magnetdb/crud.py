@@ -2,12 +2,12 @@
 Basic crud methods
 """
 
+import re
 from datetime import datetime
+from os import path
 from uuid import uuid4
 
-from os import getenv, path, listdir
-from orator import DatabaseManager, Schema, Model
-
+from python_magnetdb.models.part_geometry import PartGeometry
 from .models.attachment import Attachment
 from .models.cad_attachment import CadAttachment
 from .models.magnet import Magnet
@@ -17,9 +17,9 @@ from .models.part import Part
 from .models.record import Record
 from .models.site import Site
 from .models.site_magnet import SiteMagnet
+from .seeds import data_directory
 from .storage import s3_client, s3_bucket
 
-import re
 
 def upload_attachment(file: str) -> Attachment:
     """upload file as attachment in s3_bucket"""
@@ -45,9 +45,14 @@ def create_part(obj):
     part = Part(obj)
     if material is not None:
         part.material().associate(material)
-    if geometry is not None:
-        part.geometry().associate(upload_attachment(path.join(data_directory, 'geometries', f"{geometry}.yaml")))
     part.save()
+    if geometry is not None:
+        part_geometry = PartGeometry(type='default')
+        part_geometry.part().associate(part)
+        part_geometry.attachment().associate(
+            upload_attachment(path.join(data_directory, 'geometries', f"{geometry}.yaml"))
+        )
+        part.geometries().save_many([part_geometry])
     if cad is not None:
         def generate_cad_attachment(file):
             cad_attachment = CadAttachment()

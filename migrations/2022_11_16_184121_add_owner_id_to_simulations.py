@@ -5,7 +5,7 @@ class AddOwnerIdToSimulations(Migration):
 
     def up(self):
         with self.schema.table('simulations') as table:
-            table.big_integer('owner_id').nullable()
+            table.big_integer('owner_id')
 
 
     def down(self):

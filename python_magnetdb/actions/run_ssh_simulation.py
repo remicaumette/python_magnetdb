@@ -43,7 +43,6 @@ def run_ssh_simulation(simulation, server):
                     'key_filename': ssh_key
                 })
 
-
                 log_file.write("Downloading setup archive...\n")
                 simulation.setup_output_attachment.download(f"{local_tempdir}/setup.tar.gz")
                 remote_temp_dir = run_cmd(connection, 'mktemp -d', log_file).strip()

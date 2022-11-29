@@ -2,7 +2,7 @@ import json
 import os
 import shutil
 
-from python_magnetdb.actions.generate_simulation_config import generate_site_config, generate_magnet_config
+from python_magnetdb.actions.generate_simulation_config import generate_magnet_config
 from python_magnetdb.models.site import Site
 
 
@@ -15,7 +15,7 @@ def mkdir(dir):
 
 def generate_site_directory(site_id, directory):
     site = Site \
-        .with_('site_magnets.magnet.magnet_parts.part.geometry',
+        .with_('site_magnets.magnet.magnet_parts.part.geometries.attachment',
                'site_magnets.magnet.magnet_parts.part.cad.attachment',
                'site_magnets.magnet.geometry',
                'site_magnets.magnet.magnet_parts.part.material',
@@ -36,8 +36,8 @@ def generate_site_directory(site_id, directory):
         for magnet_part in magnet.magnet_parts:
             if not magnet_part.active:
                 continue
-            if magnet_part.part.geometry:
-                magnet_part.part.geometry.download(f"{directory}/data/geometries/{magnet_part.part.geometry.filename}")
+            for geometry in magnet_part.part.geometries:
+                geometry.attachment.download(f"{directory}/data/geometries/{geometry.attachment.filename}")
             if magnet_part.part.cad:
                 for cad in magnet_part.part.cad:
                     cad.attachment.download(f"{directory}/data/cad/{cad.attachment.filename}")

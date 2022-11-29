@@ -2,25 +2,11 @@
 Create a basic magnetdb
 """
 
-from datetime import datetime
-from uuid import uuid4
+from os import getenv
 
-from os import getenv, path, listdir
 from orator import DatabaseManager, Schema, Model
 
-from .models.attachment import Attachment
-from .models.cad_attachment import CadAttachment
-from .models.magnet import Magnet
-from .models.magnet_part import MagnetPart
-from .models.material import Material
-from .models.part import Part
-from .models.record import Record
-from .models.site import Site
-from .models.site_magnet import SiteMagnet
-from .storage import s3_client, s3_bucket
-
-from .crud import upload_attachment, extract_date_from_filename
-from .crud import create_material, create_part, create_site, create_magnet, create_record
+from .crud import create_material, create_part, create_site, create_magnet
 
 db = DatabaseManager({
     'postgres': {
@@ -36,7 +22,6 @@ schema = Schema(db)
 Model.set_connection_resolver(db)
 
 data_directory = getenv('DATA_DIR')
-
 
 
 with Model.get_connection_resolver().transaction():

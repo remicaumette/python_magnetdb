@@ -14,7 +14,7 @@ def mkdir(dir):
 
 
 def generate_magnet_directory(magnet_id, directory):
-    magnet = Magnet.with_('magnet_parts.part.geometry', 'magnet_parts.part.cad.attachment', 'geometry',
+    magnet = Magnet.with_('magnet_parts.part.geometries.attachment', 'magnet_parts.part.cad.attachment', 'geometry',
                           'magnet_parts.part.material', 'site_magnets.site', 'cad.attachment').find(magnet_id)
     mkdir(f"{directory}/data")
     mkdir(f"{directory}/data/geometries")
@@ -26,8 +26,8 @@ def generate_magnet_directory(magnet_id, directory):
     for magnet_part in magnet.magnet_parts:
         if not magnet_part.active:
             continue
-        if magnet_part.part.geometry:
-            magnet_part.part.geometry.download(f"{directory}/data/geometries/{magnet_part.part.geometry.filename}")
+        for geometry in magnet_part.part.geometries:
+            geometry.attachment.download(f"{directory}/data/geometries/{geometry.attachment.filename}")
         if magnet_part.part.cad:
             for cad in magnet_part.part.cad:
                 cad.attachment.download(f"{directory}/data/cad/{cad.attachment.filename}")

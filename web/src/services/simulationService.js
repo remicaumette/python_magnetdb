@@ -55,13 +55,8 @@ export function listModels() {
 }
 
 export function getMeasures({ id, measure }) {
-  // console.log('getMeasures: (id=' + id + ',measure=' + measure+')')
-  let form = null
-  if (measure) {
-    form = new FormData()
-    form.set('measure', measure)
-  }
-  return client.post(`/api/simulations/${id}/measures`, form)
+  return client.get(`/api/simulations/${id}/measures`, {
+    params: { measure_name: measure }
+  })
     .then((res) => res.data)
 }
-

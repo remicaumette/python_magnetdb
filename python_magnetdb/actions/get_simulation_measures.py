@@ -34,37 +34,14 @@ def get_simulation_measures(simulation_id: int, measure_name: str=None):
 
         measures_files = find_measures_files(tempdir)
         measures_names = list(map(lambda file: file.split('/').pop()[:-9], measures_files))
-        print(f"measures_files={measures_files}")
-        print(f"measures_names={measures_names}")
 
         for (index, measures_path) in enumerate(measures_files):
             if measure_name is None or measures_path.endswith(f"{measure_name}.measures"):
                 csv = read_csv(f"{measures_path}/values.csv")
-                print(f"csv={measures_path}/values.csv")
                 return {
                     'measure': measures_path.split('/').pop()[:-9],
                     'available_measures': measures_names,
                     'columns': csv.columns.tolist(),
                     'rows': csv.values.tolist(),
                 }
-        return None
-        # if not measures_files:
-        #     print('empty measure_files')
-        #     return None
-
-        # try:
-        #     index = measures_names.index(measure)
-        # except ValueError:
-        #     index = 0
-
-        # measures_path = measures_files[index]
-        # csv = read_csv(f"{measures_path}/values.csv")
-        # print(f"index={index}")
-        # print(f"csv={csv}")
-        # print(f"measure={measures_path.split('/').pop()[:-9]}")
-        # return {
-        #     'measure': measures_path.split('/').pop()[:-9],
-        #     'available_measures': measures_names,
-        #     'columns': csv.columns.tolist(),
-        #     'rows': csv.values.tolist(),
-        # }
+    return None
