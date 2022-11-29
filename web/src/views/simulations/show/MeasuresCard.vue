@@ -54,7 +54,7 @@ export default {
   },
   methods: {
     async fetch(measure) {
-      // console.log('MeasureCard fetch (' + this.simulationId + ',' +  measure +')')
+      console.log('MeasureCard fetch (' + this.simulationId + ',' +  measure +')')
       simulationService.getMeasures({ id: this.simulationId, measure: measure })
           .then((data) => {
             this.measure = data.measure
@@ -63,12 +63,12 @@ export default {
             this.rows = data.rows
           })
           .catch(console.error)
-      // console.log(`MeasureCard fetch this.measure=` + this.measure)
+      console.log(`MeasureCard fetch this.measure=` + this.measure)
     }
       
   },
   async mounted() {
-    // console.log('MeasureCard mounted')
+    console.log('MeasureCard mounted')
     this.fetch(null)
   },
 }

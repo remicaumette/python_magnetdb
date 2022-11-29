@@ -56,12 +56,12 @@ export function listModels() {
 
 export function getMeasures({ id, measure }) {
   // console.log('getMeasures: (id=' + id + ',measure=' + measure+')')
-  if (measure !== null) {
-    // console.log('getMeasures: measure defined')
-    const params = new URLSearchParams()
-    params.append('measure', measure)
-    return client.get(`/api/simulations/${id}/measures`, {params: params})
-      .then((res) => res.data)
+  let form = null
+  if (measure) {
+    form = new FormData()
+    form.set('measure', measure)
   }
-  return client.get(`/api/simulations/${id}/measures`)
-    .then((res) => res.data)  
+  return client.post(`/api/simulations/${id}/measures`, form)
+    .then((res) => res.data)
+}
+
