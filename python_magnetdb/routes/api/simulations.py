@@ -1,3 +1,5 @@
+from typing import Union
+
 from fastapi import APIRouter, HTTPException, Depends, Form, Query
 from python_magnetsetup.config import loadconfig, supported_methods, supported_models
 
@@ -124,7 +126,11 @@ def run(id: int, server_id: int = Form(None), user=Depends(get_user('update'))):
     return simulation.serialize()
 
 
-@router.get("/api/simulations/{id}/measures")
-#def measures(id: int, measure: str = Query(None), user=Depends(get_user('read'))):
-def measures(id: int, measure: str=None, user=Depends(get_user('read'))):
+@router.post("/api/simulations/{id}/measures")
+def measures(id: int, measure: str= Form(None), user=Depends(get_user('read'))):
+    print(f'routes/api/measures: {id}, {measure}')
     measures = get_simulation_measures(id, measure)
+    if measures is None:
+        raise HTTPException(status_code=404, detail="Measures not found")
+    return measures
+
