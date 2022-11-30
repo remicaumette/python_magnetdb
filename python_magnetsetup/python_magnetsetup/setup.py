@@ -208,9 +208,9 @@ def msite_setup(MyEnv, confdata: str, method_data: List, templates: dict, debug:
     """
     Creating dict for setup for msite
     """
-    print("msite_setup:", "debug=", debug)
-    print("msite_setup:", "confdata=", confdata)
-    print("msite_setup: confdata[magnets]=", confdata["magnets"])
+    if debug:
+        print("msite_setup:", "confdata=", confdata)
+        print("msite_setup: confdata[magnets]=", confdata["magnets"])
 
     mdict = {}
     mmat = {}
@@ -218,39 +218,34 @@ def msite_setup(MyEnv, confdata: str, method_data: List, templates: dict, debug:
     mpost = {}
 
     for magnet in confdata["magnets"]:
-        print(f"magnet:  {magnet}")
-        try:
-            mconfdata = load_object(MyEnv, magnet + "-data.json", debug)
-        except:
-            print(f"setup: failed to load {magnet}-data.json look into magnetdb")
-            try:
-                mconfdata = load_object_from_db(MyEnv, "magnet", magnet, debug, session)
-            except:
-                raise Exception(f"setup: failed to load {magnet} from magnetdb")
-
         if debug:
-            print("mconfdata[geom]:", mconfdata["geom"])
-
+            print(f"magnet:  {magnet}")
+        mname = list(magnet.keys())[0]
+        if debug:
+            print(f'msite_setup: magnet_setup[{list(magnet.keys())[0]}]: confdata={magnet}'),
+        mconfdata = magnet[mname]
         (tdict, tmat, tmodels, tpost) = magnet_setup(MyEnv, mconfdata, method_data, templates, debug)
 
-        # print("tdict[part_electric]:", tdict['part_electric'])
-        # print("tdict[part_thermic]:", tdict['part_thermic'])
+        if debug:
+            print("tdict[part_electric]:", tdict['part_electric'])
+            print("tdict[part_thermic]:", tdict['part_thermic'])
         mdict = NMerge(tdict, mdict, debug, "msite_setup/tdict")
-        # print("mdict[part_electric]:", mdict['part_electric'])
-        # print("mdict[part_thermic]:", mdict['part_thermic'])
+        if debug:
+            print("mdict[part_electric]:", mdict['part_electric'])
+            print("mdict[part_thermic]:", mdict['part_thermic'])
 
-        # print("tmat:", tmat)
         mmat = NMerge(tmat, mmat, debug, "msite_setup/tmat")
-        # print("NewMerge:", NMerge(tmat, mmat))
-        # print("mmat:", mmat)
+        if debug:
+            print("mmat:", mmat)
         
         mmodels = NMerge(tmodels, mmodels, debug, "msite_setup/tmodels")
 
-        # print("tpost:", tpost)
         mpost = NMerge(tpost, mpost, debug, "msite_setup/tpost") #debug)
-        # print("NewMerge:", mpost)
+        if debug:
+            print("NewMerge:", mpost)
 
-    # print("mdict:", mdict)
+    if debug:
+        print("mdict:", mdict)
     return (mdict, mmat, mmodels, mpost)
 
 def setup(MyEnv, args, confdata, jsonfile, session=None):
@@ -289,7 +284,8 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
                 cad_basename = cad.name
         except:
             cad_basename = confdata["geom"].replace(".yaml", "")
-            print(f'confdata: {confdata}')
+            if args.debug:
+                print(f'confdata: {confdata}')
             for mtype in ["Bitter", "Supra"]:
                 if mtype in confdata:
                     # why do I need that???
@@ -307,16 +303,29 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
         try:
             findfile(confdata["name"] + ".yaml", search_paths(MyEnv, "geom"))
         except FileNotFoundError as e:
-            print("confdata:", confdata)
+            if args.debug:
+                print("confdata:", confdata)
+            yamldata = {'name': confdata["name"]}
+            todict = {}
+            if 'magnets' in confdata:
+                for magnet in confdata['magnets']:
+                    if args.debug:
+                        print(f"magnet(type={type(magnet)}: {magnet}")
+                    mname = list(magnet.keys())[0]
+                    if args.debug:
+                        print(f"{mname} (type:{type(mname)}")
+                        print(f"magnet[{mname}]: {magnet[mname]}")
+                    todict[mname] = magnet[mname]['geom']
+            yamldata['magnets'] = todict
+
             print(f"try to create {MyEnv.yaml_repo + '/' + confdata['name'] + '.yaml'}")
             # for obj in confdata[mtype]:
             with open(MyEnv.yaml_repo + '/' + confdata["name"] + ".yaml", "x") as out:
                 out.write("!<MSite>\n")
-                yaml.dump(confdata, out)
+                yaml.dump(yamldata, out)
             print(f"try to create {confdata['name']}.yaml done")
 
         (mdict, mmat, mmodels, mpost) = msite_setup(MyEnv, confdata, method_data, templates, args.debug or args.verbose, session)
-        # print(f"setup: msite mpost={mpost['current_H']}")
 
     name = jsonfile
     if name in confdata:
