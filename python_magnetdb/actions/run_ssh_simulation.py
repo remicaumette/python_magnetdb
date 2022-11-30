@@ -15,6 +15,7 @@ from python_magnetdb.models.attachment import Attachment
 
 def run_cmd(connection, cmd, stdout):
     res = connection.run(cmd)
+    print(f'run_cmd: res={res}')
     stdout.write(f"=== RUNNING CMD: {cmd}\n")
     stdout.write(f"===\n")
     stdout.write(res.stdout)
@@ -77,7 +78,7 @@ def run_ssh_simulation(simulation, server):
 
                 # Save cmds in a file
                 with open("cmds.txt", "a") as f:
-                    log_file.write("Saving commands... pwd{os.getcwd()} \n")
+                    log_file.write(f"Saving commands... pwd({os.getcwd()}) \n")
                     for (key, value) in cmds.items():
                         f.write(f'{key}: {value}')
 
@@ -86,6 +87,7 @@ def run_ssh_simulation(simulation, server):
                         if key in ['Unpack', 'Workflow']:
                             continue
                         log_file.write(f"Performing {key}...\n")
+                        print(f'Running {key}: {value}')
                         if key in ['Update_cfg', 'Update_Mesh']:
                             run_cmd(connection, value, log_file)
                         else:
@@ -94,7 +96,7 @@ def run_ssh_simulation(simulation, server):
                     log_file.write("Archiving results...\n")
                     simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
                     remote_output_archive = f"{remote_temp_dir}/{simulation_name}.tar.gz"
-                    run_cmd(connection, f"tar cvzf {remote_output_archive} *", log_file)
+                    run_cmd(connection, f"tar --exclude=tmp.hdf --exclude=setup.tar.gz -cvzf {remote_output_archive} *", log_file)
                     local_output_archive = f"{local_tempdir}/{simulation_name}.tar.gz"
                     connection.get(remote_output_archive, local_output_archive)
                     simulation.output_attachment().associate(
@@ -102,9 +104,9 @@ def run_ssh_simulation(simulation, server):
                     )
                 log_file.write("Done!\n")
                 simulation.status = "done"
-            except Exception as e:
+            except Exception as err:
                 simulation.status = "failed"
-                print_exception(e)
+                print_exception(None, err, err.__traceback__)
             simulation.log_attachment().associate(Attachment.raw_upload("debug.log", "text/plain", log_file_path))
             os.chdir(current_dir)
             simulation.save()

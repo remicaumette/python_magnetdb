@@ -82,15 +82,15 @@ def run_simulation(simulation):
                 log_file.write("Archiving results...\n")
                 simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
                 output_archive = f"{tempdir}/{simulation_name}.tar.gz"
-                run_cmd([f"tar cvzf {output_archive} *"], log_file)
+                run_cmd([f"tar --exclude=tmp.hdf --exclude=setup.tar.gz -cvzf {output_archive} *"], log_file)
                 simulation.output_attachment().associate(
                     Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
                 )
                 log_file.write("Done!\n")
                 simulation.status = "done"
-            except Exception as e:
+            except Exception as err:
                 simulation.status = "failed"
-                print_exception(e)
+                print_exception(None, err, err.__traceback__)
             simulation.log_attachment().associate(Attachment.raw_upload("debug.log", "text/plain", log_file_path))
             os.chdir(current_dir)
             simulation.save()
