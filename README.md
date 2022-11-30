@@ -28,6 +28,8 @@ openssl req -new -x509 -days 365 -nodes -out certs/cert.pem -keyout certs/cert.k
 chmod 600 certs/cert.perm certs.cert.key
 ```
 
+NB: eventually remove poetry-cache data before starting the services
+
 
 1. Start the services
 
@@ -43,10 +45,24 @@ The first time you run the service, you would need to:
 sudo chown -R 5050:5050 pgadmin-data
 ```
 
-2. Create/Update Database
+2. Set timezone in nginx-proxy
+
 
 ```shell
-docker exec -it remi_magnetdb_web-api_1 /bin/bash
+docker exec -it magnetdb-nginx-proxy
+```
+
+then run
+
+```shell
+ln -snf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+echo "Europe/Paris" > /etc/timezone
+```
+
+3. Create/Update Database
+
+```shell
+docker exec -it magnetdb-api /bin/bash
 ```
 
 In the container, to perform database migration run:
@@ -64,7 +80,7 @@ poetry run python3 -m python_magnetdb.seed-again
 poetry run python3 -m python_magnetdb.seed-records
 ```
     
-3. Configure LemonLDAP (https://github.com/LemonLDAPNG/lemonldap-ng-docker):
+4. Configure LemonLDAP (https://github.com/LemonLDAPNG/lemonldap-ng-docker):
    1. Sign in to http://sso.grenoble.lncmi.local/ with dwho/dwho
    2. Enable OpenID Connect in Administration > WebSSO Manager > General Parameters > Issuer modules > OpenID Connect
    3. Create OpenID relying party in Administration > WebSSO Manager > OpenID Connect Relying Parties > Add OpenID Relying Party
@@ -73,7 +89,7 @@ poetry run python3 -m python_magnetdb.seed-records
    6. Set Client secret to `testsecret`
    7. Set Allowed redirection addresses for login to `http://localhost:8080/sign_in`
 
-4. Setup pgadmin
+5. Setup pgadmin
 
 Load `localhost:5050/` in your web browser
 add a server for magnetdb
@@ -108,16 +124,3 @@ To start magnetdb:
 firefox -private http://localhost:8080/
 ```
 
-8. Eventually perform a DB migration
-
-Log into magnetdb-api
-
-```shell
-docker exec -it magnetdb-api bash
-```
-
-Run the migration
-
-```shell
-poetry run orator migrate -c python_magnetdb/database.py
-```

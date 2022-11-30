@@ -10,12 +10,6 @@ services:
       - ./certs:/etc/nginx/certs
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./network_internal.conf:/etc/nginx/network_internal.conf
-    command:
-      - /bin/bash
-      - -c
-      - |
-        cp /usr/share/zoneinfo/Europe/Paris /etc/localtime
-        echo "Europe/Paris" > /etc/timezone
     environment:
     - NETWORK_ACCESS=internal
 
@@ -27,12 +21,6 @@ services:
     - ../magnetdb-data/lemonldap-ng-data/conf:/var/lib/lemonldap-ng/conf
     - ../magnetdb-data/logs:/www/logs
     #- ./assets/custom:/assets/custom
-    command:
-      - /bin/bash
-      - -c
-      - |
-        cp /usr/share/zoneinfo/Europe/Paris /etc/localtime
-        echo "Europe/Paris" > /etc/timezone
     environment:
     - VIRTUAL_HOST=sso.grenoble.lncmi.local,manager.sso.grenoble.lncmi.local,handler.sso.grenoble.lncmi.local
     # - VIRTUAL_PROTO=https
@@ -93,7 +81,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: christophe.trophime@lncmi.cnrs.fr
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
-      TZ: 'Europe/Paris'
+      TIMEZONE: 'Europe/Paris'
     volumes:
       - ../magnetdb-data/pgadmin-data:/var/lib/pgadmin
     depends_on:
