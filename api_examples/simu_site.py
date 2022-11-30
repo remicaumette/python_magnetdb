@@ -8,11 +8,10 @@ from time import sleep
 import requests
 
 api_server = os.getenv('MAGNETDB_API_SERVER') or "http://magnetdb-api.grenoble.lncmi.local"
-magnet_name = 'HL-test'
-server_name = 'calcul22'
+site_name = 'MTest'
 
 r = requests.get(
-    f"{api_server}:8000/api/magnets",
+    f"{api_server}:8000/api/sites",
     headers={'Authorization': os.getenv('MAGNETDB_API_KEY')}
 )
 
@@ -23,28 +22,28 @@ def get_simulation(id: int):
     ).json()
 
 result_list = r.json()['items']
-for magnet in result_list:
-    print(f"MAGNET: {magnet['name']} (status:{magnet['status']}, id:{magnet['id']})")
-    if magnet['name'] == magnet_name:
+for site in r.json()['items']:
+    print(f"SITE: {site['name']} (status:{site['status']}, id:{site['id']})")
+    if site['name'] == site_name:
         found = True
         break
 
 if not found:
-    print(f"magnet: {magnet_name} not found in magnetdb ({api_server})")
-    print(f"available magnets: {[magnet['name'] for magnet in result_list]}")
+    print(f"site: {site_name} not found in magnetdb ({api_server})")
+    print(f"available sites: {[site['name'] for site in result_list]}")
     sys.exit(1)
 
 # Create a simu
 
 sim_data={
-    'resource_type': 'magnet',
-    'resource_id': magnet['id'],
+    'resource_type': 'site',
+    'resource_id': site['id'],
     'method': 'cfpdes',
     'model': 'thmagel_hcurl',
     'geometry': 'Axi',
     'cooling': 'meanH',
     'static': True,
-    'non_linear': False
+    'non_linear': True
     }
    
 print(sim_data)
@@ -78,7 +77,6 @@ print(f'tdiff: {diff} seconds: {diff.seconds}  milliseconds: {diff.microseconds/
 # from db result_list[-1]['owner']['name']:
     
 # Run setup
-print("Setup simulation...")
 r = requests.post(
     f"{api_server}:8000/api/simulations/{simu_id}/run_setup",
     headers={'Authorization': os.getenv('MAGNETDB_API_KEY')}
@@ -87,28 +85,24 @@ while True:
     simulation = get_simulation(simu_id)
     if simulation['setup_status'] in ['failed', 'done']:
         break
-    sleep(1)
+    sleep(10)
 
-print(f"Setup done: status={simulation['setup_status']}")
+print(f"Setup done: status={simulation['set_status']}")
 if simulation['setup_status'] == 'failed':
     sys.exit(1)
 
-# Get server id
+# Run simu with ssh
 r = requests.get(f"{api_server}:8000/api/servers", headers={'Authorization': os.getenv('MAGNETDB_API_KEY')})
 print(f"result: type={type(r.json()['items'])}")
 result_list = r.json()['items']
 for server in result_list:
-    print(f"server: {server['name']}, id:{server['id']})")
-    if server['name'] == server_name:
-        found = True
-        break
-
+    print(f'server: {server}')
+    
 if not found:
     print(f"server: {server['name']} not found")
     print(f"available servers: {[server['name'] for server in result_list]}")
     sys.exit(1)
-print(f'server: {server}')
-
+    
 print("Starting simulation...")
 r = requests.post(
     f"{api_server}:8000/api/simulations/{simu_id}/run",
@@ -124,7 +118,3 @@ print(f"Simulation done: status={simulation['status']}")
 
 if simulation['status'] == 'failed':
     sys.exit(1)
-
-r = requests.get(f"{api_server}:8000/api/attachments/{simulation['log_attachment_id']}/download",
-                 headers={'Authorization': os.getenv('MAGNETDB_API_KEY')})
-print(r.text)
