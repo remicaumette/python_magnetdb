@@ -37,13 +37,17 @@ def run_ssh_simulation(simulation, server):
         log_file_path = f"{local_tempdir}/debug.log"
         with open(log_file_path, "a") as log_file:
             try:
-                ssh_key = f"{local_tempdir}/ssh_key"
-                with open(ssh_key, "w") as f:
-                    f.write(server.private_key)
-                connection = Connection(host=server.host, user=server.username, connect_kwargs={
-                    'key_filename': ssh_key
-                })
-
+                # TODO try to use native ssh key for API
+                try:
+                    ssh_key = f"{local_tempdir}/ssh_key"
+                    with open(ssh_key, "w") as f:
+                        f.write(server.private_key)
+                    connection = Connection(host=server.host, user=server.username, connect_kwargs={'key_filename': ssh_key})
+                except:
+                    print(f'Failed to connect to {server.host} with magnetdb private ssh key')
+                    print(f'Trying to connect with {server.username} native ssh key')
+                    connection = Connection(host=server.host, user=server.username)
+                    
                 log_file.write("Downloading setup archive...\n")
                 simulation.setup_output_attachment.download(f"{local_tempdir}/setup.tar.gz")
                 remote_temp_dir = run_cmd(connection, 'mktemp -d', log_file).strip()
