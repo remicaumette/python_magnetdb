@@ -315,7 +315,7 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
                     if args.debug:
                         print(f"{mname} (type:{type(mname)}")
                         print(f"magnet[{mname}]: {magnet[mname]}")
-                    todict[mname] = magnet[mname]['geom']
+                    todict[mname] = magnet[mname]['geom'].replace(".yaml","")
             yamldata['magnets'] = todict
 
             print(f"try to create {MyEnv.yaml_repo + '/' + confdata['name'] + '.yaml'}")
