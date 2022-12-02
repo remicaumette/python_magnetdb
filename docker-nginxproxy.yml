@@ -54,6 +54,9 @@ services:
       TZ: 'Europe/Paris'
     ports:
       - 6379:6379
+    environment:
+      VIRTUAL_HOST: redis.grenoble.lncmi.local
+      NETWORK_ACCESS: internal
     depends_on:
       - nginx-proxy
 
@@ -68,6 +71,7 @@ services:
       POSTGRES_PASSWORD: magnetdb
       TZ: 'Europe/Paris'
       PGTZ: 'Europe/Paris'
+      NETWORK_ACCESS: internal
     volumes:
       - ../magnetdb-data/postgres-data:/var/lib/postgresql/data
     depends_on:
@@ -82,6 +86,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       TIMEZONE: 'Europe/Paris'
+      NETWORK_ACCESS: internal
     volumes:
       - ../magnetdb-data/pgadmin-data:/var/lib/pgadmin
     depends_on:
@@ -101,6 +106,7 @@ services:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
       TZ: 'Europe/Paris'
+      NETWORK_ACCESS: internal
     ports:
       - 9000:9000
       - 9080:9080
@@ -129,6 +135,8 @@ services:
     environment:
       VIRTUAL_HOST: magnetdb.grenoble.lncmi.local
       TZ: 'Europe/Paris'
+      NETWORK_ACCESS: internal
+      API_ENDPOINT: http://magnetdb-api.grenoble.lncmi.local:8000
     ports:
       - 8080:8080
 
@@ -168,6 +176,7 @@ services:
       DATABASE_HOST: postgres.grenoble.lncmi.local
       IMAGES_DIR: /images
       TZ: 'Europe/Paris'
+      NETWORK_ACCESS: internal
     ports:
       - 8000:8000
 
@@ -206,6 +215,7 @@ services:
       DATABASE_HOST: postgres.grenoble.lncmi.local
       IMAGES_DIR: /images
       TZ: 'Europe/Paris'
+      NETWORK_ACCESS: internal
 
 volumes:
   minio-data: {}
