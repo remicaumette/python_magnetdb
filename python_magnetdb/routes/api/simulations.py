@@ -112,7 +112,7 @@ def run_setup(id: int, user=Depends(get_user('update'))):
 
 
 @router.post("/api/simulations/{id}/run")
-def run(id: int, server_id: int = Form(None), user=Depends(get_user('update'))):
+def run(id: int, server_id: int = Form(None), cores: int = Form(...), user=Depends(get_user('update'))):
     simulation = Simulation.with_('resource').find(id)
     if not simulation:
         raise HTTPException(status_code=404, detail="Simulation not found")
@@ -120,7 +120,7 @@ def run(id: int, server_id: int = Form(None), user=Depends(get_user('update'))):
     simulation.status = "scheduled"
     simulation.save()
     AuditLog.log(user, "Simulation scheduled", resource=simulation)
-    worker.run_simulation.delay(simulation.id, server_id)
+    worker.run_simulation.delay(simulation.id, server_id, cores)
     return simulation.serialize()
 
 

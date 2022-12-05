@@ -24,7 +24,21 @@ export function create(values) {
     .then((res) => res.data)
 }
 
-export function shutdown({ serverId }) {
-  return client.delete(`/api/servers/${serverId}`)
+export function find({ id }) {
+  return client.get(`/api/servers/${id}`)
+    .then((res) => res.data)
+}
+
+export function update({ id, ...values }) {
+  const form = new FormData()
+  for (const [key, value] of Object.entries(values)) {
+    form.append(key, value)
+  }
+  return client.patch(`/api/servers/${id}`, form)
+    .then((res) => res.data)
+}
+
+export function destroy({ id }) {
+  return client.delete(`/api/servers/${id}`)
     .then((res) => res.data)
 }
