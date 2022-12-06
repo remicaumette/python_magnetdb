@@ -151,7 +151,7 @@ services:
         cd python_magnetsetup
         poetry update
         cd ..
-        poetry install
+        poetry update
         wait-for-it magnetdb.grenoble.lncmi.local:8080 -t 120 -- poetry run uvicorn python_magnetdb.web:app --reload --host 0.0.0.0
     # eventually perform a migration
     working_dir: /home/feelpp/test
