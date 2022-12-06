@@ -99,7 +99,7 @@ export default {
       this.modelOptions = this.availableModels
           .filter((model) =>
             model.method === values.method && model.geometry === values.geometry &&
-            (model.time === (values.static === 'on' ? 'static' : 'transient') )
+            (model.time === (values.static ? 'static' : 'transient'))
           )
           .map((model) => model.model)
     },
@@ -109,8 +109,8 @@ export default {
         resource: undefined,
         resource_type: values.resource.value?.type,
         resource_id: values.resource.value?.id,
-        static: values.static === 'on',
-        non_linear: values.non_linear === 'on',
+        static: values.static,
+        non_linear: values.non_linear,
       })
           .then((simulation) => {
             this.$router.push({ name: 'simulation', params: { id: simulation.id } })

@@ -65,7 +65,7 @@ def run_ssh_simulation(simulation, server, cores):
                                  nonlinear=simulation.non_linear,
                                  cooling=simulation.cooling,
                                  flow_params=f"{remote_temp_dir}/flow_params.json",
-                                 np=0,
+                                 np=cores,
                                  debug=False,
                                  verbose=False,
                                  skip_archive=True)
@@ -73,7 +73,7 @@ def run_ssh_simulation(simulation, server, cores):
                              cad_repo=f"{remote_temp_dir}/cad", mesh_repo=data_dir, simage_repo=server.image_directory,
                              mrecord_repo=data_dir, optim_repo=data_dir)
                 node_spec = NodeSpec(name=server.name, otype=server.type, smp=server.smp, dns=server.dns,
-                                     cores=cores, multithreading=server.multithreading,
+                                     cores=server.cores, multithreading=server.multithreading,
                                      manager=JobManager(otype=server.job_manager, queues=[]),
                                      mgkeydir=server.mesh_gems_directory)
                 cmds = setup_cmds(env, args, node_spec, simulation.setup_state['yamlfile'],

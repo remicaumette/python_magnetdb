@@ -58,15 +58,6 @@ def run_simulation_setup(simulation):
         try:
             with open(f"{tempdir}/config.json", "r") as config_file:
                 config = json.load(config_file)
-                # (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename) = setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
-                # simulation.setup_state = {
-                #     'yamlfile': yamlfile,
-                #     'cfgfile': cfgfile[len(tempdir) + 1:],
-                #     'jsonfile': jsonfile[len(tempdir) + 1:],
-                #     'xaofile': xaofile,
-                #     'meshfile': meshfile,
-                #     'tarfilename': tarfilename[len(tempdir):],
-                # }
                 (yamlfile, cfgfile, jsonfile, xaofile, meshfile) = setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
                 simulation.setup_state = {
                     'yamlfile': yamlfile,
@@ -75,8 +66,6 @@ def run_simulation_setup(simulation):
                     'xaofile': xaofile,
                     'meshfile': meshfile
                 }
-            # subprocess.run([f"pwd"], shell=True, check=True)
-            # subprocess.run([f"ls -alrth"], shell=True, check=True)
             config_file_path = None
             for file in os.listdir(tempdir):
                 if file.endswith('.cfg'):
@@ -84,7 +73,7 @@ def run_simulation_setup(simulation):
                     break
             simulation_name = os.path.basename(os.path.splitext(config_file_path)[0])
             output_archive = f"{tempdir}/setup-{simulation_name}.tar.gz"
-            done = subprocess.run([f"tar cvzf {output_archive} *"], shell=True, check=True)
+            subprocess.run([f"tar cvzf {output_archive} *"], shell=True, check=True)
             attachment = Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
             simulation.setup_output_attachment().associate(attachment)
             simulation.setup_status = "done"
