@@ -19,6 +19,7 @@ def generate_magnet_directory(magnet_id, directory):
     mkdir(f"{directory}/data")
     mkdir(f"{directory}/data/geometries")
     mkdir(f"{directory}/data/cad")
+    print(f'generate_magnet_directory: {os.getcwd()}/flow_params.json')
     shutil.copyfile(f"{os.getcwd()}/flow_params.json", f"{directory}/flow_params.json")
     if magnet.geometry:
         magnet.geometry.download(f"{directory}/data/geometries/{magnet.geometry.filename}")

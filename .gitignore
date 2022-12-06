@@ -62,6 +62,7 @@ ENV/
 *.xao
 .yaml
 *~
+\#*\#
 pint/*
 fastapi/*
 team/*
@@ -75,3 +76,9 @@ data
 core
 poetry-cache
 /images
+
+minio-data
+postgres-data
+lemonldap-ng-data
+certs
+*.orig

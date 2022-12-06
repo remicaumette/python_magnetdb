@@ -1,3 +1,5 @@
+from typing import Union
+
 from fastapi import APIRouter, HTTPException, Depends, Form, Query
 from python_magnetsetup.config import loadconfig, supported_methods, supported_models
 

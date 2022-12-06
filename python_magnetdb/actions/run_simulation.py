@@ -49,6 +49,8 @@ def run_simulation(simulation):
                                  nonlinear=simulation.non_linear,
                                  cooling=simulation.cooling,
                                  flow_params=f"{tempdir}/flow_params.json",
+                                 machine='unknown',
+                                 np=0,
                                  debug=False,
                                  verbose=False,
                                  skip_archive=True)
@@ -59,30 +61,36 @@ def run_simulation(simulation):
                                      multithreading=True, manager=JobManager(otype=JobManagerType.none, queues=[]),
                                      mgkeydir=None)
                 cmds = setup_cmds(env, args, node_spec, simulation.setup_state['yamlfile'],
-                                  simulation.setup_state['cfgfile'], simulation.setup_state['xaofile'],
+                                  simulation.setup_state['cfgfile'], simulation.setup_state['jsonfile'], simulation.setup_state['xaofile'],
                                   simulation.setup_state['meshfile'], tempdir)
 
+                # Save cmds in a file
+                with open("cmds.txt", "a") as f:
+                    log_file.write("Saving commands...\n")
+                    for (key, value) in cmds.items():
+                        f.write(f'{key}: {value}')
+
                 for (key, value) in cmds.items():
-                    if key in ['Unpack', 'Pre']:
+                    if key in ['Unpack', 'Workflow']:
                         continue
                     if key in ['Update_cfg', 'Update_Mesh']:
                         log_file.write(f"{value}\n")
                         run_cmd([value], log_file)
                     else:
-                        run_cmd([f"bash -c \"{cmds['Pre']} && {value}\""], log_file)
+                        run_cmd([f"bash -c \"{value}\""], log_file)
 
                 log_file.write("Archiving results...\n")
                 simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
                 output_archive = f"{tempdir}/{simulation_name}.tar.gz"
-                run_cmd([f"tar cvzf {output_archive} *"], log_file)
+                run_cmd([f"tar --exclude=tmp.hdf --exclude=setup.tar.gz -cvzf {output_archive} *"], log_file)
                 simulation.output_attachment().associate(
                     Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
                 )
                 log_file.write("Done!\n")
                 simulation.status = "done"
-            except Exception as e:
+            except Exception as err:
                 simulation.status = "failed"
-                print_exception(e)
+                print_exception(None, err, err.__traceback__)
             simulation.log_attachment().associate(Attachment.raw_upload("debug.log", "text/plain", log_file_path))
             os.chdir(current_dir)
             simulation.save()

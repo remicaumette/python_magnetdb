@@ -38,7 +38,8 @@ class appenv():
                 self.mesh_repo = data.get('DATA_REPO') + "/meshes"
                 self.mrecord_repo = data.get('DATA_REPO') + "/mrecords"
                 self.optim_repo = data.get('DATA_REPO') + "/optims"
-        print(f"DATA: {self.yaml_repo}")
+        if debug:
+            print(f"DATA: {self.yaml_repo}")
 
     def template_path(self, debug: bool = False):
         """
@@ -78,7 +79,7 @@ def loadconfig():
         magnetsetup = json.load(appcfg)
     return magnetsetup
 
-def loadtemplates(appenv: appenv, appcfg: dict , method_data: List[str], linear: bool=True, debug: bool=False):
+def loadtemplates(appenv: appenv, appcfg: dict, method_data: List[str], debug: bool=False):
     """
     Load templates into a dict
 
@@ -90,35 +91,73 @@ def loadtemplates(appenv: appenv, appcfg: dict , method_data: List[str], linear:
     cooling
 
     """
-    
-    [method, time, geom, model, cooling, units_def] = method_data
+
+    [method, time, geom, model, cooling, units_def, nonlinear] = method_data
+    print(f"time: {time}")
+    print(f"nonlinear: {nonlinear} type={type(nonlinear)}")
     template_path = os.path.join(appenv.template_path(), method, geom, model)
 
     cfg_model = appcfg[method][time][geom][model]["cfg"]
     json_model = appcfg[method][time][geom][model]["model"]
-    if linear:
+    if not nonlinear:
         conductor_model = appcfg[method][time][geom][model]["conductor-linear"]
     else:
-        if geom == "3D": 
+        if geom == "3D":
             json_model = appcfg[method][time][geom][model]["model-nonlinear"]
         conductor_model = appcfg[method][time][geom][model]["conductor-nonlinear"]
     insulator_model = appcfg[method][time][geom][model]["insulator"]
     
     fcfg = os.path.join(template_path, cfg_model)
     if debug:
-        print("fcfg:", fcfg, type(fcfg))
+        print(f"fcfg: {fcfg} type={type(fcfg)}")
     fmodel = os.path.join(template_path, json_model)
     fconductor = os.path.join(template_path, conductor_model)
     finsulator = os.path.join(template_path, insulator_model)
     if 'th' in model:
+        heat_conductor = appcfg[method][time][geom][model]["models"]["heat-conductor"]
+        heat_insulator = appcfg[method][time][geom][model]["models"]["heat-insulator"]
+
         cooling_model = appcfg[method][time][geom][model]["cooling"][cooling]
         flux_model = appcfg[method][time][geom][model]["cooling-post"][cooling]
         stats_T_model = appcfg[method][time][geom][model]["stats_T"]
+
+        fheatconductor = os.path.join(template_path, heat_conductor)
+        fheatinsulator = os.path.join(template_path, heat_insulator)
     
         fcooling = os.path.join(template_path, cooling_model)
         frobin = os.path.join(template_path, appcfg[method][time][geom][model]["cooling"]["robin"])
         fflux = os.path.join(template_path, flux_model)
         fstats_T = os.path.join(template_path, stats_T_model)
+
+    if 'mag' in model or 'mqs' in model :
+        magnetic_conductor = appcfg[method][time][geom][model]["models"]["magnetic-conductor"]
+        magnetic_insulator = appcfg[method][time][geom][model]["models"]["magnetic-insulator"]
+
+        fmagconductor = os.path.join(template_path, magnetic_conductor)
+        fmaginsulator = os.path.join(template_path, magnetic_insulator)
+
+        plot_model = appcfg[method][time][geom][model]["plots_B"]
+        plots_B =  os.path.join(template_path, plot_model)
+
+    if 'magel' in model :
+        elastic_conductor = appcfg[method][time][geom][model]["models"]["elastic-conductor"]
+        elastic_insulator = appcfg[method][time][geom][model]["models"]["elastic-insulator"]
+        felasconductor = os.path.join(template_path, elastic_conductor)
+        felasinsulator = os.path.join(template_path, elastic_insulator)
+        stats_Stress_model = appcfg[method][time][geom][model]["stats_Stress"]
+
+    if 'mqsel' in model :
+        elastic1_conductor = appcfg[method][time][geom][model]["models"]["elastic1-conductor"]
+        elastic1_insulator = appcfg[method][time][geom][model]["models"]["elastic1-insulator"]
+        elastic2_conductor = appcfg[method][time][geom][model]["models"]["elastic2-conductor"]
+        elastic2_insulator = appcfg[method][time][geom][model]["models"]["elastic2-insulator"]
+
+        felas1conductor = os.path.join(template_path, elastic1_conductor)
+        felas1insulator = os.path.join(template_path, elastic1_insulator)
+        felas2conductor = os.path.join(template_path, elastic2_conductor)
+        felas2insulator = os.path.join(template_path, elastic2_insulator)
+
+        stats_Stress_model = appcfg[method][time][geom][model]["stats_Stress"]
 
     #if model != 'mag' and model != 'mag_hcurl' and model != 'mqs' and model != 'mqs_hcurl':
     stats_Power_model = appcfg[method][time][geom][model]["stats_Power"]
@@ -137,14 +176,32 @@ def loadtemplates(appenv: appenv, appcfg: dict , method_data: List[str], linear:
         "conductor": fconductor,
         "insulator": finsulator,
         "stats": [],
+        "plots":[],
         "material_def" : material_generic_def
     }
 
     if 'th' in model:
+        dict["heat-conductor"] = fheatconductor
+        dict["heat-insulator"] = fheatinsulator
         dict["cooling"] = fcooling
         dict["robin"] = frobin
         dict["flux"] = fflux
         dict["stats"].append(fstats_T)
+
+    if 'mag' in model or 'mqs' in model :
+        dict["magnetic-conductor"] = fmagconductor
+        dict["magnetic-insulator"] = fmaginsulator
+        dict["plots"].append(plots_B)
+
+    if 'magel' in model :
+        dict["elastic-conductor"] = felasconductor
+        dict["elastic-insulator"] = felasinsulator
+
+    if 'mqsel' in model :
+        dict["elastic1-conductor"] = felas1conductor
+        dict["elastic1-insulator"] = felas1insulator
+        dict["elastic2-conductor"] = felas2conductor
+        dict["elastic2-insulator"] = felas2insulator
     
     #if model != 'mag' and model != 'mag_hcurl' and model != 'mqs' and model != 'mqs_hcurl':
     dict["stats"].append(fstats_Power)
@@ -153,7 +210,7 @@ def loadtemplates(appenv: appenv, appcfg: dict , method_data: List[str], linear:
     if check_templates(dict):
         pass
 
-    return dict    
+    return dict
 
 def check_templates(templates: dict):
     """
@@ -170,7 +227,7 @@ def check_templates(templates: dict):
                 print(key, s)
                 with open(s, "r") as f: pass
     print("==========================\n\n")
-    
+
     return True
 
 def supported_models(Appcfg, method: str, geom: str, time: str) -> List:
@@ -179,7 +236,7 @@ def supported_models(Appcfg, method: str, geom: str, time: str) -> List:
     """
 
     models = []
-    print("supported_models:", Appcfg[method])
+    # print(f'supported_models[{method}]: {Appcfg[method]}')
     if Appcfg[method][time]:
         if geom in Appcfg[method][time]:
             for key in Appcfg[method][time][geom]:
@@ -194,7 +251,7 @@ def supported_methods(Appcfg) -> List:
 
     methods = []
     for key in Appcfg:
-        if Appcfg[key] and not key in ['mesh']:
+        if Appcfg[key] and not key in ['mesh', 'post']:
             methods.append(key)
 
     return methods

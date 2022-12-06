@@ -1,10 +1,14 @@
+from typing import List, Union, Optional
+
+import sys
+import os
 import json
+import yaml
+
 import math
-from typing import List, Optional
 
-from .units import load_units, convert_data
 from .utils import Merge
-
+from .units import load_units, convert_data
 
 def create_params_supra(gdata: tuple, method_data: List[str], debug: bool=False) -> dict:
     """
@@ -40,7 +44,7 @@ def create_params_bitter(gdata: tuple, method_data: List[str], debug: bool=False
     params_data = { 'Parameters': []}
 
     # for cfpdes only
-    if method_data[0] == "cfpdes" and method_data[3] == "thmagel" :
+    if method_data[0] == "cfpdes" and method_data[3] in ["thmagel", "thmagel_hcurl", "thmqsel", "thmqsel_hcurl"] :
         params_data['Parameters'].append({"name":"bool_laplace", "value":"1"})
         params_data['Parameters'].append({"name":"bool_dilatation", "value":"1"})
 
@@ -106,7 +110,7 @@ def create_params_insert(gdata: tuple, method_data: List[str], debug: bool=False
     params_data = { 'Parameters': []}
 
     # for cfpdes only
-    if method_data[0] == "cfpdes" and method_data[3] == "thmagel" :
+    if method_data[0] == "cfpdes" and method_data[3] in ["thmagel", "thmagel_hcurl", "thmqsel", "thmqsel_hcurl"] :
         params_data['Parameters'].append({"name":"bool_laplace", "value":"1"})
         params_data['Parameters'].append({"name":"bool_dilatation", "value":"1"})
 
@@ -270,6 +274,82 @@ def create_materials_insert(gdata: tuple, idata: Optional[List], confdata: dict,
 
     return materials_dict
 
+def create_models_supra(gdata: tuple, confdata: dict, templates: dict, method_data: List[str], debug: bool = False) -> dict:
+    models_dict = {}
+    if debug: print("create_models_supra:", confdata)
+
+    fconductor = templates["conductor"]
+    
+    # TODO: length data are written in mm should be in SI instead
+    unit_Length = method_data[5] # "meter"
+    units = load_units(unit_Length)
+    for prop in ["ThermalConductivity", "Young", "VolumicMass", "ElectricalConductivity"]:
+        confdata["material"][prop] = convert_data(units, confdata["material"][prop], prop)
+
+    if method_data[2] == "Axi":
+        pass
+    else:
+        pass
+
+    return models_dict
+
+def create_models_bitter(gdata: tuple, confdata: dict, templates: dict, method_data: List[str], equation: str, debug: bool = False) -> dict:
+    models_dict = {}
+    if debug: print("create_model_bitter:", confdata)
+
+    fconductor = templates[equation+"-conductor"]
+    
+    # TODO: length data are written in mm should be in SI instead
+    unit_Length = method_data[5] # "meter"
+    units = load_units(unit_Length)
+
+    (name, snames, turns) = gdata
+    for sname in snames:
+        if method_data[2] == "Axi":
+            if debug: print("create_model_bitter:", sname)
+            mdata = entry(fconductor, Merge({'name': "%s" % sname}, confdata["material"]) , debug)
+            models_dict["%s" % sname] = mdata
+        else:
+            return {}
+
+    if debug:
+        print(models_dict)
+    return models_dict
+
+
+def create_models_insert(gdata: tuple, idata: Optional[List], confdata: dict, templates: dict, method_data: List[str], equation: str, debug: bool = False) -> dict:
+    # TODO loop for Plateau (Axi specific)
+    models_dict = {}
+        #"physic":equation }
+    if debug: print("create_models_insert:", confdata)
+
+    fconductor = templates[equation+"-conductor"]
+    finsulator = templates[equation+"-insulator"]
+    # print('\n\nfconductor :', fconductor)
+
+    (NHelices, NRings, NChannels, Nsections, R1, R2, Z1, Z2, Zmin, Zmax, Dh, Sh) = gdata
+            
+    # Loop for Helix
+    for i in range(NHelices):
+        # section j==0:  treated as insulator in Axi
+        mdata = entry(finsulator, {'name': "H%d_Cu%d" % (i+1, 0)}, debug)
+        models_dict["H%d_Cu%d" % (i+1, 0)] = mdata
+    
+        # load conductor template
+        for j in range(1,Nsections[i]+1):
+            mdata = entry(fconductor, {'name': "H%d_Cu%d" % (i+1, j)}, debug)
+            models_dict["H%d_Cu%d" % (i+1, j)] = mdata
+
+        # section j==Nsections+1:  treated as insulator in Axi
+        mdata = entry(finsulator, {'name': "H%d_Cu%d" % (i+1, Nsections[i]+1)}, debug)
+        models_dict["H%d_Cu%d" % (i+1, Nsections[i]+1)] = mdata
+
+    # loop for Rings
+    for i in range(NRings):
+        mdata = entry(finsulator, {'name': "R%d" % (i+1)}, debug)
+        models_dict["R%d" % (i+1)] = mdata
+
+    return models_dict
 
 def create_bcs_supra(boundary_meca: List, 
                boundary_maxwell: List,
@@ -284,7 +364,8 @@ def create_bcs_supra(boundary_meca: List,
     meca_bcs_dir = { 'boundary_Meca_Dir': []} # name, value
     maxwell_bcs_dir = { 'boundary_Maxwell_Dir': []} # name, value
     
-    fcooling = templates["cooling"]
+    if 'th' in method_data[3]:
+        fcooling = templates["cooling"]
     
     return {}
 
@@ -411,16 +492,17 @@ def create_bcs_insert(boundary_meca: List,
             
     return {}
 
-def create_json(jsonfile: str, mdict: dict, mmat: dict, mpost: dict, templates: dict, method_data: List[str], debug: bool = False):
+def create_json(jsonfile: str, mdict: dict, mmat: dict, mmodels: dict, mpost: dict, templates: dict, method_data: List[str], debug: bool = False):
     """
     Create a json model file
     """
+
     if debug:
         print("create_json jsonfile=", jsonfile)
         print("create_json mdict=", mdict)
     data = entry(templates["model"], mdict, debug)
     if debug:
-        print("create_json/data model:", data)
+        print(f"create_json/data model: {data}")
     
     # material section
     if "Materials" in data:
@@ -429,6 +511,30 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mpost: dict, templates: 
     else:
         data["Materials"] = mmat
     if debug: print("create_json/Materials data:", data)
+
+    # models section
+    if 'th' in method_data[3]:
+        heat = mmodels["heat"]
+        for key in heat:
+            data["Models"]["heat"]["models"].append(heat[key])
+
+    if 'mag' in method_data[3] or 'mqs' in method_data[3] :
+        magnetic = mmodels["magnetic"]
+        for key in magnetic:
+            data["Models"]["magnetic"]["models"].append(magnetic[key])
+    
+    if 'magel' in method_data[3] :
+        elastic = mmodels["elastic"]
+        for key in elastic:
+            data["Models"]["elastic"]["models"].append(elastic[key])
+
+    if 'mqsel' in method_data[3] :
+        elastic1 = mmodels["elastic1"]
+        elastic2 = mmodels["elastic2"]
+        for key in elastic1:
+            data["Models"]["elastic1"]["models"].append(elastic1[key])
+        for key in elastic2:
+            data["Models"]["elastic2"]["models"].append(elastic2[key])
 
     # postprocess
     # print("=== FORCE DEBUG to True ===")
@@ -442,7 +548,7 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mpost: dict, templates: 
             odata = entry(templates["flux"], flux_data, debug)
             if debug: print(odata)
             for md in odata["Flux"]:
-                data["PostProcess"]["heat"]["Measures"]["Statistics"][md] = odata["Flux"][md]
+                add[md] = odata["Flux"][md]
     
     if "meanT_H" in mpost:
         if "heat" in data["PostProcess"]:
@@ -453,7 +559,18 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mpost: dict, templates: 
             odata = entry(templates["stats"][0], {'meanT_H': meanT_data}, debug)
             if debug: print("odata:", odata)
             for md in odata["Stats_T"]:
-                data["PostProcess"]["heat"]["Measures"]["Statistics"][md] = odata["Stats_T"][md]
+                add[md] = odata["Stats_T"][md]
+
+    if "meanStress_H" in mpost:
+        if "elastic" in data["PostProcess"]:
+            meanStress_data = mpost["meanStress_H"]
+            if debug: 
+                print("meanStress_H", type(meanStress_data))
+            add = data["PostProcess"]["elastic"]["Measures"]["Statistics"]
+            odata = entry(templates["stats"][0], {'meanStress_H': meanStress_data}, debug)
+            if debug: print("odata:", odata)
+            for md in odata["Stats_Stress"]:
+                add[md] = odata["Stats_Stress"][md]
 
     index_post_ = 0
     section = "electric"
@@ -475,7 +592,7 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mpost: dict, templates: 
         odata = entry(templates["stats"][index_post_+1], {'Current_H': currentH_data}, debug)
         if debug: print(odata)
         for md in odata["Stats_Current"]:
-            data["PostProcess"][section]["Measures"]["Statistics"][md] = odata["Stats_Current"][md]
+            add[md] = odata["Stats_Current"][md]
     
     if "power_H" in mpost:
         if debug:
@@ -487,8 +604,26 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mpost: dict, templates: 
         odata = entry(templates["stats"][index_post_], {'Power_H': powerH_data}, debug)
         if debug: print(odata)
         for md in odata["Stats_Power"]:
-            data["PostProcess"][section]["Measures"]["Statistics"][md] = odata["Stats_Power"][md]
-    
+            add[md] = odata["Stats_Power"][md]
+
+    # TODO: add data for B plots, aka Rinf, Zinf, NR and Nz?
+    if "plot_B" in mpost:
+        if debug:
+            print("plotB")
+            print("section:", "magnetic")
+            print("templates[plots]:", templates["plots"])
+        plotB_data = mpost["plot_B"]
+        print(f"plotB_data:{plotB_data}")
+        add = data["PostProcess"]["magnetic"]["Measures"]["Points"]
+        odata = entry(templates["plots"][0], {'Rinf': plotB_data['Rinf'], 'Zinf': plotB_data['Zinf'], 'NR': 100, 'NZ': 100}, debug)
+        if debug: print("odata:", odata)
+        print(f"data[PostProcess][magnetic][Measures][Points]: {add}")
+        print(f"odata: {odata}")
+        for md in odata:
+            print(f"odata[{md}: {odata[md]}")
+            add[md] = odata[md]
+        print(f"data[PostProcess][magnetic][Measures][Points]: {add}")
+
     mdata = json.dumps(data, indent = 4)
 
     with open(jsonfile, "w+") as out:
@@ -511,6 +646,8 @@ def entry(template: str, rdata: List, debug: bool = False) -> str:
     corrected = re.sub(r'},\s+}\n', '}\n}\n', corrected)
     # corrected = re.sub(r'},\s+}\n', '}\n}\n', corrected)
     corrected = corrected.replace("&quot;", "\"")
+    corrected = corrected.replace("&lt;", "<")
+    corrected = corrected.replace("&gt;", ">")
     if debug:
         print(f"entry/jsonfile: {jsonfile}")
         print(f"corrected: {corrected}")

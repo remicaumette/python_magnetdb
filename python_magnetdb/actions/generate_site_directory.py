@@ -31,20 +31,25 @@ def generate_site_directory(site_id, directory):
         if not site_magnet.active:
             continue
         magnet = site_magnet.magnet
+        print(f'site_magnet: name={magnet.name} id={magnet.id}')
         if magnet.geometry:
+            print(f'download: magnet geometry={magnet.geometry.filename}')
             magnet.geometry.download(f"{directory}/data/geometries/{magnet.geometry.filename}")
         for magnet_part in magnet.magnet_parts:
+            print(f'magnet_part: name={magnet_part.part.name}')
             if not magnet_part.active:
                 continue
             for geometry in magnet_part.part.geometries:
+                print(f'download: magnet geometry={geometry.attachment.filename}')
                 geometry.attachment.download(f"{directory}/data/geometries/{geometry.attachment.filename}")
             if magnet_part.part.cad:
                 for cad in magnet_part.part.cad:
                     cad.attachment.download(f"{directory}/data/cad/{cad.attachment.filename}")
-        with open(f"{directory}/{magnet.name}-data.json", "w+") as file:
-            magnet_config = generate_magnet_config(site_magnet.id)
-            file.write(json.dumps(magnet_config))
-            site_config['magnets'].append(magnet.name)
+            with open(f"{directory}/{magnet.name}-data.json", "w+") as file:
+                magnet_config = generate_magnet_config(magnet.id)
+                file.write(json.dumps(magnet_config))
+                site_config['magnets'].append({magnet.name: magnet_config})
+        # print(f'generate_site_directory: site_config={site_config}')
 
     with open(f"{directory}/config.json", "w+") as file:
         file.write(json.dumps(site_config))

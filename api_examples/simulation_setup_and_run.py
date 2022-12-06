@@ -3,8 +3,8 @@ from time import sleep
 
 import requests
 
-simulation_id = 6
-server_id = 4
+simulation_id = 154
+server_id = 2
 
 def get_simulation():
     return requests.get(
@@ -38,17 +38,19 @@ r = requests.post(
     data={'server_id': 4},
     headers={'Authorization': os.getenv('MAGNETDB_API_KEY')}
 )
+simulation = get_simulation()
 while True:
     simulation = get_simulation()
     if simulation['status'] == 'failed':
-        print('Simulation failed!')
+        print('failed!')
         exit(1)
     if simulation['status'] == 'done':
-        print('Simulation done!')
+        print('done!')
         break
-    print(f"Waiting the end of the simulation... ({simulation['status']})")
+    print(f"Waiting setup... ({simulation['status']})")
     sleep(10)
-
+print(f"Simulation done: status={simulation['status']}")
+    
 r = requests.get(f"http://localhost:8000/api/attachments/{simulation['log_attachment_id']}/download",
                  headers={'Authorization': os.getenv('MAGNETDB_API_KEY')})
 print(r.text)

@@ -16,11 +16,10 @@ router = APIRouter()
 @router.get("/api/records")
 def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
           query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False)):
-    records = Record
+    records = Record \
+        .order_by(sort_by or 'created_at', 'desc' if sort_desc else 'asc')
     if query is not None and query.strip() != '':
         records = records.where('name', 'ilike', f'%{query}%')
-    if sort_by is not None:
-        records = records.order_by(sort_by, 'desc' if sort_desc else 'asc')
     records = records.paginate(per_page, page)
     return {
         "current_page": records.current_page,

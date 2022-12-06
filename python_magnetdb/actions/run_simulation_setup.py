@@ -27,15 +27,15 @@ def run_simulation_setup(simulation):
     simulation.save()
 
     with tempfile.TemporaryDirectory() as tempdir:
-        subprocess.run([f"rm -rf {tempdir}"], shell=True)
-        subprocess.run([f"mkdir -p {tempdir}"], shell=True)
+        done = subprocess.run([f"rm -rf {tempdir}"], shell=True)
+        done = subprocess.run([f"mkdir -p {tempdir}"], shell=True)
 
         print(f"generating config in {tempdir}...")
         prepare_directory(simulation, tempdir)
-        subprocess.run([f"ls -lR {tempdir}"], shell=True)
+        done = subprocess.run([f"ls -lR {tempdir}"], shell=True)
         print("generating config done")
 
-        print("running setup...")
+        print(f"running setup... non_linear={simulation.non_linear} type={type(simulation.non_linear)}")
         data_dir = f"{tempdir}/data"
         current_dir = os.getcwd()
         os.chdir(tempdir)
@@ -58,15 +58,25 @@ def run_simulation_setup(simulation):
         try:
             with open(f"{tempdir}/config.json", "r") as config_file:
                 config = json.load(config_file)
-                (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename) = setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
+                # (yamlfile, cfgfile, jsonfile, xaofile, meshfile, tarfilename) = setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
+                # simulation.setup_state = {
+                #     'yamlfile': yamlfile,
+                #     'cfgfile': cfgfile[len(tempdir) + 1:],
+                #     'jsonfile': jsonfile[len(tempdir) + 1:],
+                #     'xaofile': xaofile,
+                #     'meshfile': meshfile,
+                #     'tarfilename': tarfilename[len(tempdir):],
+                # }
+                (yamlfile, cfgfile, jsonfile, xaofile, meshfile) = setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
                 simulation.setup_state = {
                     'yamlfile': yamlfile,
                     'cfgfile': cfgfile[len(tempdir) + 1:],
                     'jsonfile': jsonfile[len(tempdir) + 1:],
                     'xaofile': xaofile,
-                    'meshfile': meshfile,
-                    'tarfilename': tarfilename[len(tempdir):],
+                    'meshfile': meshfile
                 }
+            # subprocess.run([f"pwd"], shell=True, check=True)
+            # subprocess.run([f"ls -alrth"], shell=True, check=True)
             config_file_path = None
             for file in os.listdir(tempdir):
                 if file.endswith('.cfg'):
@@ -74,12 +84,12 @@ def run_simulation_setup(simulation):
                     break
             simulation_name = os.path.basename(os.path.splitext(config_file_path)[0])
             output_archive = f"{tempdir}/setup-{simulation_name}.tar.gz"
-            subprocess.run([f"tar cvzf {output_archive} *"], shell=True)
+            done = subprocess.run([f"tar cvzf {output_archive} *"], shell=True, check=True)
             attachment = Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
             simulation.setup_output_attachment().associate(attachment)
             simulation.setup_status = "done"
-        except Exception as e:
+        except Exception as err:
             simulation.setup_status = "failed"
-            print_exception(e)
+            print_exception(None, err, err.__traceback__)
         os.chdir(current_dir)
         simulation.save()
