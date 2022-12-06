@@ -29,6 +29,7 @@ const router = new VueRouter({
     { name: 'profile', path: '/profile', component: () => import('./views/profile') },
     { name: 'servers', path: '/servers', component: () => import('./views/servers/list') },
     { name: 'new_server', path: '/servers/new', component: () => import('./views/servers/new') },
+    { name: 'edit_server', path: '/servers/:id/edit', component: () => import('./views/servers/edit') },
     { name: 'visualisation_bmap', path: '/visualisations/bmap', component: () => import('./views/visualisations/bmap') },
     { name: 'visualisation_bmap_2d', path: '/visualisations/bmap_2d', component: () => import('./views/visualisations/bmap-2d') },
     { name: 'visualisation_stress_map', path: '/visualisations/stress_map', component: () => import('./views/visualisations/stress-map') },

@@ -10,7 +10,7 @@
     </div>
 
     <Card>
-      <DataTable :headers="headers" @fetch="fetch" config-persistence-key="server-list">
+      <DataTable ref="datatable" :headers="headers" @fetch="fetch" config-persistence-key="server-list">
         <template v-slot:item.name="{ item }">
           {{ item.name }}
         </template>
@@ -28,6 +28,16 @@
         <template v-slot:item.updated_at="{ item }">
           {{ item.updated_at | datetime }}
         </template>
+        <template v-slot:item.actions="{ item }">
+          <div class="flex items-center space-x-2">
+            <router-link :to="{ name: 'edit_server', params: { id: item.id } }" class="btn btn-small btn-default">
+              Edit
+            </router-link>
+            <Button @click="destroy(item.id)" class="btn btn-small btn-danger">
+              Delete
+            </Button>
+          </div>
+        </template>
       </DataTable>
     </Card>
   </div>
@@ -37,10 +47,12 @@
 import * as serverService from '@/services/serverService'
 import Card from '@/components/Card'
 import DataTable from "@/components/DataTable";
+import Button from "@/components/Button";
 
 export default {
   name: 'ServerList',
   components: {
+    Button,
     Card,
     DataTable,
   },
@@ -76,13 +88,17 @@ export default {
         {
           key: 'created_at',
           name: 'Created At',
-          default: true,
           sortable: true,
         },
         {
           key: 'updated_at',
           name: 'Updated At',
           sortable: true,
+        },
+        {
+          key: 'actions',
+          name: 'Actions',
+          default: true,
         },
       ]
     }
@@ -102,6 +118,9 @@ export default {
     copy(value) {
       navigator.clipboard.writeText(value)
     },
+    destroy(serverId) {
+      return serverService.destroy({ id: serverId }).then(this.$refs.datatable.fetch)
+    }
   },
 }
 </script>

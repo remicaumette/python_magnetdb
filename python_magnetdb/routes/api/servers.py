@@ -26,20 +26,69 @@ def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(d
 
 
 @router.post("/api/servers")
-def create(user=Depends(get_user('create')), name: str = Form(...), host: str = Form(...), username: str = Form(...),
-           image_directory: str = Form(...)):
+def create(name: str = Form(...), host: str = Form(...), username: str = Form(...),
+           image_directory: str = Form(...), type: str = Form(None), smp: bool = Form(None),
+           multithreading: bool = Form(None), cores: int = Form(None), dns: str = Form(None),
+           job_manager: str = Form(None), mesh_gems_directory: str = Form(None),
+           user=Depends(get_user('create'))):
     private_key, public_key = generate_server_key_pairs()
-    server = Server(name=name, host=host, username=username, image_directory=image_directory,
-                    private_key=private_key, public_key=public_key)
+    server = Server(name=name, host=host, username=username, image_directory=image_directory, private_key=private_key,
+                    public_key=public_key)
     server.user().associate(user)
+    if type is not None:
+        server.type = type
+    if smp is not None:
+        server.smp = smp
+    if multithreading is not None:
+        server.multithreading = multithreading
+    if cores is not None:
+        server.cores = cores
+    if dns is not None:
+        server.dns = dns
+    if job_manager is not None:
+        server.job_manager = job_manager
+    if mesh_gems_directory is not None:
+        server.mesh_gems_directory = mesh_gems_directory
     server.save()
     AuditLog.log(user, "Server created", resource=server)
     return server.serialize()
 
 
+@router.get("/api/servers/{id}")
+def show(id: int, user=Depends(get_user('read'))):
+    server = Server.where('user_id', user.id).find(id)
+    if not server:
+        raise HTTPException(status_code=404, detail="Server not found")
+    return server.serialize()
+
+
+@router.patch("/api/servers/{id}")
+def update(id: int, name: str = Form(...), host: str = Form(...), username: str = Form(...),
+           image_directory: str = Form(...), type: str = Form(...), smp: bool = Form(...),
+           multithreading: bool = Form(...), cores: int = Form(...), dns: str = Form(...),
+           job_manager: str = Form(...), mesh_gems_directory: str = Form(...), user=Depends(get_user('update'))):
+    server = Server.where('user_id', user.id).find(id)
+    if not server:
+        raise HTTPException(status_code=404, detail="Server not found")
+    server.name = name
+    server.host = host
+    server.username = username
+    server.image_directory = image_directory
+    server.type = type
+    server.smp = smp
+    server.multithreading = multithreading
+    server.cores = cores
+    server.dns = dns
+    server.job_manager = job_manager
+    server.mesh_gems_directory = mesh_gems_directory
+    server.save()
+    AuditLog.log(user, "Server updated", resource=server)
+    return server.serialize()
+
+
 @router.delete("/api/servers/{id}")
 def destroy(id: int, user=Depends(get_user('delete'))):
-    server = Server.find(id)
+    server = Server.where('user_id', user.id).find(id)
     if not server:
         raise HTTPException(status_code=404, detail="Server not found")
     server.delete()

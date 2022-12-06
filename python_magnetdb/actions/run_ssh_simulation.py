@@ -27,7 +27,7 @@ def run_cmd(connection, cmd, stdout):
     return res.stdout
 
 
-def run_ssh_simulation(simulation, server):
+def run_ssh_simulation(simulation, server, cores):
     simulation.status = "in_progress"
     simulation.save()
 
@@ -72,10 +72,10 @@ def run_ssh_simulation(simulation, server):
                 env = appenv(envfile=None, url_api=data_dir, yaml_repo=f"{remote_temp_dir}/geometries",
                              cad_repo=f"{remote_temp_dir}/cad", mesh_repo=data_dir, simage_repo=server.image_directory,
                              mrecord_repo=data_dir, optim_repo=data_dir)
-                # TODO: create node_spec from server
-                node_spec = NodeSpec(name="local-node", otype=NodeType.compute, smp=True, dns="localhost", cores=8,
-                                     multithreading=True, manager=JobManager(otype=JobManagerType.none, queues=[]),
-                                     mgkeydir=None)
+                node_spec = NodeSpec(name=server.name, otype=server.type, smp=server.smp, dns=server.dns,
+                                     cores=cores, multithreading=server.multithreading,
+                                     manager=JobManager(otype=server.job_manager, queues=[]),
+                                     mgkeydir=server.mesh_gems_directory)
                 cmds = setup_cmds(env, args, node_spec, simulation.setup_state['yamlfile'],
                                   simulation.setup_state['cfgfile'], simulation.setup_state['jsonfile'], simulation.setup_state['xaofile'],
                                   simulation.setup_state['meshfile'], remote_temp_dir)

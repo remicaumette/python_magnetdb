@@ -64,7 +64,6 @@ export default {
     return {
       FormInput,
       FormUpload,
-      error: null,
     }
   },
   methods: {
