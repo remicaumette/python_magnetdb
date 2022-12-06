@@ -99,7 +99,7 @@ export default {
       this.modelOptions = this.availableModels
           .filter((model) =>
             model.method === values.method && model.geometry === values.geometry &&
-            (model.time === 'static' || !values.static)
+            (model.time === (values.static === 'on' ? 'static' : 'transient') )
           )
           .map((model) => model.model)
     },
