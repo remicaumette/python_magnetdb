@@ -109,8 +109,8 @@ export default {
         resource: undefined,
         resource_type: values.resource.value?.type,
         resource_id: values.resource.value?.id,
-        static: values.static,
-        non_linear: values.non_linear,
+        static: values.static ?? false,
+        non_linear: values.non_linear ?? false,
       })
           .then((simulation) => {
             this.$router.push({ name: 'simulation', params: { id: simulation.id } })
