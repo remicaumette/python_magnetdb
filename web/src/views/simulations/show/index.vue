@@ -118,6 +118,17 @@
             :disabled="true"
             :checked="simulation.non_linear"
         />
+        <FormField
+            v-for="(current, index) in simulation.currents"
+            :key="current.magnet.id"
+            :label="`Current for ${current.magnet.name}`"
+            :name="`currents.${index}.value`"
+            :component="FormInput"
+            type="number"
+            :required="true"
+            :disabled="true"
+            :default-value="current.value"
+        />
       </Form>
     </Card>
 
