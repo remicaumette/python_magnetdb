@@ -93,12 +93,12 @@
             :unit-options="[
                 {
                   name: '1/Celsius',
-                  value: '1/celsius',
+                  value: 'celsius^-1',
                   symbol: '1/°C',
                 },
                 {
                   name: '1/Kelvin',
-                  value: '1/kelvin',
+                  value: 'kelvin^-1',
                   symbol: '1/K',
                   default: true,
                 }
@@ -197,12 +197,12 @@
             :unit-options="[
                 {
                   name: '1/Celsius',
-                  value: '1/celsius',
+                  value: 'celsius^-1',
                   symbol: '1/°C',
                 },
                 {
                   name: '1/Kelvin',
-                  value: '1/kelvin',
+                  value: 'kelvin^-1',
                   symbol: '1/K',
                   default: true,
                 }

@@ -40,7 +40,9 @@ export default {
   methods: {
     changeUnit(event) {
       const newUnit = this.unitOptions.find((opt) => opt.value === event.target.value)
-      this.displayableValue = unit(this.displayableValue, this.unit.value).to(newUnit.value).value
+      this.displayableValue = String(
+          parseFloat(unit(this.displayableValue, this.unit.value).to(newUnit.value).format({ notation: 'fixed' }))
+      )
       this.unit = newUnit
     },
   },
