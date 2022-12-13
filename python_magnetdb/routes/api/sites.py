@@ -14,16 +14,29 @@ router = APIRouter()
 @router.get("/api/sites")
 def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
           query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False)):
-    sites = Site \
+    sites = Site.with_('site_magnets.magnet') \
         .order_by(sort_by or 'created_at', 'desc' if sort_desc else 'asc')
     if query is not None and query.strip() != '':
         sites = sites.where('name', 'ilike', f'%{query}%')
     sites = sites.paginate(per_page, page)
+
+    items = []
+    for site in sites:
+        item = site.serialize()
+        item['commissioned_at'] = sorted(
+            list(map(lambda curr: curr.commissioned_at, site.site_magnets)), reverse=True
+        )[0] if len(site.site_magnets) > 0 else None
+        decommissioned_at = list(
+            filter(lambda curr: curr is not None, map(lambda curr: curr.decommissioned_at, list(site.site_magnets)))
+        )
+        item['decommissioned_at'] = sorted(decommissioned_at, reverse=True)[0] if len(decommissioned_at) > 0 else None
+        items.append(item)
+
     return {
         "current_page": sites.current_page,
         "last_page": sites.last_page,
         "total": sites.total,
-        "items": sites.serialize(),
+        "items": items,
     }
 
 
@@ -46,7 +59,16 @@ def show(id: int, user=Depends(get_user('read'))):
     site = Site.with_('config', 'site_magnets.magnet', 'records').find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
-    return site.serialize()
+
+    res = site.serialize()
+    res['commissioned_at'] = sorted(
+        list(map(lambda curr: curr.commissioned_at, list(site.site_magnets))), reverse=True
+    )[0]
+    decommissioned_at = list(
+        filter(lambda curr: curr is not None, map(lambda curr: curr.decommissioned_at, list(site.site_magnets)))
+    )
+    res['decommissioned_at'] = sorted(decommissioned_at, reverse=True)[0] if len(decommissioned_at) > 0 else None
+    return res
 
 
 @router.patch("/api/sites/{id}")
