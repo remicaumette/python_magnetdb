@@ -50,10 +50,10 @@ export default {
     this.targetUnitValue = this.unitOptions.find((opt) => opt.value === this.targetUnit) ||
         this.unitOptions.find((opt) => opt.default)
     this.unit = this.unitOptions.find((opt) => opt.default)
-    this.displayableValue = String(
+    this.displayableValue = this.value ? String(
         parseFloat(unit(this.value, this.targetUnitValue.value).to(this.unit.value)
             .format({ notation: 'fixed' }))
-    )
+    ) : null
   },
 }
 </script>

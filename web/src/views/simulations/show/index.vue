@@ -123,11 +123,25 @@
             :key="current.magnet.id"
             :label="`Current for ${current.magnet.name}`"
             :name="`currents.${index}.value`"
-            :component="FormInput"
+            :component="FormInputWithUnit"
             type="number"
             :required="true"
             :disabled="true"
             :default-value="current.value"
+            :unit-options="[
+              {
+                name: 'Ampère',
+                value: 'A',
+                symbol: 'A',
+                default: true,
+              },
+              {
+                name: 'Giga Ampère',
+                value: 'GA',
+                symbol: 'GA',
+                default: false,
+              }
+            ]"
         />
       </Form>
     </Card>
@@ -143,6 +157,7 @@ import Card from '@/components/Card'
 import Form from "@/components/Form";
 import FormField from "@/components/FormField";
 import FormInput from "@/components/FormInput";
+import FormInputWithUnit from "@/components/FormInputWithUnit";
 import FormSelect from "@/components/FormSelect";
 import FormUpload from "@/components/FormUpload";
 import Button from "@/components/Button";
@@ -167,6 +182,7 @@ export default {
   data() {
     return {
       FormInput,
+      FormInputWithUnit,
       FormSelect,
       FormUpload,
       error: null,

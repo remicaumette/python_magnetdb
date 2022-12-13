@@ -5,16 +5,30 @@
         :key="magnet.id"
         :label="`Current for ${magnet.name}`"
         :name="`i_${magnet.id}`"
-        :component="FormInput"
+        :component="FormInputWithUnit"
         type="number"
         :required="true"
+        :unit-options="[
+          {
+            name: 'Ampère',
+            value: 'A',
+            symbol: 'A',
+            default: true,
+          },
+          {
+            name: 'Giga Ampère',
+            value: 'GA',
+            symbol: 'GA',
+            default: false,
+          }
+        ]"
     />
   </div>
 </template>
 
 <script>
 import FormField from "@/components/FormField";
-import FormInput from "@/components/FormInput";
+import FormInputWithUnit from "@/components/FormInputWithUnit";
 import * as siteService from '@/services/siteService'
 import * as magnetService from '@/services/magnetService'
 
@@ -23,7 +37,7 @@ export default {
   inject: ['form'],
   components: { FormField },
   data: () => ({
-    FormInput,
+    FormInputWithUnit,
     magnets: [],
   }),
   watch: {
