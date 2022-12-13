@@ -128,7 +128,7 @@
             :unit-options="[
                 {
                   name: '1/ohm/m',
-                  value: '1/ohm/m',
+                  value: 'ohm^-1*m^2',
                   symbol: 'S',
                   default: true,
                 }
@@ -162,11 +162,17 @@
             type="number"
             placeholder="0"
             :component="FormInputWithUnit"
+            target-unit="Pa"
             :unit-options="[
                 {
                   name: 'Pascal',
                   value: 'Pa',
                   symbol: 'Pa',
+                },
+                {
+                  name: 'Giga Pascal',
+                  value: 'GPa',
+                  symbol: 'GPa',
                   default: true,
                 },
                 {

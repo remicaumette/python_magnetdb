@@ -23,32 +23,37 @@ window.mathUnit = unit
 export default {
   name: 'FormInputWithUnit',
   inheritAttrs: false,
-  props: ['value', 'unitOptions', 'hasError'],
+  props: ['value', 'targetUnit', 'unitOptions', 'hasError'],
   inject: ['form'],
   data() {
     return {
-      displayableValue: this.value,
-      defaultUnit: null,
+      displayableValue: null,
+      targetUnitValue: null,
       unit: null,
     }
   },
   watch: {
     displayableValue(value) {
-      this.$emit('value', unit(value, this.unit.value).to(this.defaultUnit.value).value)
+      this.$emit('value', unit(value, this.unit.value).to(this.targetUnitValue.value).value)
     }
   },
   methods: {
     changeUnit(event) {
       const newUnit = this.unitOptions.find((opt) => opt.value === event.target.value)
       this.displayableValue = String(
-          parseFloat(unit(this.displayableValue, this.unit.value).to(newUnit.value).format({ notation: 'fixed' }))
+        parseFloat(unit(this.displayableValue, this.unit.value).to(newUnit.value).format({ notation: 'fixed' }))
       )
       this.unit = newUnit
     },
   },
   created() {
-    this.defaultUnit = this.unitOptions.find((opt) => opt.default)
-    this.unit = this.defaultUnit
+    this.targetUnitValue = this.unitOptions.find((opt) => opt.value === this.targetUnit) ||
+        this.unitOptions.find((opt) => opt.default)
+    this.unit = this.unitOptions.find((opt) => opt.default)
+    this.displayableValue = String(
+        parseFloat(unit(this.value, this.targetUnitValue.value).to(this.unit.value)
+            .format({ notation: 'fixed' }))
+    )
   },
 }
 </script>
