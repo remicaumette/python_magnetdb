@@ -393,7 +393,7 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
 
     return (yamlfile, cfgfile, jsonfile, xaofile, meshfile) #, tarfilename)
 
-def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, meshfile, root_directory):
+def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, meshfile, root_directory, currents):
     """
     create cmds
 

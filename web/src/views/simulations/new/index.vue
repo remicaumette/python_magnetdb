@@ -134,7 +134,7 @@ export default {
         cooling: Yup.string().required(),
         ...Object.fromEntries(
           this.$refs.currents.magnets.map(
-            (magnet) => [`i_${magnet.id}`, Yup.string().required()]
+            (magnet) => [`i_${magnet.id}`, Yup.mixed().required()]
           )
         )
       })

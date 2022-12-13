@@ -27,6 +27,8 @@ def run_cmd(cmd, stdout):
 def run_simulation(simulation):
     simulation.status = "in_progress"
     simulation.save()
+    simulation.load('currents.magnet')
+    currents = {current.magnet.name: current.value for current in simulation.currents}
 
     with tempfile.TemporaryDirectory() as tempdir:
         current_dir = os.getcwd()
@@ -61,8 +63,9 @@ def run_simulation(simulation):
                                      multithreading=True, manager=JobManager(otype=JobManagerType.none, queues=[]),
                                      mgkeydir=None)
                 cmds = setup_cmds(env, args, node_spec, simulation.setup_state['yamlfile'],
-                                  simulation.setup_state['cfgfile'], simulation.setup_state['jsonfile'], simulation.setup_state['xaofile'],
-                                  simulation.setup_state['meshfile'], tempdir)
+                                  simulation.setup_state['cfgfile'], simulation.setup_state['jsonfile'],
+                                  simulation.setup_state['xaofile'],
+                                  simulation.setup_state['meshfile'], tempdir, currents)
 
                 # Save cmds in a file
                 with open("cmds.txt", "a") as f:
