@@ -63,7 +63,7 @@ def show(id: int, user=Depends(get_user('read'))):
     res = site.serialize()
     res['commissioned_at'] = sorted(
         list(map(lambda curr: curr.commissioned_at, list(site.site_magnets))), reverse=True
-    )[0]
+    )[0] if len(site.site_magnets) > 0 else None
     decommissioned_at = list(
         filter(lambda curr: curr is not None, map(lambda curr: curr.decommissioned_at, list(site.site_magnets)))
     )

@@ -14,16 +14,29 @@ router = APIRouter()
 @router.get("/api/magnets")
 def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
           query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False)):
-    magnets = Magnet \
+    magnets = Magnet.with_('site_magnets') \
         .order_by(sort_by or 'created_at', 'desc' if sort_desc else 'asc')
     if query is not None and query.strip() != '':
         magnets = magnets.where('name', 'ilike', f'%{query}%')
     magnets = magnets.paginate(per_page, page)
+
+    items = []
+    for magnet in magnets:
+        item = magnet.serialize()
+        item['commissioned_at'] = sorted(
+            list(map(lambda curr: curr.commissioned_at, magnet.site_magnets)), reverse=True
+        )[0] if len(magnet.site_magnets) > 0 else None
+        decommissioned_at = list(
+            filter(lambda curr: curr is not None, map(lambda curr: curr.decommissioned_at, list(magnet.site_magnets)))
+        )
+        item['decommissioned_at'] = sorted(decommissioned_at, reverse=True)[0] if len(decommissioned_at) > 0 else None
+        items.append(item)
+
     return {
         "current_page": magnets.current_page,
         "last_page": magnets.last_page,
         "total": magnets.total,
-        "items": magnets.serialize(),
+        "items": items,
     }
 
 
@@ -48,7 +61,16 @@ def show(id: int, user=Depends(get_user('read'))):
     magnet = Magnet.with_('magnet_parts.part', 'site_magnets.site', 'cad.attachment', 'geometry').find(id)
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
-    return magnet.serialize()
+
+    res = magnet.serialize()
+    res['commissioned_at'] = sorted(
+        list(map(lambda curr: curr.commissioned_at, list(magnet.site_magnets))), reverse=True
+    )[0] if len(magnet.site_magnets) > 0 else None
+    decommissioned_at = list(
+        filter(lambda curr: curr is not None, map(lambda curr: curr.decommissioned_at, list(magnet.site_magnets)))
+    )
+    res['decommissioned_at'] = sorted(decommissioned_at, reverse=True)[0] if len(decommissioned_at) > 0 else None
+    return res
 
 
 @router.patch("/api/magnets/{id}")
