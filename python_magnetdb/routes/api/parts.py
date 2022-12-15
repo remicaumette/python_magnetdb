@@ -61,6 +61,8 @@ def show(id: int, user=Depends(get_user('read'))):
             result.append(site['site_id'])
             print(f"site={site_data['name']}")
 
+    # can return result as a list
+    # pour la suite voir show.vue de simulations avec Measures
     raise HTTPException(status_code=404, detail=f"part/{id}/sites not defined yet")
 
 # ............./records

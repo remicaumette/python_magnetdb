@@ -42,6 +42,22 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
     AuditLog.log(user, "Magnet created", resource=magnet)
     return magnet.serialize()
 
+# ............./records
+@router.get("/api/parts/{id}/records")
+def show(id: int, user=Depends(get_user('read'))):
+    magnet = Magnet.with_('site_magnets.site').find(id)
+
+    result = []
+    data = magnet.to_dict()
+    for site in magnet['site_magnets']:
+        site_data = Site.with_('records').find(site['site_id'])
+        print(f"site={site_data['name']}")
+
+        for record in site_data['records']:
+            result.append(record['id'])
+            print(f"record={record['name']}")
+    raise HTTPException(status_code=404, detail=f"magnet/{id}/records not defined yet")
+
 
 @router.get("/api/magnets/{id}")
 def show(id: int, user=Depends(get_user('read'))):
