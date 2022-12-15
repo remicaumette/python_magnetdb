@@ -312,10 +312,24 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
                     if args.debug:
                         print(f"magnet(type={type(magnet)}: {magnet}")
                     mname = list(magnet.keys())[0]
-                    if args.debug:
-                        print(f"{mname} (type:{type(mname)}")
-                        print(f"magnet[{mname}]: {magnet[mname]}")
-                    todict[mname] = magnet[mname]['geom'].replace(".yaml","")
+                    mconfdata = magnet[mname]
+                    # if args.debug:
+                    print(f"magnet[{mname}]: {mconfdata}")
+                    if "Helix" in mconfdata:
+                        todict[mname] = mconfdata['geom'].replace(".yaml","")
+                    else:
+                        todict[mname] = []
+                        if 'Bitter' in mconfdata:
+                            for obj in mconfdata['Bitter']:
+                                todict[mname].append(obj['geom'].replace(".yaml",""))
+                        if 'Supra' in mconfdata:
+                            for obj in mconfdata['Supra']:
+                                todict[mname].append(obj['geom'].replace(".yaml",""))
+            else:
+                raise Exception(f"setup: no magnet in site {confdata['name']}")
+
+            if args.debug:
+                print(f'todict: {todict}')
             yamldata['magnets'] = todict
 
             print(f"try to create {MyEnv.yaml_repo + '/' + confdata['name'] + '.yaml'}")
@@ -413,7 +427,7 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
         print(f"NP={NP} {type(NP)}")
     if args.np > 0:
         if args.np > NP:
-            print(f'requested number of cores {args.np} exceed {server.name} capability (max: {NP})')
+            print(f'requested number of cores {args.np} exceed {node_spec.name} capability (max: {NP})')
         else:
             NP = args.np
 
