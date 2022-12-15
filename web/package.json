@@ -16,7 +16,7 @@
     "chartjs-plugin-zoom": "^1.2.0",
     "core-js": "^3.6.5",
     "lodash": "^4.17.21",
-    "mathjs": "^10.1.0",
+    "mathjs": "^11.5.0",
     "nouislider": "^15.6.0",
     "plotly.js": "^2.12.1",
     "vue": "^2.6.11",

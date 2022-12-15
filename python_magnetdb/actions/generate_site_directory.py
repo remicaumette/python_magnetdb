@@ -45,10 +45,10 @@ def generate_site_directory(site_id, directory):
             if magnet_part.part.cad:
                 for cad in magnet_part.part.cad:
                     cad.attachment.download(f"{directory}/data/cad/{cad.attachment.filename}")
-            with open(f"{directory}/{magnet.name}-data.json", "w+") as file:
-                magnet_config = generate_magnet_config(magnet.id)
-                file.write(json.dumps(magnet_config))
-                site_config['magnets'].append({magnet.name: magnet_config})
+        with open(f"{directory}/{magnet.name}-data.json", "w+") as file:
+            magnet_config = generate_magnet_config(magnet.id)
+            file.write(json.dumps(magnet_config))
+            site_config['magnets'].append({magnet.name: magnet_config})
         # print(f'generate_site_directory: site_config={site_config}')
 
     with open(f"{directory}/config.json", "w+") as file:

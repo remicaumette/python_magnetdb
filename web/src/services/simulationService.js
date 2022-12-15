@@ -23,12 +23,12 @@ export function runSetup({ id }) {
     .then((res) => res.data)
 }
 
-export function runSimulation({ id, serverId }) {
-  let form = null
+export function runSimulation({ id, serverId, cores }) {
+  let form = new FormData()
   if (serverId) {
-    form = new FormData()
     form.set('server_id', serverId)
   }
+  form.set('cores', cores)
   return client.post(`/api/simulations/${id}/run`, form)
     .then((res) => res.data)
 }
@@ -39,13 +39,11 @@ export function deleteSimulation({ id }) {
 }
 
 export function create(values) {
-  const form = new FormData()
-  for (const [key, value] of Object.entries(values)) {
-    if (value !== undefined) {
-      form.append(key, value)
-    }
-  }
-  return client.post(`/api/simulations`, form)
+  return client.post(
+    `/api/simulations`,
+    JSON.stringify(values),
+    { headers: { 'Content-Type': 'application/json' } }
+  )
     .then((res) => res.data)
 }
 

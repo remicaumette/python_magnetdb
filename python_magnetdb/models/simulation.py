@@ -1,5 +1,5 @@
 from orator import Model
-from orator.orm import belongs_to, morph_to
+from orator.orm import belongs_to, morph_to, has_many
 
 
 class Simulation(Model):
@@ -14,6 +14,11 @@ class Simulation(Model):
     @morph_to
     def resource(self):
         return
+
+    @has_many
+    def currents(self):
+        from .simulation_current import SimulationCurrent
+        return SimulationCurrent
 
     @belongs_to('setup_output_attachment_id')
     def setup_output_attachment(self):

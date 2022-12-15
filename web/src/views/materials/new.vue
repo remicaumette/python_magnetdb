@@ -93,12 +93,12 @@
             :unit-options="[
                 {
                   name: '1/Celsius',
-                  value: '1/celsius',
+                  value: 'celsius^-1',
                   symbol: '1/°C',
                 },
                 {
                   name: '1/Kelvin',
-                  value: '1/kelvin',
+                  value: 'kelvin^-1',
                   symbol: '1/K',
                   default: true,
                 }
@@ -128,7 +128,7 @@
             :unit-options="[
                 {
                   name: '1/ohm/m',
-                  value: '1/ohm/m',
+                  value: 'ohm^-1*m^-1',
                   symbol: 'S',
                   default: true,
                 }
@@ -162,11 +162,17 @@
             type="number"
             placeholder="0"
             :component="FormInputWithUnit"
+            target-unit="Pa"
             :unit-options="[
                 {
                   name: 'Pascal',
                   value: 'Pa',
                   symbol: 'Pa',
+                },
+                {
+                  name: 'Giga Pascal',
+                  value: 'GPa',
+                  symbol: 'GPa',
                   default: true,
                 },
                 {
@@ -197,12 +203,12 @@
             :unit-options="[
                 {
                   name: '1/Celsius',
-                  value: '1/celsius',
+                  value: 'celsius^-1',
                   symbol: '1/°C',
                 },
                 {
                   name: '1/Kelvin',
-                  value: '1/kelvin',
+                  value: 'kelvin^-1',
                   symbol: '1/K',
                   default: true,
                 }

@@ -10,11 +10,11 @@ app = Celery('tasks', broker=os.getenv('REDIS_ADDR') or 'redis://localhost:6379/
 
 
 @app.task
-def run_simulation(simulation_id, server_id):
+def run_simulation(simulation_id, server_id, cores):
     from .actions.run_simulation import run_simulation
     from .actions.run_ssh_simulation import run_ssh_simulation
     if server_id is not None:
-        return run_ssh_simulation(Simulation.find(simulation_id), Server.find(server_id))
+        return run_ssh_simulation(Simulation.find(simulation_id), Server.find(server_id), cores)
     else:
         return run_simulation(Simulation.find(simulation_id))
 

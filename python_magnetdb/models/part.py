@@ -8,6 +8,13 @@ class Part(Model):
     __table__ = "parts"
     __fillable__ = ['name', 'description', 'status', 'type', 'design_office_reference', 'material_id']
 
+    def allow_geometry_types(self):
+        if self.type == 'helix':
+            return ['default', 'salome', 'catia', 'cam', 'shape']
+        elif self.type == 'supra':
+            return ['default', 'hts']
+        return ['default']
+
     @has_many
     def geometries(self):
         from python_magnetdb.models.part_geometry import PartGeometry

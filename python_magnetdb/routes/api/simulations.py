@@ -1,6 +1,7 @@
-from typing import Union
+from typing import Union, List
 
 from fastapi import APIRouter, HTTPException, Depends, Form, Query
+from pydantic import BaseModel
 from python_magnetsetup.config import loadconfig, supported_methods, supported_models
 
 from ... import worker
@@ -10,6 +11,7 @@ from ...dependencies import get_user
 from ...models.audit_log import AuditLog
 from ...models.magnet import Magnet
 from ...models.simulation import Simulation
+from ...models.simulation_current import SimulationCurrent
 from ...models.site import Site
 
 router = APIRouter()
@@ -52,30 +54,51 @@ def models():
     return available_models
 
 
+class CreatePayloadCurrent(BaseModel):
+    magnet_id: int
+    value: float
+
+
+class CreatePayload(BaseModel):
+    resource_type: str
+    resource_id: int
+    method: str
+    model: str
+    geometry: str
+    cooling: str
+    static: bool
+    non_linear: bool
+    currents: List[CreatePayloadCurrent]
+
+
 @router.post("/api/simulations")
-def create(resource_type: str = Form(...), resource_id: int = Form(...), method: str = Form(...),
-           model: str = Form(...), geometry: str = Form(...), cooling: str = Form(...),
-           static: bool = Form(...), non_linear: bool = Form(...), user=Depends(get_user('create'))):
-    if resource_type == 'magnet':
-        resource = Magnet.find(resource_id)
-    elif resource_type == 'site':
-        resource = Site.find(resource_id)
+def create(payload: CreatePayload, user=Depends(get_user('create'))):
+    if payload.resource_type == 'magnet':
+        resource = Magnet.find(payload.resource_id)
+    elif payload.resource_type == 'site':
+        resource = Site.find(payload.resource_id)
 
     if not resource:
         raise HTTPException(status_code=404, detail="Resource not found")
 
-    simulation = Simulation(method=method, model=model, geometry=geometry, cooling=cooling,
-                            static=static, non_linear=non_linear)
+    simulation = Simulation(
+        method=payload.method, model=payload.model, geometry=payload.geometry,
+        cooling=payload.cooling, static=payload.static, non_linear=payload.non_linear
+    )
+    currents = map(lambda value: SimulationCurrent(magnet_id=value.magnet_id, value=value.value), payload.currents)
     simulation.owner().associate(user)
     simulation.resource().associate(resource)
     simulation.save()
+    simulation.currents().save_many(currents)
     AuditLog.log(user, "Simulation created", resource=simulation)
     return simulation.serialize()
 
 
 @router.get("/api/simulations/{id}")
 def show(id: int, user=Depends(get_user('read'))):
-    simulation = Simulation.with_('resource', 'setup_output_attachment', 'output_attachment', 'log_attachment').find(id)
+    simulation = Simulation.\
+        with_('resource', 'setup_output_attachment', 'output_attachment', 'log_attachment', 'currents.magnet').\
+        find(id)
     if not simulation:
         raise HTTPException(status_code=404, detail="Simulation not found")
     return simulation.serialize()
@@ -114,7 +137,7 @@ def run_setup(id: int, user=Depends(get_user('update'))):
 
 
 @router.post("/api/simulations/{id}/run")
-def run(id: int, server_id: int = Form(None), user=Depends(get_user('update'))):
+def run(id: int, server_id: int = Form(None), cores: int = Form(...), user=Depends(get_user('update'))):
     simulation = Simulation.with_('resource').find(id)
     if not simulation:
         raise HTTPException(status_code=404, detail="Simulation not found")
@@ -122,7 +145,7 @@ def run(id: int, server_id: int = Form(None), user=Depends(get_user('update'))):
     simulation.status = "scheduled"
     simulation.save()
     AuditLog.log(user, "Simulation scheduled", resource=simulation)
-    worker.run_simulation.delay(simulation.id, server_id)
+    worker.run_simulation.delay(simulation.id, server_id, cores)
     return simulation.serialize()
 
 

@@ -53,6 +53,7 @@
             :component="FormInput"
             type="checkbox"
         />
+        <CurrentsField ref="currents" />
         <Button type="submit" class="btn btn-primary">
           Save
         </Button>
@@ -72,10 +73,12 @@ import FormField from "@/components/FormField";
 import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
 import Button from "@/components/Button";
+import CurrentsField from "./CurrentsField.vue";
 
 export default {
   name: 'SimulationNew',
   components: {
+    CurrentsField,
     Button,
     FormField,
     Form,
@@ -99,18 +102,23 @@ export default {
       this.modelOptions = this.availableModels
           .filter((model) =>
             model.method === values.method && model.geometry === values.geometry &&
-            (model.time === (values.static === 'on' ? 'static' : 'transient') )
+            (model.time === (values.static ? 'static' : 'transient'))
           )
           .map((model) => model.model)
     },
     submit(values, {setRootError}) {
       return simulationService.create({
-        ...values,
-        resource: undefined,
         resource_type: values.resource.value?.type,
         resource_id: values.resource.value?.id,
-        static: values.static === 'on',
-        non_linear: values.non_linear === 'on',
+        method: values.method,
+        geometry: values.geometry,
+        cooling: values.cooling,
+        static: values.static ?? false,
+        model: values.model,
+        non_linear: values.non_linear ?? false,
+        currents: this.$refs.currents.magnets.map(
+          (magnet) => ({ magnet_id: magnet.id, value: parseFloat(values[`i_${magnet.id}`]) })
+        )
       })
           .then((simulation) => {
             this.$router.push({ name: 'simulation', params: { id: simulation.id } })
@@ -124,6 +132,11 @@ export default {
         model: Yup.string().oneOf(this.modelOptions).required(),
         geometry: Yup.string().required(),
         cooling: Yup.string().required(),
+        ...Object.fromEntries(
+          this.$refs.currents.magnets.map(
+            (magnet) => [`i_${magnet.id}`, Yup.mixed().required()]
+          )
+        )
       })
     },
   },
