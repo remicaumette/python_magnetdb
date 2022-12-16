@@ -15,7 +15,7 @@ from python_magnetdb.models.attachment import Attachment
 
 def run_cmd(connection, cmd, stdout):
     res = connection.run(cmd)
-    print(f'run_cmd: res={res}')
+    print(f'run_cmd: cmd={cmd}, res={res}')
     stdout.write(f"=== RUNNING CMD: {cmd}\n")
     stdout.write(f"===\n")
     stdout.write(res.stdout)
@@ -53,11 +53,13 @@ def run_ssh_simulation(simulation, server, cores):
                 log_file.write("Downloading setup archive...\n")
                 simulation.setup_output_attachment.download(f"{local_tempdir}/setup.tar.gz")
                 remote_temp_dir = run_cmd(connection, 'mktemp -d', log_file).strip()
+                print(f'remote_temp_dir={remote_temp_dir} (type={type(remote_temp_dir)})')
                 connection.put(f"{local_tempdir}/setup.tar.gz", remote_temp_dir)
                 log_file.write("Extracting setup archive...\n")
                 run_cmd(connection, f"tar xvf {remote_temp_dir}/setup.tar.gz -C {remote_temp_dir}", log_file)
                 log_file.write("Generating commands...\n")
                 data_dir = f"{remote_temp_dir}/data"
+                print(f'data_dir={data_dir}')
                 args = Namespace(wd=remote_temp_dir,
                                  datafile=f"{remote_temp_dir}/config.json",
                                  method=simulation.method,
@@ -71,6 +73,7 @@ def run_ssh_simulation(simulation, server, cores):
                                  debug=False,
                                  verbose=False,
                                  skip_archive=True)
+                # check yaml_repo, cad_repo - are they really used??
                 env = appenv(envfile=None, url_api=data_dir, yaml_repo=f"{remote_temp_dir}/geometries",
                              cad_repo=f"{remote_temp_dir}/cad", mesh_repo=data_dir, simage_repo=server.image_directory,
                              mrecord_repo=data_dir, optim_repo=data_dir)
@@ -84,20 +87,22 @@ def run_ssh_simulation(simulation, server, cores):
                                   remote_temp_dir, currents)
 
                 # Save cmds in a file
+                print('Commands to be run:')
                 with open("cmds.txt", "a") as f:
                     log_file.write(f"Saving commands... pwd({os.getcwd()}) \n")
                     for (key, value) in cmds.items():
                         f.write(f'{key}: {value}')
+                        print(f'{key}: {value}')
 
-                # Save cmds in a file
-                with open("cmds.txt", "a") as f:
-                    log_file.write(f"Saving commands... pwd({os.getcwd()}) \n")
-                    for (key, value) in cmds.items():
-                        f.write(f'{key}: {value}')
-
+                # geom_dir = f'{remote_temp_dir}/data/geometries'
+                geom_dir = os.path.join(remote_temp_dir, 'data', 'geometries')
+                with connection.cd(geom_dir):
+                    log_file.write(f"Performing CAD...\n")
+                    run_cmd(connection, cmds['CAD'], log_file)
+                    
                 with connection.cd(remote_temp_dir):
                     for (key, value) in cmds.items():
-                        if key in ['Unpack', 'Workflow']:
+                        if key in ['Unpack', 'CAD', 'Workflow']:
                             continue
                         log_file.write(f"Performing {key}...\n")
                         print(f'Running {key}: {value}')

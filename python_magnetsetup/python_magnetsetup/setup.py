@@ -442,21 +442,22 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
         exec = AppCfg[args.method][args.time][args.geom][args.model]
     pyfeel = ' -m workflows.cli' # commisioning, fixcooling
 
+    # TODO infty as params
     if "mqs" in args.model or "mag" in args.model:
-        geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,data/geometries"
-        meshcmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
+        geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2"
+        meshcmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants" # -wd ??
     else:
-        geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,data/geometries"
-        meshcmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
+        geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},2,2"
+        meshcmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants" # -wd ??
 
     gmshfile = meshfile.replace(".med", ".msh")
     meshconvert = ""
 
     if args.geom == "Axi" and args.method == "cfpdes":
         if "mqs" in args.model or "mag" in args.model:
-            geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--air,2,2,--wd,data/geometries"
+            geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--air,2,2"
         else:
-            geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--wd,data/geometries"
+            geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi"
         
         # if gmsh:
         meshcmd = f"python3 -m python_magnetgeo.xao {xaofile} --wd data/geometries mesh --group CoolingChannels --geo {yamlfile} --lc=1"
