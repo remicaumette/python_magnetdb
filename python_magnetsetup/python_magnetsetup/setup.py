@@ -459,8 +459,8 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
         else:
             geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi"
         
-        # if gmsh:
-        meshcmd = f"python3 -m python_magnetgeo.xao {xaofile} --wd data/geometries mesh --group CoolingChannels --geo {yamlfile} --lc=1"
+        # let xao decide mesh caracteristic length ??:
+        meshcmd = f"python3 -m python_magnetgeo.xao {xaofile} --wd data/geometries mesh --group CoolingChannels --geo {yamlfile}"
     else:
         gmshfile = meshfile.replace(".med", ".msh")
         meshconvert = f"gmsh -0 {meshfile} -bin -o {gmshfile}"
