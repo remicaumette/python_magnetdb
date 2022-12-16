@@ -440,7 +440,15 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
         exec = AppCfg[args.method]["exec"]
     if "exec" in AppCfg[args.method][args.time][args.geom][args.model]:
         exec = AppCfg[args.method][args.time][args.geom][args.model]
-    pyfeel = ' -m workflows.cli' # commisioning, fixcooling
+
+    if len([*currents]) > 1:
+        currents_v = [float(currents[key]) for key in currents]
+    else:
+        for key in currents:
+            currents_v = currents[key]
+
+    pyfeel = ' -m python_magnetworkflows.cli' # fix-current, commisioning, fixcooling
+    pyfeel_args = f'--current {currents_v} --cooling {args.cooling} --eps {1.e-5} --itermax {20} --flow_params {args.flow_params}'
 
     # TODO infty as params
     if "mqs" in args.model or "mag" in args.model:
@@ -506,7 +514,7 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
     cmds["Update_Mesh"] = update_cfgmesh
 
     feelcmd = f"{exec} --directory {root_directory} --config-file {cfgfile}"
-    pyfeelcmd = f"python {pyfeel} {cfgfile}"
+    pyfeelcmd = f"python {pyfeel} {cfgfile} {pyfeel_args}"
     if node_spec.smp:
         feelcmd = f"mpirun -np {NP} {feelcmd}"
         pyfeelcmd = f"mpirun -np {NP} {pyfeelcmd}"

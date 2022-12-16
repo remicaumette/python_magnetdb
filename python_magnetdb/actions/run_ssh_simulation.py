@@ -102,7 +102,9 @@ def run_ssh_simulation(simulation, server, cores):
                     
                 with connection.cd(remote_temp_dir):
                     for (key, value) in cmds.items():
-                        if key in ['Unpack', 'CAD', 'Workflow']:
+                        # TODO ignore Run only if model is not including elasticity
+                        # otherwise ignore Workflow
+                        if key in ['Unpack', 'CAD', 'Run']:
                             continue
                         log_file.write(f"Performing {key}...\n")
                         print(f'Running {key}: {value}')
