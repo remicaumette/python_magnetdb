@@ -7,6 +7,7 @@ from ...dependencies import get_user
 from ...models.attachment import Attachment
 from ...models.audit_log import AuditLog
 from ...models.site import Site
+from ...models.status import Status
 
 router = APIRouter()
 
@@ -43,7 +44,7 @@ def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(d
 @router.post("/api/sites")
 def create(user=Depends(get_user('create')), name: str = Form(...), description: str = Form(None),
            config: UploadFile = File(None)):
-    site = Site(name=name, description=description, status='in_study')
+    site = Site(name=name, description=description, status=Status.IN_STUDY)
     if config is not None:
         site.config().associate(Attachment.upload(config))
     try:
@@ -94,13 +95,17 @@ def put_in_operation(id: int, user=Depends(get_user('update'))):
         raise HTTPException(status_code=404, detail="Site not found")
 
     for site_magnet in site.site_magnets:
-        site_magnet.magnet.status = 'in_operation'
+        if not site_magnet.active:
+            continue
+        site_magnet.magnet.status = Status.IN_OPERATION
         site_magnet.magnet.save()
         for magnet_part in site_magnet.magnet.magnet_parts:
-            magnet_part.part.status = 'in_operation'
+            if not magnet_part.active:
+                continue
+            magnet_part.part.status = Status.IN_OPERATION
             magnet_part.part.save()
 
-    site.status = 'in_operation'
+    site.status = Status.IN_OPERATION
     site.save()
     AuditLog.log(user, "Site put in operation", resource=site)
     return site.serialize()
@@ -113,12 +118,14 @@ def shutdown(id: int, user=Depends(get_user('update'))):
         raise HTTPException(status_code=404, detail="Site not found")
 
     for site_magnet in site.site_magnets:
-        site_magnet.magnet.status = 'in_stock'
+        if not site_magnet.active:
+            continue
+        site_magnet.magnet.status = Status.IN_STOCK
         site_magnet.magnet.save()
         site_magnet.decommissioned_at = datetime.now()
         site_magnet.save()
 
-    site.status = 'defunct'
+    site.status = Status.DEFUNCT
     site.save()
     AuditLog.log(user, "Site shutdown", resource=site)
     return site.serialize()

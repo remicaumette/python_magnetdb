@@ -7,6 +7,7 @@ from ...dependencies import get_user
 from ...models.attachment import Attachment
 from ...models.audit_log import AuditLog
 from ...models.magnet import Magnet
+from ...models.status import Status
 
 router = APIRouter()
 
@@ -44,7 +45,7 @@ def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(d
 def create(user=Depends(get_user('create')), name: str = Form(...), description: str = Form(None),
            design_office_reference: str = Form(None)):
     magnet = Magnet(name=name, description=description, design_office_reference=design_office_reference,
-                    status='in_study')
+                    status=Status.IN_STUDY)
     try:
         magnet.save()
     except orator.exceptions.query.QueryException as e:
@@ -97,12 +98,14 @@ def defunct(id: int, user=Depends(get_user('update'))):
         raise HTTPException(status_code=404, detail="Magnet not found")
 
     for magnet_part in magnet.magnet_parts:
-        magnet_part.part.status = 'in_stock'
+        if not magnet_part.active:
+            continue
+        magnet_part.part.status = Status.IN_STOCK
         magnet_part.part.save()
         magnet_part.decommissioned_at = datetime.now()
         magnet_part.save()
 
-    magnet.status = 'defunct'
+    magnet.status = Status.DEFUNCT
     magnet.save()
     AuditLog.log(user, "Magnet defunct", resource=magnet)
     return magnet.serialize()
