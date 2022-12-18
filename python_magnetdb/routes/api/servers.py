@@ -28,7 +28,7 @@ def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(d
 @router.post("/api/servers")
 def create(name: str = Form(...), host: str = Form(...), username: str = Form(...),
            image_directory: str = Form(...), type: str = Form(None), smp: bool = Form(None),
-           multithreading: bool = Form(None), cores: int = Form(None), dns: str = Form(None),
+           multithreading: bool = Form(None), cores: int = Form(None),
            job_manager: str = Form(None), mesh_gems_directory: str = Form(None),
            user=Depends(get_user('create'))):
     private_key, public_key = generate_server_key_pairs()
@@ -43,8 +43,6 @@ def create(name: str = Form(...), host: str = Form(...), username: str = Form(..
         server.multithreading = multithreading
     if cores is not None:
         server.cores = cores
-    if dns is not None:
-        server.dns = dns
     if job_manager is not None:
         server.job_manager = job_manager
     if mesh_gems_directory is not None:
@@ -65,7 +63,7 @@ def show(id: int, user=Depends(get_user('read'))):
 @router.patch("/api/servers/{id}")
 def update(id: int, name: str = Form(...), host: str = Form(...), username: str = Form(...),
            image_directory: str = Form(...), type: str = Form(...), smp: bool = Form(...),
-           multithreading: bool = Form(...), cores: int = Form(...), dns: str = Form(...),
+           multithreading: bool = Form(...), cores: int = Form(...),
            job_manager: str = Form(...), mesh_gems_directory: str = Form(...), user=Depends(get_user('update'))):
     server = Server.where('user_id', user.id).find(id)
     if not server:
@@ -78,7 +76,6 @@ def update(id: int, name: str = Form(...), host: str = Form(...), username: str 
     server.smp = smp
     server.multithreading = multithreading
     server.cores = cores
-    server.dns = dns
     server.job_manager = job_manager
     server.mesh_gems_directory = mesh_gems_directory
     server.save()

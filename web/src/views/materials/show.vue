@@ -136,7 +136,7 @@
             :unit-options="[
                 {
                   name: '1/ohm/m',
-                  value: 'ohm^-1*m^2',
+                  value: 'ohm^-1*m^-1',
                   symbol: 'S',
                   default: true,
                 }

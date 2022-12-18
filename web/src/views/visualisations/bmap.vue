@@ -7,7 +7,7 @@
     </div>
 
     <Card v-if="params">
-      <Form :initial-values="params" @change="handleChanges">
+      <Form ref="form" :initial-values="params" @change="handleChanges">
         <div class="flex items-center space-x-4">
           <div class="w-1/3">
             <FormField
@@ -202,13 +202,13 @@ export default {
           labels: data.x,
           datasets: [
             {
-              label: `Y`,
+              label: this.$refs.form.values.pkey,
               backgroundColor: '#FF0000',
               borderColor: '#FF0000',
               data: data.y,
             },
             {
-              label: `Y`,
+              label: `${this.$refs.form.values.pkey} max`,
               backgroundColor: '#00FF00',
               borderColor: '#00FF00',
               data: data.ymax,

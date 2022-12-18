@@ -48,13 +48,6 @@
             :component="FormInput"
         />
         <FormField
-            label="DNS"
-            name="dns"
-            type="text"
-            :component="FormInput"
-            :required="true"
-        />
-        <FormField
             label="Cores"
             name="cores"
             type="number"
@@ -131,7 +124,6 @@ export default {
         username: Yup.string().required(),
         image_directory: Yup.string().required(),
         type: Yup.string().required(),
-        dns: Yup.string().required(),
         cores: Yup.mixed().required(),
         job_manager: Yup.string().required(),
         mesh_gems_directory: Yup.string().required(),
