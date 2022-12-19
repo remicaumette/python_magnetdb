@@ -5,6 +5,7 @@ from ...dependencies import get_user
 from ...models.audit_log import AuditLog
 from ...models.magnet import MagnetPart, Magnet
 from ...models.part import Part
+from ...models.status import Status
 
 router = APIRouter()
 
@@ -19,7 +20,7 @@ def create(magnet_id: int, user=Depends(get_user('create')), part_id: int = Form
         raise HTTPException(status_code=404, detail="Part not found")
 
     for magnet_part in part.magnet_parts:
-        if magnet_part.magnet.status == 'in_study':
+        if magnet_part.magnet.status == Status.IN_STUDY:
             magnet_part.delete()
 
     magnet_part = MagnetPart(commissioned_at=datetime.now())

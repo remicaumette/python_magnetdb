@@ -212,6 +212,7 @@ export default {
       options: {
         scales: {
           x: {
+            type: 'linear',
             title: {
               display: true,
               text: ''

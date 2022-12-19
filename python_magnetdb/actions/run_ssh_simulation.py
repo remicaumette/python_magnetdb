@@ -77,7 +77,7 @@ def run_ssh_simulation(simulation, server, cores):
                 env = appenv(envfile=None, url_api=data_dir, yaml_repo=f"{remote_temp_dir}/geometries",
                              cad_repo=f"{remote_temp_dir}/cad", mesh_repo=data_dir, simage_repo=server.image_directory,
                              mrecord_repo=data_dir, optim_repo=data_dir)
-                node_spec = NodeSpec(name=server.name, otype=server.type, smp=server.smp, dns=server.dns,
+                node_spec = NodeSpec(name=server.name, otype=server.type, smp=server.smp, dns=server.host,
                                      cores=server.cores, multithreading=server.multithreading,
                                      manager=JobManager(otype=server.job_manager, queues=[]),
                                      mgkeydir=server.mesh_gems_directory)

@@ -40,37 +40,6 @@
             />
           </div>
         </div>
-        <div class="flex items-center space-x-4">
-          <div class="w-1/3">
-            <FormField
-                label="N"
-                name="n"
-                :component="FormSlider"
-                :min="50"
-                :max="1000"
-                :step="1"
-            />
-          </div>
-          <div class="w-1/3">
-            <FormField
-                label="Z"
-                name="z"
-                :component="FormSlider"
-                :min="-0.2"
-                :max="0.2"
-            />
-          </div>
-        </div>
-        <div class="flex items-center space-x-4">
-          <div class="w-1/3">
-            <FormField
-                label="Pkey"
-                name="pkey"
-                :component="FormSelect"
-                :options="['A', 'Br', 'Bz', 'B']"
-            />
-          </div>
-        </div>
       </Form>
     </Card>
     <Card>
