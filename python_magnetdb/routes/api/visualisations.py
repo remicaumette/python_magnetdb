@@ -64,7 +64,7 @@ class StressMapPayload(BaseModel):
     i_h: float = None
     i_b: float = None
     i_s: float = None
-    # mtype: str = None
+    magnet_type: str = None
 
 
 @router.post("/api/visualisations/stress_map")
@@ -76,17 +76,18 @@ def stress_map(payload: StressMapPayload, user=Depends(get_user('create'))):
     else:
         raise HTTPException(status_code=400, detail="The resource type supplied is invalid")
 
-    # (i_h, i_b, i_s, allowed_currents, mtype) = prepare_stress_map_chart_params(data, payload.i_h, payload.i_b, payload.i_s, payload.mtype)
-    (i_h, i_b, i_s, allowed_currents) = prepare_stress_map_chart_params(data, payload.i_h, payload.i_b, payload.i_s)
+    (i_h, i_b, i_s, allowed_currents, magnet_type) = prepare_stress_map_chart_params(
+        data, payload.i_h, payload.i_b, payload.i_s, payload.magnet_type
+    )
     return {
         'params': {
             'i_h': i_h,
             'i_b': i_b,
             'i_s': i_s,
-            # 'mtype': :type,
+            'magnet_type': magnet_type,
         },
         'allowed_currents': allowed_currents,
-        'results': compute_stress_map_chart(data, i_h, i_b, i_s),  # mtype),
+        'results': compute_stress_map_chart(data, i_h, i_b, i_s, magnet_type),
     }
 
 

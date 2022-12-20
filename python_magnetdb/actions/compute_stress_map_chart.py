@@ -1,10 +1,9 @@
 import MagnetTools.Bmap as bmap
 import MagnetTools.MagnetTools as mt
-import numpy as np
 import pandas as pd
 
-# def prepare_stress_map_chart_params(data, i_h, i_b, i_s, mtype):
-def prepare_stress_map_chart_params(data, i_h, i_b, i_s):
+
+def prepare_stress_map_chart_params(data, i_h, i_b, i_s, magnet_type):
     (Tubes, Helices, OHelices, BMagnets, UMagnets, Shims) = data
     icurrents = mt.get_currents(Tubes, Helices, BMagnets, UMagnets)
 
@@ -13,11 +12,11 @@ def prepare_stress_map_chart_params(data, i_h, i_b, i_s):
         i_b if i_b is not None else (icurrents[1] if len(icurrents) > 1 else 0),
         i_s if i_s is not None else (icurrents[2] if len(icurrents) > 2 else 0),
         ["i_h", "i_b", "i_s"][:len(icurrents)],
-        # mtype if mtype is not None else "H",
+        magnet_type if magnet_type is not None else "H",
     )
 
 
-def compute_stress_map_chart(data, i_h: float, i_b: float, i_s: float, mtype: str="H"):
+def compute_stress_map_chart(data, i_h: float, i_b: float, i_s: float, magnet_type: str):
     def update_current():
         (Tubes, Helices, OHelices, BMagnets, UMagnets, Shims) = data
 
@@ -50,8 +49,8 @@ def compute_stress_map_chart(data, i_h: float, i_b: float, i_s: float, mtype: st
     def sine():
         (Tubes, Helices, OHelices, BMagnets, UMagnets, Shims) = data
         mdata = {"H": Helices, "B": BMagnets, "S": UMagnets}
-        Magnets = mdata[mtype]
-        (headers, values) = bmap.getHoop(Magnets, Tubes, Helices, BMagnets, UMagnets, mtype)
+        Magnets = mdata[magnet_type]
+        (headers, values) = bmap.getHoop(Magnets, Tubes, Helices, BMagnets, UMagnets, magnet_type)
         df = pd.DataFrame.from_records(values)
         df.columns = headers
         print(f'df = {df}')

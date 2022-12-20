@@ -12,7 +12,7 @@
           <div class="w-1/3">
             <FormField
                 v-if="allowedCurrents.includes('i_h')"
-                label="I h"
+                label="I h [A]"
                 name="i_h"
                 :component="FormSlider"
                 :min="0"
@@ -22,7 +22,7 @@
           <div class="w-1/3">
             <FormField
                 v-if="allowedCurrents.includes('i_b')"
-                label="I b"
+                label="I b [A]"
                 name="i_b"
                 :component="FormSlider"
                 :min="0"
@@ -32,7 +32,7 @@
           <div class="w-1/3">
             <FormField
                 v-if="allowedCurrents.includes('i_s')"
-                label="I s"
+                label="I s [A]"
                 name="i_s"
                 :component="FormSlider"
                 :min="0"
@@ -54,7 +54,7 @@
             </div>
             <div v-if="values.command === '1D_r'" class="w-1/3">
               <FormField
-                  label="R"
+                  label="R [m]"
                   name="r"
                   :component="FormSlider"
                   :min="0"
@@ -63,7 +63,7 @@
             </div>
             <div v-if="values.command === '1D_z'" class="w-1/3">
               <FormField
-                  label="Z"
+                  label="Z [m]"
                   name="z"
                   :component="FormSlider"
                   :min="-10"
@@ -75,7 +75,7 @@
         <div class="flex items-center space-x-4">
           <div class="w-1/3">
             <FormField
-                label="R0"
+                label="R0 [m]"
                 name="r0"
                 type="number"
                 :component="FormInput"
@@ -83,7 +83,7 @@
           </div>
           <div class="w-1/3">
             <FormField
-                label="Z0"
+                label="Z0 [m]"
                 name="z0"
                 type="number"
                 :component="FormInput"
