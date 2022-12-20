@@ -63,6 +63,9 @@
             </div>
           </div>
         </div>
+        <Button v-else class="btn btn-primary" @click="signIn">
+          Sign In
+        </Button>
       </div>
     </div>
 
@@ -75,6 +78,8 @@
 <script>
 import { ChevronDownIcon } from '@vue-hero-icons/solid'
 import * as userService from '@/services/userService'
+import Button from "@/components/Button.vue";
+import * as sessionService from "@/services/sessionService";
 
 export default {
   name: 'App',
@@ -84,6 +89,7 @@ export default {
     }
   },
   components: {
+    Button,
     ChevronDownIcon,
   },
   watch: {
@@ -102,6 +108,17 @@ export default {
     logout() {
       this.$store.commit('setToken', null)
       this.$router.push({ name: 'sign_in' })
+    },
+    async signIn() {
+      this.error = null
+      try {
+        const res = await sessionService.getAuthorizationUrl({
+          redirect_uri: `${window.location.origin}/sign_in`
+        })
+        window.location.href = res.url
+      } catch (error) {
+        this.error = error
+      }
     },
   },
   computed: {
