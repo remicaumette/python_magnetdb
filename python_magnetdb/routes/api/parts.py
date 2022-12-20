@@ -65,25 +65,20 @@ def show(id: int, user=Depends(get_user('read'))):
     # pour la suite voir show.vue de simulations avec Measures
     raise HTTPException(status_code=404, detail=f"part/{id}/sites not defined yet")
 
-# ............./records
+
 @router.get("/api/parts/{id}/records")
-def show(id: int, user=Depends(get_user('read'))):
-    part = Part.with_('magnet_parts.magnet').find(id)
+def records(id: int, user=Depends(get_user('read'))):
+    part = Part.with_('magnet_parts.magnet.site_magnets.site.records').find(id)
+    if not part:
+        raise HTTPException(status_code=404, detail="Part not found")
 
     result = []
-    data = part.to_dict()
-    for magnet in data['magnet_parts']:
-        magnet_data = Magnet.with_('site_magnets.site').find(magnet['magnet_id'])
-        print(f"magnet={magnet_data['name']}")
+    for magnet_part in part.magnet_parts:
+        for site_magnet in magnet_part.magnet.site_magnets:
+            for record in site_magnet.site.records:
+                result.append(record.serialize())
+    return {'records': result}
 
-        for site in magnet_data['site_magnets']:
-            site_data = Site.with_('records').find(site['site_id'])
-            print(f"site={site_data['name']}")
-
-            for record in site_data['records']:
-                result.append(record['id'])
-                print(f"record={record['name']}")
-    raise HTTPException(status_code=404, detail=f"part/{id}/records not defined yet")
 
 @router.get("/api/parts/{id}")
 def show(id: int, user=Depends(get_user('read'))):

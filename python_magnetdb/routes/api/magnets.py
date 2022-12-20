@@ -2,6 +2,7 @@ from datetime import datetime
 
 import orator.exceptions.query
 from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
+from python_magnetdb.models.site import Site
 
 from ...dependencies import get_user
 from ...models.attachment import Attachment
@@ -56,21 +57,18 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
     AuditLog.log(user, "Magnet created", resource=magnet)
     return magnet.serialize()
 
-# ............./records
-@router.get("/api/parts/{id}/records")
-def show(id: int, user=Depends(get_user('read'))):
-    magnet = Magnet.with_('site_magnets.site').find(id)
+
+@router.get("/api/magnets/{id}/records")
+def records(id: int, user=Depends(get_user('read'))):
+    magnet = Magnet.with_('site_magnets.site.records').find(id)
+    if not magnet:
+        raise HTTPException(status_code=404, detail="Magnet not found")
 
     result = []
-    data = magnet.to_dict()
-    for site in magnet['site_magnets']:
-        site_data = Site.with_('records').find(site['site_id'])
-        print(f"site={site_data['name']}")
-
-        for record in site_data['records']:
-            result.append(record['id'])
-            print(f"record={record['name']}")
-    raise HTTPException(status_code=404, detail=f"magnet/{id}/records not defined yet")
+    for site_magnet in magnet.site_magnets:
+        for record in site_magnet.site.records:
+            result.append(record.serialize())
+    return {'records': result}
 
 
 @router.get("/api/magnets/{id}")
