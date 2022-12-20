@@ -66,6 +66,8 @@ def run_simulation_setup(simulation):
                     'xaofile': xaofile,
                     'meshfile': meshfile
                 }
+            # subprocess.run([f"pwd"], shell=True, check=True)
+            # subprocess.run([f"ls -alrth"], shell=True, check=True)
             config_file_path = None
             for file in os.listdir(tempdir):
                 if file.endswith('.cfg'):
@@ -73,7 +75,11 @@ def run_simulation_setup(simulation):
                     break
             simulation_name = os.path.basename(os.path.splitext(config_file_path)[0])
             output_archive = f"{tempdir}/setup-{simulation_name}.tar.gz"
-            subprocess.run([f"tar cvzf {output_archive} *"], shell=True, check=True)
+            print(f'Archiving setup files ({simulation.geometry})')
+            if simulation.geometry == 'Axi':
+                subprocess.run([f"tar --exclude=*.xao --exclude=*.brep -cvzf {output_archive} *"], shell=True, check=True)
+            else:
+                subprocess.run([f"tar cvzf {output_archive} *"], shell=True, check=True)
             attachment = Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
             simulation.setup_output_attachment().associate(attachment)
             simulation.setup_status = "done"

@@ -6,6 +6,8 @@ from ...dependencies import get_user
 from ...models.audit_log import AuditLog
 from ...models.material import Material
 from ...models.part import Part
+from ...models.magnet import Magnet
+from ...models.site import Site
 
 router = APIRouter()
 
@@ -43,12 +45,52 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
     AuditLog.log(user, "Part created", resource=part)
     return part.serialize()
 
+# api/parts/{id}/sites
+@router.get("/api/parts/{id}/sites")
+def show(id: int, user=Depends(get_user('read'))):
+    part = Part.with_('magnet_parts.magnet').find(id)
+
+    result = []
+    data = part.to_dict()
+    for magnet in data['magnet_parts']:
+        magnet_data = Magnet.with_('site_magnets.site').find(magnet['magnet_id'])
+        print(f"magnet={magnet_data['name']}")
+
+        for site in magnet_data['site_magnets']:
+            site_data = Site.with_('records').find(site['site_id'])
+            result.append(site['site_id'])
+            print(f"site={site_data['name']}")
+
+    # can return result as a list
+    # pour la suite voir show.vue de simulations avec Measures
+    raise HTTPException(status_code=404, detail=f"part/{id}/sites not defined yet")
+
+# ............./records
+@router.get("/api/parts/{id}/records")
+def show(id: int, user=Depends(get_user('read'))):
+    part = Part.with_('magnet_parts.magnet').find(id)
+
+    result = []
+    data = part.to_dict()
+    for magnet in data['magnet_parts']:
+        magnet_data = Magnet.with_('site_magnets.site').find(magnet['magnet_id'])
+        print(f"magnet={magnet_data['name']}")
+
+        for site in magnet_data['site_magnets']:
+            site_data = Site.with_('records').find(site['site_id'])
+            print(f"site={site_data['name']}")
+
+            for record in site_data['records']:
+                result.append(record['id'])
+                print(f"record={record['name']}")
+    raise HTTPException(status_code=404, detail=f"part/{id}/records not defined yet")
 
 @router.get("/api/parts/{id}")
 def show(id: int, user=Depends(get_user('read'))):
     part = Part.with_('material', 'cad.attachment', 'geometries.attachment', 'magnet_parts.magnet').find(id)
     if not part:
         raise HTTPException(status_code=404, detail="Part not found")
+    # print(f'part/show: {part.to_dict()}')
     return part.serialize()
 
 

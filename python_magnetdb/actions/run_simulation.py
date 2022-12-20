@@ -73,6 +73,12 @@ def run_simulation(simulation):
                     for (key, value) in cmds.items():
                         f.write(f'{key}: {value}')
 
+                # Save cmds in a file
+                with open("cmds.txt", "a") as f:
+                    log_file.write("Saving commands...\n")
+                    for (key, value) in cmds.items():
+                        f.write(f'{key}: {value}')
+
                 for (key, value) in cmds.items():
                     if key in ['Unpack', 'Workflow']:
                         continue

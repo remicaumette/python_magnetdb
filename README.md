@@ -4,6 +4,13 @@ Tools for creating and manipulating a database designed for Magnet simulations.
 Data may be partly retreived from **Lncmi control and monitoring website**.
 See `python_magnetrun` for more details
 
+## Cloning the depot
+
+```shell
+git clone ...
+git submodule update --init --recursive
+```
+
 ## Development setup
 
 0. Pre-requisites

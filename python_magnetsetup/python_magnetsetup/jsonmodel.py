@@ -86,12 +86,13 @@ def create_params_insert(gdata: tuple, method_data: List[str], debug: bool=False
     # TODO: length data are written in mm should be in SI instead
     unit_Length = method_data[5] # "meter"
     units = load_units(unit_Length)
-    print("unit_Length", unit_Length)
 
     (NHelices, NRings, NChannels, Nsections, R1, R2, Z1, Z2, Zmin, Zmax, Dh, Sh, turns_h) = gdata
     
-    if debug: print("R1:", R1)
-    print("Zmin:", Zmin)
+    if debug:
+        print("unit_Length", unit_Length)
+        print("R1:", R1)
+        print("Zmin:", Zmin)
     if unit_Length == 'meter':
         R1 = convert_data(units, R1, "Length")
         R2 = convert_data(units, R2, "Length")
@@ -101,10 +102,12 @@ def create_params_insert(gdata: tuple, method_data: List[str], debug: bool=False
         Zmax = convert_data(units, Zmax, "Length")
         Dh = convert_data(units, Dh, "Length")
         Sh  = convert_data(units, Sh, "Area")
-    print("Zmin:", Zmin)
     
     # chech dim
-    if debug: print("corrected R1:", R1)
+    if debug:
+        print("corrected R1:", R1)
+        print("unit_Length", unit_Length)
+        print("R1:", R1, "R2:", R2, "Zmin:", Zmin, "Zmax:", Zmax)
     
     # Tini, Aini for transient cases??
     params_data = { 'Parameters': []}
@@ -616,13 +619,12 @@ def create_json(jsonfile: str, mdict: dict, mmat: dict, mmodels: dict, mpost: di
         print(f"plotB_data:{plotB_data}")
         add = data["PostProcess"]["magnetic"]["Measures"]["Points"]
         odata = entry(templates["plots"][0], {'Rinf': plotB_data['Rinf'], 'Zinf': plotB_data['Zinf'], 'NR': 100, 'NZ': 100}, debug)
-        if debug: print("odata:", odata)
-        print(f"data[PostProcess][magnetic][Measures][Points]: {add}")
-        print(f"odata: {odata}")
+        # print(f"data[PostProcess][magnetic][Measures][Points]: {add}")
+        if debug: print(f"plot_B odata: {odata}")
         for md in odata:
             print(f"odata[{md}: {odata[md]}")
             add[md] = odata[md]
-        print(f"data[PostProcess][magnetic][Measures][Points]: {add}")
+        # print(f"data[PostProcess][magnetic][Measures][Points]: {add}")
 
     mdata = json.dumps(data, indent = 4)
 

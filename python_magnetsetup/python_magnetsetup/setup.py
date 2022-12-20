@@ -312,10 +312,24 @@ def setup(MyEnv, args, confdata, jsonfile, session=None):
                     if args.debug:
                         print(f"magnet(type={type(magnet)}: {magnet}")
                     mname = list(magnet.keys())[0]
-                    if args.debug:
-                        print(f"{mname} (type:{type(mname)}")
-                        print(f"magnet[{mname}]: {magnet[mname]}")
-                    todict[mname] = magnet[mname]['geom'].replace(".yaml","")
+                    mconfdata = magnet[mname]
+                    # if args.debug:
+                    print(f"magnet[{mname}]: {mconfdata}")
+                    if "Helix" in mconfdata:
+                        todict[mname] = mconfdata['geom'].replace(".yaml","")
+                    else:
+                        todict[mname] = []
+                        if 'Bitter' in mconfdata:
+                            for obj in mconfdata['Bitter']:
+                                todict[mname].append(obj['geom'].replace(".yaml",""))
+                        if 'Supra' in mconfdata:
+                            for obj in mconfdata['Supra']:
+                                todict[mname].append(obj['geom'].replace(".yaml",""))
+            else:
+                raise Exception(f"setup: no magnet in site {confdata['name']}")
+
+            if args.debug:
+                print(f'todict: {todict}')
             yamldata['magnets'] = todict
 
             print(f"try to create {MyEnv.yaml_repo + '/' + confdata['name'] + '.yaml'}")
@@ -413,7 +427,7 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
         print(f"NP={NP} {type(NP)}")
     if args.np > 0:
         if args.np > NP:
-            print(f'requested number of cores {args.np} exceed {server.name} capability (max: {NP})')
+            print(f'requested number of cores {args.np} exceed {node_spec.name} capability (max: {NP})')
         else:
             NP = args.np
 
@@ -426,26 +440,35 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
         exec = AppCfg[args.method]["exec"]
     if "exec" in AppCfg[args.method][args.time][args.geom][args.model]:
         exec = AppCfg[args.method][args.time][args.geom][args.model]
-    pyfeel = ' -m workflows.cli' # commisioning, fixcooling
 
-    if "mqs" in args.model or "mag" in args.model:
-        geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,data/geometries"
-        meshcmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
+    if len([*currents]) > 1:
+        currents_v = [float(currents[key]) for key in currents]
     else:
-        geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,data/geometries"
-        meshcmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants"
+        for key in currents:
+            currents_v = currents[key]
+
+    pyfeel = ' -m python_magnetworkflows.cli' # fix-current, commisioning, fixcooling
+    pyfeel_args = f'--current {currents_v} --cooling {args.cooling} --eps {1.e-5} --itermax {20} --flow_params {args.flow_params}'
+
+    # TODO infty as params
+    if "mqs" in args.model or "mag" in args.model:
+        geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2"
+        meshcmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--air,2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants" # -wd ??
+    else:
+        geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},2,2"
+        meshcmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},2,2,--wd,$PWD,mesh,--group,CoolingChannels,Isolants" # -wd ??
 
     gmshfile = meshfile.replace(".med", ".msh")
     meshconvert = ""
 
     if args.geom == "Axi" and args.method == "cfpdes":
         if "mqs" in args.model or "mag" in args.model:
-            geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--air,2,2,--wd,data/geometries"
+            geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--air,2,2"
         else:
-            geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi,--wd,data/geometries"
+            geocmd = f"salome -w1 -t {hifimagnet}/HIFIMAGNET_Cmd.py args:{yamlfile},--axi"
         
-        # if gmsh:
-        meshcmd = f"python3 -m python_magnetgeo.xao {xaofile} --wd data/geometries mesh --group CoolingChannels --geo {yamlfile} --lc=1"
+        # let xao decide mesh caracteristic length ??:
+        meshcmd = f"python3 -m python_magnetgeo.xao {xaofile} --wd data/geometries mesh --group CoolingChannels --geo {yamlfile}"
     else:
         gmshfile = meshfile.replace(".med", ".msh")
         meshconvert = f"gmsh -0 {meshfile} -bin -o {gmshfile}"
@@ -466,8 +489,9 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
 
     # TODO add mount point for MeshGems if 3D otherwise use gmsh for Axi 
     # to be changed in the future by using an entry from magnetsetup.conf MeshGems or gmsh
-    MeshGems_licdir = f"-B {node_spec.mgkeydir}:/opt/DISTENE/license:ro" if node_spec.mgkeydir is not None else ""
-    cmds["Mesh"] = f"singularity exec {MeshGems_licdir} {simage_path}/{salome} {meshcmd}"
+    # MeshGems_licdir = f"-B {node_spec.mgkeydir}:/opt/DISTENE/license:ro" if node_spec.mgkeydir is not None else ""
+    # cmds["Mesh"] = f"singularity exec {MeshGems_licdir} {simage_path}/{salome} {meshcmd}"
+    cmds["Mesh"] = f"singularity exec {simage_path}/{salome} {meshcmd}"
     # if gmsh:
     #    cmds["Mesh"] = f"singularity exec -B /opt/MeshGems:/opt/DISTENE/license:ro {simage_path}/{salome} {meshcmd}"
 
@@ -490,7 +514,7 @@ def setup_cmds(MyEnv, args, node_spec, yamlfile, cfgfile, jsonfile, xaofile, mes
     cmds["Update_Mesh"] = update_cfgmesh
 
     feelcmd = f"{exec} --directory {root_directory} --config-file {cfgfile}"
-    pyfeelcmd = f"python {pyfeel} {cfgfile}"
+    pyfeelcmd = f"python {pyfeel} {cfgfile} {pyfeel_args}"
     if node_spec.smp:
         feelcmd = f"mpirun -np {NP} {feelcmd}"
         pyfeelcmd = f"mpirun -np {NP} {pyfeelcmd}"
