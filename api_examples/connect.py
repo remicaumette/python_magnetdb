@@ -6,55 +6,162 @@ Connect to MagnetDB site
 
 import os
 import sys
+import json
+import argparse
+from time import sleep
 import requests
 import requests.exceptions
+
+import utils
 
 api_server = os.getenv('MAGNETDB_API_SERVER') or "magnetdb-api.grenoble.lncmi.local"
 api_key = os.getenv('MAGNETDB_API_KEY')
 
-def createSession(s, url: str, payload: dict={}, headers: dict={}, debug: bool=False):
-    """create a request session"""
-
-    p = s.post(url=url, data=payload, verify=True)
-    if debug:
-        print( f"connect: {p.url}, status={p.status_code}" )
-    if p.status_code != 200:
-        print(f"error {p.status_code} logging to {url_logging}" )
-        sys.exit(1)
-    p.raise_for_status()
-    return p
 
 def main():
-    import argparse
-    
-    requests.packages.urllib3.disable_warnings()
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--server", help="specify server", type=str, default=api_server)
     parser.add_argument("--port", help="specify port", type=int, default=8000)
-    parser.add_argument("--type", help="select object type",
+    parser.add_argument("--mtype", help="select object type",
                         type=str,
-                        choices=['part', 'magnet', 'site', 'record'],
+                        choices=['part', 'magnet', 'site', 'record', 'server', 'simulation'],
                         default='magnet')
+    parser.add_argument("--name", help="specify an object name", type=str, default="None")
     parser.add_argument("--debug", help="activate debug mode", action='store_true')
+
+    subparsers = parser.add_subparsers(title="commands", dest="command", help='sub-command help')
+    parser_list = subparsers.add_parser('list', help='list help')
+    parser_view = subparsers.add_parser('view', help='view help')
+    parser_create = subparsers.add_parser('create', help='create help')
+    parser_run = subparsers.add_parser('run', help='run help')
+    parser_select = subparsers.add_parser('select', help='select help')
+    parser_compute = subparsers.add_parser('compute', help='compute help')
+    parser_post = subparsers.add_parser('process', help='process help')
+
+    # list subcommand
+
+    # view subcommand
+
+    # create subcommand
+
+    # run subcommand
+    parser_run.add_argument('--geometry', help='select a method', type=str, choices=['Axi', '3D'], default= 'Axi')
+    parser_run.add_argument('--static', help="activate static mode", action='store_true')
+    parser_run.add_argument('--nonlinear', help="activate non_linear", action='store_true')
+    parser_run.add_argument('--method', help='select a method', type=str, default='cfpdes')
+    parser_run.add_argument('--model', help='select a model', type=str, default='thmagel_hcurl')
+    parser_run.add_argument('--cooling', help='select a cooling mode', type=str, choices=['mean', 'meanH', 'grad', 'gradH'], default= 'meanH')
+    parser_run.add_argument('--setup', help="activate setup only", action='store_true')
+    parser.add_argument("--compute_server", help="choose compute node", type=str, default='calcul22')
+    parser.add_argument("--np", help="choose number of procs", type=int, default=4)
+
+    # stats subcommand
+
+    # get args
     args = parser.parse_args()
 
-    otype = args.type
+    # main
+    otype = args.mtype
     payload = {}
     headers = {'Authorization': os.getenv('MAGNETDB_API_KEY')}
-    
-    # Use 'with' to ensure the session context is closed after use.
+    web = "http://{args.server}:{args.port}"
+    api = "{web}/api"
+
     with requests.Session() as s:
-        print(f"connect to http://{args.server}:{args.port}/api/{otype}s")
-        # r = requests.get(f"http://{args.server}:{args.port}/api/{otype}s", headers=headers)
-        r = s.get(f"http://{args.server}:{args.port}/api/{otype}s", headers=headers)
-        print(f"{otype.upper()}: {len(r.json()['items'])} objects")
-        for object in r.json()['items']:
-            response = f"name={object['name']}, id:{object['id']}"
-            if 'status' in object:
-                response += f", status:{object['status']}"
-            print(f"{otype.upper()}: {response}")
-    # s.close()
+        r = s.get(f"{api}/{otype}s", headers=headers)
+        response = r.json()
+        if args.debug:
+            print(f'response={response}')
+        if 'detail' in response and response['detail'] == 'Forbidden.':
+            raise RuntimeError(f"{args.server} : wrong credentials - check MAGNETDB_API_KEY")
+
+        if args.command == 'list':
+            ids = utils.getlist(f"{web}", headers=headers, mtype=otype, debug=args.debug)
+            print(f'{args.mtype.upper()}: found {len([*ids])} items')
+            for obj in ids:
+                print(f'{args.mtype.upper()}: {obj}, id={ids[obj]}')
+
+        if args.command == 'view':
+            ids = utils.getlist(f"{web}", headers=headers, mtype=otype, debug=args.debug)
+            if args.name in ids:
+                response = utils.getobject(f"{web}", headers=headers, mtype=otype, id=ids[args.name], debug=args.debug)
+                print(f'{args.name}:\n{json.dumps(response, indent=4)}')
+            else:
+                raise RuntimeError(f"{args.server} : cannot found {args.name} in {args.mtype.upper()} objects")
+
+        if args.command == 'create':
+            print('create: not implemented')
+
+        if args.command == 'run':
+            ids = utils.getlist(f"{web}", headers=headers, mtype=otype, debug=args.debug)
+            if args.name in ids:
+                response = utils.getobject(f"{web}", headers=headers, mtype=otype, id=ids[args.name], debug=args.debug)
+            else:
+                raise RuntimeError(f"{args.server} : cannot found {args.name} in {args.mtype.upper()} objects")
+
+            if args.mtype not in ['site', 'magnet']:
+                raise RuntimeError(f"unexpected type {args.mtype} in run subcommand")
+
+            sim_data={
+                'resource_type': args.mtype,
+                'resource_id': ids[args.name],
+                'method': args.method,
+                'model': args.model,
+                'geometry': args.geometry,
+                'cooling': args.cooling,
+                'static': args.static,
+                'non_linear': args.nonlinear
+            }
+
+            # check parameters consistency: see allowed_methods in
+            # create simu
+            simu_id = utils.createobject(f"{api}/simulations", headers=headers, mtype='simulation', data=sim_data, debug=args.debug)
+
+            # run setup
+            print("Starting setup...")
+            r = requests.post(f"{api}/simulations/{simu_id}/run_setup", headers=headers)
+
+            while True:
+                simulation = utils.getobject(f"{web}", headers=headers, mtype='simulation', id=simu_id, debug=args.debug)
+                if simulation['setup_status'] in ['failed', 'done']:
+                    break
+                sleep(10)
+
+            print(f"Setup done: status={simulation['set_status']}")
+            if simulation['setup_status'] == 'failed':
+                sys.exit(1)
+
+            if not args.setup:
+                # Run simu with ssh
+                ids = utils.getlist(f"{web}", headers=headers, mtype='server', debug=args.debug)
+                if args.compute_server in ids:
+                    server_id = ids[args.compute_server]
+                else:
+                    raise RuntimeError(f"{args.server} : cannot found {args.name} in server objects")
+
+                server_data =  utils.getobject(f"{web}", headers=headers, mtype='server', id=server_id, debug=args.debug)
+
+                print("Starting simulation...")
+                r = requests.post(f"{api}/simulations/{simu_id}/run", data={'server_id': server_id}, headers=headers)
+                while True:
+                    simulation = utils.getobject(f"{web}", headers=headers, mtype='simulation', id=simu_id, debug=args.debug)
+                    if simulation['status'] in ['failed', 'done']:
+                        break
+                    sleep(10)
+                print(f"Simulation done: status={simulation['status']}")
+
+                if simulation['status'] == 'failed':
+                    sys.exit(1)
+
+        if args.command == 'select':
+            print('select: not implemented')
+
+        if args.command == 'compute':
+            print('compute: not implemented')
+
+        if args.command == 'post':
+            print('post: not implemented')
 
 if __name__ == "__main__":
     main()
