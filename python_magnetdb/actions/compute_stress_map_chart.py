@@ -26,10 +26,10 @@ def compute_stress_map_chart(data, i_h: float, i_b: float, i_s: float, mtype: st
         mcurrents = icurrents
         print("n_magnets", n_magnets)
         print("icurrents", icurrents)
-        for j,Tube in enumerate(Tubes):
-            print(f"Tube[{j}]: n_elem={Tube.get_n_elem()}, index={Tube.get_index()}")
-            for i in range(Tube.get_n_elem()):
-                print(f"H[{i}]: j={Helices[i + Tube.get_index()].get_CurrentDensity()}")
+        # for j,Tube in enumerate(Tubes):
+        #     print(f"Tube[{j}]: n_elem={Tube.get_n_elem()}, index={Tube.get_index()}")
+        #     for i in range(Tube.get_n_elem()):
+        #         print(f"H[{i}]: j={Helices[i + Tube.get_index()].get_CurrentDensity()}")
         Bz0 = mt.MagneticField(Tubes, Helices, BMagnets, UMagnets, 0, 0)[1]
         print("Bz0=", Bz0)
 
@@ -51,7 +51,7 @@ def compute_stress_map_chart(data, i_h: float, i_b: float, i_s: float, mtype: st
         (Tubes, Helices, OHelices, BMagnets, UMagnets, Shims) = data
         mdata = {"H": Helices, "B": BMagnets, "S": UMagnets}
         Magnets = mdata[mtype]
-        (headers, values) = bmap.getHoop(Magnets, Tubes, Helices, BMagnets, UMagnets, "H")
+        (headers, values) = bmap.getHoop(Magnets, Tubes, Helices, BMagnets, UMagnets, mtype)
         df = pd.DataFrame.from_records(values)
         df.columns = headers
         print(f'df = {df}')
