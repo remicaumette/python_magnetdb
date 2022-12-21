@@ -1,3 +1,6 @@
 [submodule "python_magnetgeo"]
 	path = python_magnetgeo
 	url = https://github.com/Trophime/python_magnetgeo.git
+[submodule "python_magnetsetup"]
+	path = python_magnetsetup
+	url = git@github.com:Trophime/python_magnetsetup.git
