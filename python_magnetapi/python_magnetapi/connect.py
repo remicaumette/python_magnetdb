@@ -12,7 +12,7 @@ from time import sleep
 import requests
 import requests.exceptions
 
-import utils
+from . import utils
 
 api_server = os.getenv('MAGNETDB_API_SERVER') or "magnetdb-api.grenoble.lncmi.local"
 api_key = os.getenv('MAGNETDB_API_KEY')
@@ -175,8 +175,8 @@ def main():
                 ids = utils.getlist(f"{web}", headers=headers, mtype=otype, debug=args.debug)
                 if args.name in ids:
                     response = utils.getobject(f"{web}", headers=headers, mtype=otype, id=ids[args.name], debug=args.debug)
-                    import flow_params
-                    flow_params.compute(f"{web}", headers=headers, mtype=otype, id=ids[args.name], debug=args.debug)
+                    from . import flow_params
+                    flow_params.compute(f"{web}", headers=headers, mtype=otype, oid=ids[args.name], debug=args.debug)
                 else:
                     raise RuntimeError(f"{args.server} : cannot found {args.name} in {args.mtype.upper()} objects")
 

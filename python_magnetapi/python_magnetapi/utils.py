@@ -6,11 +6,12 @@ import json
 import requests
 import re
 
-def getlist(api_server: str, headers: dict, mtype: str='magnets', debug: bool=False) -> dict():
+def getlist(api_server: str, headers: dict, mtype: str='magnets', verbose: bool=False, debug: bool=False) -> dict():
     """
     return list of ids for selected tpye
     """
-    print(f'getlist: api_server={api_server}, mtype={mtype}')
+    if verbose:
+        print(f'getlist: api_server={api_server}, mtype={mtype}')
 
     # loop over pages
     objects = dict()
@@ -49,11 +50,12 @@ def getlist(api_server: str, headers: dict, mtype: str='magnets', debug: bool=Fa
 
     return ids
 
-def getobject(api_server: str, headers: dict, id: int, mtype: str='magnet', debug: bool=False):
+def getobject(api_server: str, headers: dict, id: int, mtype: str='magnet', verbose: bool=False, debug: bool=False):
     """
     return id of an object with name == name
     """
-    print(f'getobject: api_server={api_server}, mtype={mtype}, id={id}')
+    if verbose:
+        print(f'getobject: api_server={api_server}, mtype={mtype}, id={id}')
 
     r = requests.get(f"{api_server}/api/{mtype}s/{id}", headers=headers)
     response = r.json()
@@ -65,7 +67,7 @@ def getobject(api_server: str, headers: dict, id: int, mtype: str='magnet', debu
     else:
         return response
 
-def createobject(api_server: str, headers: dict, mtype: str='magnet', data: dict={}, debug: bool=False) -> int:
+def createobject(api_server: str, headers: dict, mtype: str='magnet', data: dict={}, verbose: bool=False, debug: bool=False) -> int:
     """
     create an object and return its id
     """
@@ -81,11 +83,12 @@ def createobject(api_server: str, headers: dict, mtype: str='magnet', data: dict
             print(f"{mtype.upper()} created: \n{json.dumps(response, indent=4)}")
         return response['id']
 
-def addtoobject(api_server: str, headers: dict, id: int, mtype: str='magnet', data: dict={}, files: dict()={}, debug: bool=False):
+def addtoobject(api_server: str, headers: dict, id: int, mtype: str='magnet', data: dict={}, files: dict()={}, verbose: bool=False, debug: bool=False):
     """
     add xx to an object
     """
-    print(f'addtoobject: api_server={api_server}, mtype={mtype}, id={}, data={data}, files={files}')
+    if verbose:
+        print(f'addtoobject: api_server={api_server}, mtype={mtype}, id={id}, data={data}, files={files}')
     
     r = requests.post(f"{api_server}/api/{mtype}s/{id}/geometries", data=data, files=files, headers=headers)
     response = r.json()
@@ -94,11 +97,12 @@ def addtoobject(api_server: str, headers: dict, id: int, mtype: str='magnet', da
         return None
     pass
 
-def gethistory(api_server: str, headers: dict, id: int, mtype: str='magnet', debug: bool=False):
+def gethistory(api_server: str, headers: dict, id: int, mtype: str='magnet', verbose: bool=False, debug: bool=False):
     """
     return list of records ids attached to object id
     """
-    print(f'gethistory: api_server={api_server}, mtype={mtype}, id={id}')
+    if verbose:
+        print(f'gethistory: api_server={api_server}, mtype={mtype}, id={id}')
 
     r = requests.get(f"{api_server}/api/{mtype}s/{id}", headers=headers)
     response = r.json()
@@ -127,11 +131,12 @@ def gethistory(api_server: str, headers: dict, id: int, mtype: str='magnet', deb
 
     return []
 
-def download(api_server: str, headers: dict, attach: str, debug: bool=False):
+def download(api_server: str, headers: dict, attach: str, verbose: bool=False, debug: bool=False):
     """
     download file
     """
-    print(f'download: api_server={api_server}, attach={attach}')
+    if verbose:
+        print(f'download: api_server={api_server}, attach={attach}')
 
     r = requests.get(f"{api_server}/api/attachments/{attach}/download", headers=headers)
     if r.status_code != 200:
@@ -144,9 +149,10 @@ def download(api_server: str, headers: dict, attach: str, debug: bool=False):
 
     return filename
     
-def upload(api_server: str, headers: dict, attach: str, debug: bool=False):
+def upload(api_server: str, headers: dict, attach: str, verbose: bool=False, debug: bool=False):
     """
     upload file
     """
-    print(f'upload: api_server={api_server}, attach={attach}')
+    if verbose:
+        print(f'upload: api_server={api_server}, attach={attach}')
     pass

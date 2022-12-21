@@ -22,6 +22,6 @@ You can find your API key in your profile page.
 
 ```bash
 export MAGNETDB_API_KEY=xxx
-python list_magnet
+python -m python_magnetapi.connect --help
 ```
 
