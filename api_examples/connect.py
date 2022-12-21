@@ -35,10 +35,12 @@ def main():
     parser_view = subparsers.add_parser('view', help='view help')
     parser_create = subparsers.add_parser('create', help='create help')
     parser_run = subparsers.add_parser('run', help='run help')
-    parser_select = subparsers.add_parser('select', help='select help')
     parser_compute = subparsers.add_parser('compute', help='compute help')
     parser_post = subparsers.add_parser('process', help='process help')
-
+    # pull data from srv data
+    # push data to srv data
+    # get object as json???
+    
     # list subcommand
 
     # view subcommand
@@ -53,10 +55,12 @@ def main():
     parser_run.add_argument('--model', help='select a model', type=str, default='thmagel_hcurl')
     parser_run.add_argument('--cooling', help='select a cooling mode', type=str, choices=['mean', 'meanH', 'grad', 'gradH'], default= 'meanH')
     parser_run.add_argument('--setup', help="activate setup only", action='store_true')
-    parser.add_argument("--compute_server", help="choose compute node", type=str, default='calcul22')
-    parser.add_argument("--np", help="choose number of procs", type=int, default=4)
+    parser_run.add_argument("--compute_server", help="choose compute node", type=str, default='calcul22')
+    parser_run.add_argument("--np", help="choose number of procs", type=int, default=4)
 
     # stats subcommand
+    # compute
+    parser_compute.add_argument("--flow_params", help="activate flow params", action='store_true')
 
     # get args
     args = parser.parse_args()
@@ -65,8 +69,8 @@ def main():
     otype = args.mtype
     payload = {}
     headers = {'Authorization': os.getenv('MAGNETDB_API_KEY')}
-    web = "http://{args.server}:{args.port}"
-    api = "{web}/api"
+    web = f"http://{args.server}:{args.port}"
+    api = f"{web}/api"
 
     with requests.Session() as s:
         r = s.get(f"{api}/{otype}s", headers=headers)
@@ -83,6 +87,7 @@ def main():
                 print(f'{args.mtype.upper()}: {obj}, id={ids[obj]}')
 
         if args.command == 'view':
+            # add a filter for view
             ids = utils.getlist(f"{web}", headers=headers, mtype=otype, debug=args.debug)
             if args.name in ids:
                 response = utils.getobject(f"{web}", headers=headers, mtype=otype, id=ids[args.name], debug=args.debug)
@@ -91,6 +96,10 @@ def main():
                 raise RuntimeError(f"{args.server} : cannot found {args.name} in {args.mtype.upper()} objects")
 
         if args.command == 'create':
+            # if server, try to guess some values by running appropriate commands on the server
+            # if part|magnet|site need to attach some extra files
+            # if part|magnet|site update associative tables
+            # if record upload file to minio
             print('create: not implemented')
 
         if args.command == 'run':
@@ -100,9 +109,12 @@ def main():
             else:
                 raise RuntimeError(f"{args.server} : cannot found {args.name} in {args.mtype.upper()} objects")
 
-            if args.mtype not in ['site', 'magnet']:
+            if otype not in ['site', 'magnet']:
                 raise RuntimeError(f"unexpected type {args.mtype} in run subcommand")
 
+            # TODO: add flow_params
+            # use flow_params from magnetsetup if no records attached to object id
+            # otherwise try to get flow_params from db or create it
             sim_data={
                 'resource_type': args.mtype,
                 'resource_id': ids[args.name],
@@ -140,6 +152,7 @@ def main():
                 else:
                     raise RuntimeError(f"{args.server} : cannot found {args.name} in server objects")
 
+                # TODO get server data - aka np
                 server_data =  utils.getobject(f"{web}", headers=headers, mtype='server', id=server_id, debug=args.debug)
 
                 print("Starting simulation...")
@@ -154,11 +167,18 @@ def main():
                 if simulation['status'] == 'failed':
                     sys.exit(1)
 
-        if args.command == 'select':
-            print('select: not implemented')
-
         if args.command == 'compute':
-            print('compute: not implemented')
+            if args.flow_params:
+                if otype not in ['site', 'magnet']:
+                    raise RuntimeError(f"unexpected type {args.mtype} in compute subcommand flow_params")
+
+                ids = utils.getlist(f"{web}", headers=headers, mtype=otype, debug=args.debug)
+                if args.name in ids:
+                    response = utils.getobject(f"{web}", headers=headers, mtype=otype, id=ids[args.name], debug=args.debug)
+                    import flow_params
+                    flow_params.compute(f"{web}", headers=headers, mtype=otype, id=ids[args.name], debug=args.debug)
+                else:
+                    raise RuntimeError(f"{args.server} : cannot found {args.name} in {args.mtype.upper()} objects")
 
         if args.command == 'post':
             print('post: not implemented')

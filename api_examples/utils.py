@@ -4,6 +4,7 @@ Utils for interaction with MagnetDB
 
 import json
 import requests
+import re
 
 def getlist(api_server: str, headers: dict, mtype: str='magnets', debug: bool=False) -> dict():
     """
@@ -48,17 +49,6 @@ def getlist(api_server: str, headers: dict, mtype: str='magnets', debug: bool=Fa
 
     return ids
 
-def select(api_server: str, headers: dict, name: str, mtype: str='magnets', debug: bool=False) -> int:
-    """
-    return id of an object with name == name
-    """
-
-    ids = getlist(api_server, headers, mtype, debug)
-    if name in ids:
-        return ids[name]
-
-    return None
-
 def getobject(api_server: str, headers: dict, id: int, mtype: str='magnet', debug: bool=False):
     """
     return id of an object with name == name
@@ -69,6 +59,7 @@ def getobject(api_server: str, headers: dict, id: int, mtype: str='magnet', debu
     response = r.json()
 
     if r.status_code != 200:
+        print(f'getobject: {api_server}/api/{mtype}s/{id}')
         print(response['detail'])
         return None
     else:
@@ -89,3 +80,73 @@ def createobject(api_server: str, headers: dict, mtype: str='magnet', data: dict
         if debug:
             print(f"{mtype.upper()} created: \n{json.dumps(response, indent=4)}")
         return response['id']
+
+def addtoobject(api_server: str, headers: dict, id: int, mtype: str='magnet', data: dict={}, files: dict()={}, debug: bool=False):
+    """
+    add xx to an object
+    """
+    print(f'addtoobject: api_server={api_server}, mtype={mtype}, id={}, data={data}, files={files}')
+    
+    r = requests.post(f"{api_server}/api/{mtype}s/{id}/geometries", data=data, files=files, headers=headers)
+    response = r.json()
+    if r.status_code != 200:
+        print(response['detail'])
+        return None
+    pass
+
+def gethistory(api_server: str, headers: dict, id: int, mtype: str='magnet', debug: bool=False):
+    """
+    return list of records ids attached to object id
+    """
+    print(f'gethistory: api_server={api_server}, mtype={mtype}, id={id}')
+
+    r = requests.get(f"{api_server}/api/{mtype}s/{id}", headers=headers)
+    response = r.json()
+
+    if r.status_code != 200:
+        print(response['detail'])
+        return None
+
+    if mtype in ['part', 'magnet']:
+        r = requests.get(f"{api_server}/api/{mtype}s/{id}/records", headers=headers)
+        response = r.json()
+        if r.status_code != 200:
+            print(f'{api_server}/api/{mtype}s/{id}/records')
+            print(response['detail'])
+            return None
+        return response['records']
+
+    elif mtype == 'site':
+        r = requests.get(f"{api_server}/api/{mtype}s/{id}", headers=headers)
+        response = r.json()
+        if r.status_code != 200:
+            print(response['detail'])
+            return None
+        
+        return [record.serialize() for record in response['records']]
+
+    return []
+
+def download(api_server: str, headers: dict, attach: str, debug: bool=False):
+    """
+    download file
+    """
+    print(f'download: api_server={api_server}, attach={attach}')
+
+    r = requests.get(f"{api_server}/api/attachments/{attach}/download", headers=headers)
+    if r.status_code != 200:
+        print(response['detail'])
+        return None
+
+    filename = list(re.finditer(r"filename=\"(.+)\"", r.headers['content-disposition'], re.MULTILINE))[0].group(1)
+    with open(filename, 'w+') as file:
+        file.write(r.text)
+
+    return filename
+    
+def upload(api_server: str, headers: dict, attach: str, debug: bool=False):
+    """
+    upload file
+    """
+    print(f'upload: api_server={api_server}, attach={attach}')
+    pass
