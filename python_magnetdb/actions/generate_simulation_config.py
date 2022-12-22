@@ -41,6 +41,7 @@ def generate_magnet_config(magnet_id):
             'material': format_material(magnet_part.part.material),
             'insulator': insulator_payload
         })
+    print(f'generate_magnet_config: {payload}')
     return payload
 
 
@@ -51,6 +52,7 @@ def generate_site_config(site_id):
         if not site_magnet.active:
             continue
         payload['magnets'].append(generate_magnet_config(site_magnet.magnet_id))
+    print(f'generate_site_config: {payload}')
     return payload
 
 
