@@ -4,3 +4,6 @@
 [submodule "python_magnetsetup"]
 	path = python_magnetsetup
 	url = git@github.com:Trophime/python_magnetsetup.git
+[submodule "python_magnetapi"]
+	path = python_magnetapi
+	url = git@github.com:Trophime/python_magnetapi.git
