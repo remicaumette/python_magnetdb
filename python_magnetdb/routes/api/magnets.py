@@ -10,6 +10,8 @@ from ...models.audit_log import AuditLog
 from ...models.magnet import Magnet
 from ...models.status import Status
 
+from ...actions.generate_magnet_directory import generate_magnet_directory
+
 router = APIRouter()
 
 
@@ -58,6 +60,17 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
     return magnet.serialize()
 
 
+@router.get("/api/magnets/{id}/sites")
+def sites(id: int, user=Depends(get_user('read'))):
+    magnet = Magnet.with_('site_magnets.site').find(id)
+    if not magnet:
+        raise HTTPException(status_code=404, detail="Magnet not found")
+
+    result = []
+    for site_magnet in magnet.site_magnets:
+        result.append(site_magnet.serialize())
+    return {'sites': result}
+
 @router.get("/api/magnets/{id}/records")
 def records(id: int, user=Depends(get_user('read'))):
     magnet = Magnet.with_('site_magnets.site.records').find(id)
@@ -69,6 +82,15 @@ def records(id: int, user=Depends(get_user('read'))):
         for record in site_magnet.site.records:
             result.append(record.serialize())
     return {'records': result}
+
+@router.get("/api/magnets/{id}/mdata")
+def mdata(id: int, user=Depends(get_user('read'))):
+    magnet = Magnet.find(id)
+    if not site:
+        raise HTTPException(status_code=404, detail="Magnet not found")
+
+    data = generate_magnet_directory(id)
+    return {'results': data}
 
 
 @router.get("/api/magnets/{id}")

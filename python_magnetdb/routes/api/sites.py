@@ -9,6 +9,7 @@ from ...models.audit_log import AuditLog
 from ...models.site import Site
 from ...models.status import Status
 
+from ...actions.generate_simulation_config import generate_site_config
 router = APIRouter()
 
 
@@ -87,6 +88,27 @@ def update(id: int, user=Depends(get_user('update')), name: str = Form(...), des
     AuditLog.log(user, "Site updated", resource=site)
     return site.serialize()
 
+@router.get("/api/sites/{id}/records")
+def records(id: int, user=Depends(get_user('read'))):
+    site = Site.with_('records').find(id)
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
+
+    print(f'/api/sites/{id}/records: {site}')
+    result = []
+    for record in site.records:
+        result.append(record.serialize())
+    return {'records': result}
+
+@router.get("/api/sites/{id}/mdata")
+def mdata(id: int, user=Depends(get_user('read'))):
+    site = Site.find(id)
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
+
+    data = generate_site_config(id)
+    print(f'/api/sites/{id}/mdata: {data}')
+    return {'results': data}
 
 @router.post("/api/sites/{id}/put_in_operation")
 def put_in_operation(id: int, user=Depends(get_user('update'))):
