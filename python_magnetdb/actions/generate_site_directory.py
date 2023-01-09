@@ -31,7 +31,7 @@ def generate_site_directory(site_id, directory):
         if not site_magnet.active:
             continue
         magnet = site_magnet.magnet
-        print(f'site_magnet: name={magnet.name} id={magnet.id}')
+        # print(f'site_magnet: name={magnet.name} id={magnet.id}')
         if magnet.geometry:
             print(f'download: magnet geometry={magnet.geometry.filename}')
             magnet.geometry.download(f"{directory}/data/geometries/{magnet.geometry.filename}")

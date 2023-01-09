@@ -15,7 +15,7 @@ def get_magnet_data(magnet_id):
         data_dir = f"{tempdir}/data"
         env = appenv(envfile=None, url_api=data_dir, yaml_repo=f"{data_dir}/geometries", cad_repo=f"{data_dir}/cad",
                      mesh_repo=data_dir, simage_repo=data_dir, mrecord_repo=data_dir, optim_repo=data_dir)
-        return magnet_setup(env, config_data, True)
+        return magnet_setup(env, config_data, False) # True means debug
 
 
 def get_site_data(site_id):
@@ -29,4 +29,4 @@ def get_site_data(site_id):
         env = appenv(envfile=None, url_api=data_dir, yaml_repo=f"{data_dir}/geometries", cad_repo=f"{data_dir}/cad",
                      mesh_repo=data_dir, simage_repo=data_dir, mrecord_repo=data_dir, optim_repo=data_dir)
         config_data = generate_site_config(site_id)
-        return msite_setup(env, config_data, True)
+        return msite_setup(env, config_data, False) # True means debug
