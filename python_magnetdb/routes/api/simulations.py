@@ -71,8 +71,19 @@ class CreatePayload(BaseModel):
     currents: List[CreatePayloadCurrent]
 
 
+@router.post("/api/simulations/current")
+def create_currents(payload: CreatePayloadCurrent, user=Depends(get_user('create'))):
+    #print(f'/api/simulations/currents, {user}: - payload={payload}')
+
+    current = CreatePayloadCurrent(
+        magnet_id=payload.magnet_id, value=payload.value
+    )
+    #print(f'/api/simulations, {user}: current created - payload={payload}')
+    return current
+
 @router.post("/api/simulations")
 def create(payload: CreatePayload, user=Depends(get_user('create'))):
+    #print(f'/api/simulations, {user}: - payload={payload}')
     if payload.resource_type == 'magnet':
         resource = Magnet.find(payload.resource_id)
     elif payload.resource_type == 'site':
