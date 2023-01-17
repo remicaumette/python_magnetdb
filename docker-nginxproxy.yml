@@ -122,7 +122,7 @@ services:
       - /bin/bash
       - -c
       - |
-        npm install -g npm@9.2.0
+        npm install -g npm@9.3.0
         mkdir -p /root/.config/yarn
         npx browserslist@latest --update-db
         yarn install
@@ -149,9 +149,9 @@ services:
       - -c
       - |
         cd python_magnetsetup
-        poetry install
+        poetry install --no-cache
         cd ..
-        poetry install
+        poetry install --no-cache
         wait-for-it magnetdb.grenoble.lncmi.local:8080 -t 120 -- poetry run uvicorn python_magnetdb.web:app --reload --host 0.0.0.0
     # eventually perform a migration
     working_dir: /home/feelpp/test
@@ -189,9 +189,9 @@ services:
       - -c
       - |
         cd python_magnetsetup
-        poetry install
+        poetry install --no-cache
         cd ..
-        poetry install
+        poetry install --no-cache
         wait-for-it magnetdb-api.grenoble.lncmi.local:8000 -t 120 -- watchmedo auto-restart -d ./python_magnetdb/ -p '**/*.py' --recursive -- poetry run celery -A python_magnetdb.worker worker --loglevel=info
     working_dir: /home/feelpp/test
     network_mode: host
