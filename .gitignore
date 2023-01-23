@@ -76,9 +76,9 @@ data
 core
 poetry-cache
 /images
+/certs
 
 minio-data
 postgres-data
 lemonldap-ng-data
-certs
 *.orig
