@@ -1,3 +1,9 @@
+from typing import TextIO
+from typing import Type
+from ..models.server import Server
+from ..models.simulation import Simulation
+
+
 import os
 import tempfile
 from argparse import Namespace
@@ -13,10 +19,10 @@ from python_magnetsetup.setup import setup_cmds
 from python_magnetdb.models.attachment import Attachment
 
 
-def run_cmd(connection, cmd, stdout):
-    res = connection.run(cmd)
-    print(f'run_cmd: cmd={cmd}, res={res}')
+def run_cmd(connection: Connection, cmd: str, stdout: TextIO):
+    print(f'run_cmd: cmd={cmd}')
     stdout.write(f"=== RUNNING CMD: {cmd}\n")
+    res = connection.run(cmd)
     stdout.write(f"===\n")
     stdout.write(res.stdout)
     if len(res.stderr) > 0:
@@ -24,14 +30,17 @@ def run_cmd(connection, cmd, stdout):
         stdout.write(f"===\n")
         stdout.write(res.stderr)
     stdout.write(f"=== STATUS CODE: {res.exited}\n")
+    stdout.flush()
     return res.stdout
 
 
-def run_ssh_simulation(simulation, server, cores):
+def run_ssh_simulation(simulation: Type[Simulation], server: Type[Server], cores):
     simulation.status = "in_progress"
     simulation.save()
-    simulation.load('currents.magnet')
-    currents = {current.magnet.name: current.value for current in simulation.currents}
+    simulation.load('currents.magnet.parts')
+    
+    currents = {current.magnet.name: {'value': current.value, 'type': current.magnet.get_type() } for current in simulation.currents}
+    print(f'currents={currents}')
 
     with tempfile.TemporaryDirectory() as local_tempdir:
         current_dir = os.getcwd()
@@ -56,7 +65,7 @@ def run_ssh_simulation(simulation, server, cores):
                 print(f'remote_temp_dir={remote_temp_dir} (type={type(remote_temp_dir)})')
                 connection.put(f"{local_tempdir}/setup.tar.gz", remote_temp_dir)
                 log_file.write("Extracting setup archive...\n")
-                run_cmd(connection, f"tar xvf {remote_temp_dir}/setup.tar.gz -C {remote_temp_dir}", log_file)
+                run_cmd(connection, f"tar xf {remote_temp_dir}/setup.tar.gz -C {remote_temp_dir}", log_file)
                 log_file.write("Generating commands...\n")
                 data_dir = f"{remote_temp_dir}/data"
                 print(f'data_dir={data_dir}')
@@ -116,7 +125,7 @@ def run_ssh_simulation(simulation, server, cores):
                     log_file.write("Archiving results...\n")
                     simulation_name = os.path.basename(os.path.splitext(simulation.setup_state['cfgfile'])[0])
                     remote_output_archive = f"{remote_temp_dir}/{simulation_name}.tar.gz"
-                    run_cmd(connection, f"tar --exclude=tmp.hdf --exclude=setup.tar.gz -cvzf {remote_output_archive} *", log_file)
+                    run_cmd(connection, f"tar --exclude=tmp.hdf --exclude=setup.tar.gz -czf {remote_output_archive} *", log_file)
                     local_output_archive = f"{local_tempdir}/{simulation_name}.tar.gz"
                     connection.get(remote_output_archive, local_output_archive)
                     simulation.output_attachment().associate(
@@ -125,8 +134,10 @@ def run_ssh_simulation(simulation, server, cores):
                 log_file.write("Done!\n")
                 simulation.status = "done"
             except Exception as err:
+                log_file.flush()
                 simulation.status = "failed"
                 print_exception(None, err, err.__traceback__)
+
             simulation.log_attachment().associate(Attachment.raw_upload("debug.log", "text/plain", log_file_path))
             os.chdir(current_dir)
             simulation.save()

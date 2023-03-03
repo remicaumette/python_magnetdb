@@ -136,9 +136,9 @@
                 default: true,
               },
               {
-                name: 'Giga Ampère',
-                value: 'GA',
-                symbol: 'GA',
+                name: 'Kilo Ampère',
+                value: 'kA',
+                symbol: 'kA',
                 default: false,
               }
             ]"

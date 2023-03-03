@@ -2,6 +2,7 @@ from typing import Union, List
 
 from fastapi import APIRouter, HTTPException, Depends, Form, Query
 from pydantic import BaseModel
+
 from python_magnetsetup.config import loadconfig, supported_methods, supported_models
 
 from ... import worker
@@ -57,6 +58,7 @@ def models():
 class CreatePayloadCurrent(BaseModel):
     magnet_id: int
     value: float
+    # type: str
 
 
 class CreatePayload(BaseModel):
@@ -75,6 +77,13 @@ class CreatePayload(BaseModel):
 def create_currents(payload: CreatePayloadCurrent, user=Depends(get_user('create'))):
     #print(f'/api/simulations/currents, {user}: - payload={payload}')
 
+    # can I get magnet type?
+    data = Magnet.find(payload.magnet_id)
+    print(f'create_currents: magnet={data}') 
+    
+    # current = CreatePayloadCurrent(
+    #     magnet_id=payload.magnet_id, value=payload.value, type=payload.type
+    # )
     current = CreatePayloadCurrent(
         magnet_id=payload.magnet_id, value=payload.value
     )
@@ -96,6 +105,8 @@ def create(payload: CreatePayload, user=Depends(get_user('create'))):
         method=payload.method, model=payload.model, geometry=payload.geometry,
         cooling=payload.cooling, static=payload.static, non_linear=payload.non_linear
     )
+
+    # TODO add magnet_type to current 
     currents = map(lambda value: SimulationCurrent(magnet_id=value.magnet_id, value=value.value), payload.currents)
     simulation.owner().associate(user)
     simulation.resource().associate(resource)

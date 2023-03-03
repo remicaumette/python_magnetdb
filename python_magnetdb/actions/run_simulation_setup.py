@@ -25,6 +25,10 @@ def prepare_directory(simulation, directory):
 def run_simulation_setup(simulation):
     simulation.setup_status = "in_progress"
     simulation.save()
+    simulation.load('currents.magnet.parts')
+    
+    currents = {current.magnet.name: {'value': current.value, 'type': current.magnet.get_type() } for current in simulation.currents}
+    print(f'currents={currents}')
 
     with tempfile.TemporaryDirectory() as tempdir:
         done = subprocess.run([f"rm -rf {tempdir}"], shell=True)
@@ -32,7 +36,7 @@ def run_simulation_setup(simulation):
 
         print(f"generating config in {tempdir}...")
         prepare_directory(simulation, tempdir)
-        done = subprocess.run([f"ls -lR {tempdir}"], shell=True)
+        # done = subprocess.run([f"ls -lR {tempdir}"], shell=True)
         print("generating config done")
 
         print(f"running setup... non_linear={simulation.non_linear} type={type(simulation.non_linear)}")
@@ -58,7 +62,7 @@ def run_simulation_setup(simulation):
         try:
             with open(f"{tempdir}/config.json", "r") as config_file:
                 config = json.load(config_file)
-                (yamlfile, cfgfile, jsonfile, xaofile, meshfile) = setup(env, args, config, f"{tempdir}/{simulation.resource.name}")
+                (yamlfile, cfgfile, jsonfile, xaofile, meshfile) = setup(env, args, config, f"{tempdir}/{simulation.resource.name}", currents)
                 simulation.setup_state = {
                     'yamlfile': yamlfile,
                     'cfgfile': cfgfile[len(tempdir) + 1:],
@@ -77,9 +81,9 @@ def run_simulation_setup(simulation):
             output_archive = f"{tempdir}/setup-{simulation_name}.tar.gz"
             print(f'Archiving setup files ({simulation.geometry})')
             if simulation.geometry == 'Axi':
-                subprocess.run([f"tar --exclude=*.xao --exclude=*.brep -cvzf {output_archive} *"], shell=True, check=True)
+                subprocess.run([f"tar --exclude=*.xao --exclude=*.brep -czf {output_archive} *"], shell=True, check=True)
             else:
-                subprocess.run([f"tar cvzf {output_archive} *"], shell=True, check=True)
+                subprocess.run([f"tar czf {output_archive} *"], shell=True, check=True)
             attachment = Attachment.raw_upload(basename(output_archive), "application/x-tar", output_archive)
             simulation.setup_output_attachment().associate(attachment)
             simulation.setup_status = "done"
