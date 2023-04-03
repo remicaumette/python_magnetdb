@@ -1,6 +1,9 @@
+from typing import Optional
+
 from datetime import datetime
 
 import pandas as pd
+from pydantic import BaseModel
 from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
 
 from ...dependencies import get_user
@@ -40,9 +43,36 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
     record.attachment().associate(Attachment.upload(attachment))
     record.site().associate(site)
     record.save()
-    AuditLog.log(user, "Record created", resource=record)
+    AuditLog.log(user, f"Record created {attachment.filename}", resource=record)
     return record.serialize()
 
+class RecordPayload(BaseModel):
+    name: str
+    description: Optional[str]
+    site_id: int
+    attachment_id: int
+    
+@router.post("/api/clirecords")
+def clicreate(payload: RecordPayload, user=Depends(get_user('create'))):
+    print(f'record/clicreate: name={payload.name}, attachment_id={payload.attachment_id}')
+    site = Site.find(payload.site_id)
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
+    print(f'site: {site}')
+
+    attachment = Attachment.find(payload.attachment_id)
+    if not attachment:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    print(f'attachment: {attachment}')
+
+    record = Record(name=payload.name, description=payload.description)
+    record.attachment().associate(attachment)
+    print(f'record/clicreate: associate attachment done')
+    record.site().associate(site)
+    print(f'record/clicreate: associate site done')
+    record.save()
+    AuditLog.log(user, f"Record cli created {payload.name}", resource=record)
+    return record.serialize()
 
 @router.get("/api/records/{id}")
 def show(id: int, user=Depends(get_user('read'))):
