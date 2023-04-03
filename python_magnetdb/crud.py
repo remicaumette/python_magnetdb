@@ -4,7 +4,7 @@ Basic crud methods
 
 import re
 from datetime import datetime
-from os import path
+from os import path, getenv
 from uuid import uuid4
 
 from python_magnetdb.models.part_geometry import PartGeometry
@@ -17,8 +17,9 @@ from .models.part import Part
 from .models.record import Record
 from .models.site import Site
 from .models.site_magnet import SiteMagnet
-from .seeds import data_directory
 from .storage import s3_client, s3_bucket
+
+data_directory = getenv('DATA_DIR')
 
 
 def upload_attachment(file: str) -> Attachment:
