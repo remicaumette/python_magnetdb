@@ -741,14 +741,14 @@ with Model.get_connection_resolver().transaction():
         'design_office_reference': 'BI-03-002-A',
         'status': 'in_study',
         'material': CUAG01,
-        'geometry': 'M9Bitters_Bi',
+        'geometry': 'M9_Bi',
     })
 
     M9BE = create_part({
     'name': 'M9Be',
         'type': 'bitter',
         'design_office_reference': 'BE-03-002-A',
-        'geometry': 'M9Bitters_Be',
+        'geometry': 'M9_Be',
         'status': 'in_study',
         'material': CUAG01
     })
@@ -766,7 +766,7 @@ with Model.get_connection_resolver().transaction():
     'name': 'M10Bi',
         'type': 'bitter',
         'design_office_reference': 'BI-03-002-A',
-        'geometry': 'M10Bitters_Bi',
+        'geometry': 'M10_Bi',
         'status': 'in_study',
         'material': CUAG01
     })
@@ -775,7 +775,7 @@ with Model.get_connection_resolver().transaction():
     'name': 'M10Be',
         'type': 'bitter',
         'design_office_reference': 'BE-03-002-A',
-        'geometry': 'M10Bitters_Be',
+        'geometry': 'M10_Be',
         'status': 'in_study',
         'material': CUAG01
     })
