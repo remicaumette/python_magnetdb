@@ -24,6 +24,7 @@ def create(site_id: int, user=Depends(get_user('create')), magnet_id: int = Form
     for site_magnet in magnet.site_magnets:
         if site_magnet.site.status == Status.IN_STUDY:
             site_magnet.delete()
+            AuditLog.log(user, "Magnet detached from Site", resource=magnet)
 
     site_magnet = SiteMagnet(commissioned_at=datetime.now())
     site_magnet.site().associate(site)
