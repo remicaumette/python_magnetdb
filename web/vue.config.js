@@ -5,7 +5,7 @@ module.exports = {
       errors: false
     },
     allowedHosts: [
-      'grenoble.lncmi.local',
+      'lncmig.local',
     ]
   }
 }
