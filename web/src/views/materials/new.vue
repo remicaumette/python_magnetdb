@@ -29,6 +29,7 @@
             label="RPE"
             name="rpe"
             type="number"
+            placeholder="0"
             :component="FormInputWithUnit"
             :unit-options="[
                 {
@@ -262,7 +263,6 @@ export default {
     validate() {
       return Yup.object().shape({
         name: Yup.string().required(),
-        rpe: Yup.string().required(),
       })
     },
   },
