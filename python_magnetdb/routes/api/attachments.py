@@ -25,11 +25,11 @@ class FilePayload(BaseModel):
     fileno: int
 
 @router.post("/api/attachments")
-def create(payload: FilePayload, user=Depends(get_user('create'))):
-    attached = Attachment.raw_upload(payload.filename, payload.content_type, payload.fileno)
+def upload(file: UploadFile = File(...), user=Depends(get_user('create'))):
+    attached = Attachment.upload(file)
     try:
         attached.save()
     except orator.exceptions.query.QueryException as e:
         raise HTTPException(status_code=422, detail=e.message)
-    AuditLog.log(user, f"Attachment created {payload.filename}", resource=attached)
+    AuditLog.log(user, f"Attachment created {file.filename}", resource=attached)
     return attached.serialize()
