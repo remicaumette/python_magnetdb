@@ -17,14 +17,14 @@ git submodule update --init --recursive
 
 On your host:
 ```shell
-echo "127.0.0.1 handler.sso.grenoble.lncmi.local api.manager.sso.grenoble.lncmi.local manager.sso.grenoble.lncmi.local sso.grenoble.lncmi.local test.sso.grenoble.lncmi" | sudo tee -a /etc/hosts
-echo "127.0.0.1 magnetdb.grenoble.lncmi.local" | sudo tee -a /etc/hosts
-echo "127.0.0.1 magnetdb-api.grenoble.lncmi.local" | sudo tee -a /etc/hosts
-echo "127.0.0.1 magnetdb-worker.grenoble.lncmi.local" | sudo tee -a /etc/hosts
-echo "127.0.0.1 redis.grenoble.lncmi.local" | sudo tee -a /etc/hosts
-echo "127.0.0.1 postgres.grenoble.lncmi.local" | sudo tee -a /etc/hosts
-echo "127.0.0.1 pgadmin.grenoble.lncmi.local" | sudo tee -a /etc/hosts
-echo "127.0.0.1 minio.grenoble.lncmi.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 handler.sso.lncmig.local api.manager.sso.lncmig.local manager.sso.lncmig.local sso.lncmig.local test.sso.lncmig.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 magnetdb.lncmig.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 magnetdb-api.lncmig.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 magnetdb-worker.lncmig.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 redis.lncmig.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 postgres.lncmig.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 pgadmin.lncmig.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 minio.lncmig.local" | sudo tee -a /etc/hosts
 ```
 
 Create a self signed certificate for the magnetdb server
@@ -88,7 +88,7 @@ poetry run python3 -m python_magnetdb.seed-records
 ```
     
 4. Configure LemonLDAP (https://github.com/LemonLDAPNG/lemonldap-ng-docker):
-   1. Sign in to http://sso.grenoble.lncmi.local/ with dwho/dwho
+   1. Sign in to http://sso.lncmig.local/ with dwho/dwho
    2. Enable OpenID Connect in Administration > WebSSO Manager > General Parameters > Issuer modules > OpenID Connect
    3. Create OpenID relying party in Administration > WebSSO Manager > OpenID Connect Relying Parties > Add OpenID Relying Party
    4. Go in Administration > WebSSO Manager > OpenID Connect Relying Parties > "Name of the relying party" > Options > Basic
@@ -116,7 +116,7 @@ docker exec -it lemonldap-app bash
 To change Lemonldap settings
 
 ```shell
-firefox -private http://sso.grenoble.lncmi.local
+firefox -private http://sso.lncmig.local
 ```
 
 To change user role:

@@ -10,7 +10,7 @@ See `python_magnetrun` for more details
 
 On your host:
 ```shell
-echo "127.0.0.1 handler.sso.grenoble.lncmi.local api.manager.sso.grenoble.lncmi.local manager.sso.grenoble.lncmi.local sso.grenoble.lncmi.local test.sso.grenoble.lncmi" | sudo tee -a /etc/hosts
+echo "127.0.0.1 handler.sso.lncmig.local api.manager.sso.lncmig.local manager.sso.lncmig.local sso.lncmig.local test.sso.lncmig.local" | sudo tee -a /etc/hosts
 ```
 
 Create a self signed certificate for the magnetdb server:
@@ -41,7 +41,7 @@ docker-compose -f docker-compose-dev.yml up
 Note: if you see error messages about pgadmin, try to fix permissions on pgadmin-data directory by running `sudo chown -R 5050:5050 pgadmin-data`
 
 5. Configure LemonLDAP (https://github.com/LemonLDAPNG/lemonldap-ng-docker):
-   1. Sign in to http://sso.grenoble.lncmi.local/ with dwho/dwho
+   1. Sign in to http://sso.lncmig.local/ with dwho/dwho
    2. Enable OpenID Connect in Administration > WebSSO Manager > General Parameters > Issuer modules > OpenID Connect
    3. Create OpenID relying party in Administration > WebSSO Manager > OpenID Connect Relying Parties > Add OpenID Relying Party
    4. Go in Administration > WebSSO Manager > OpenID Connect Relying Parties > "Name of the relying party" > Options > Basic
