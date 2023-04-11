@@ -106,6 +106,7 @@ services:
     image: postgres:13
     ports:
       - 5432:5432
+    user: "${UID}:${GID}"
     environment:
       POSTGRES_USER: magnetdb
       POSTGRES_PASSWORD: magnetdb
