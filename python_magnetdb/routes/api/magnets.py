@@ -177,8 +177,8 @@ def update(
 
 
 @router.post("/api/magnets/{id}/defunct")
-def defunct(id: int, user=Depends(get_user("update"))):
-    magnet = Magnet.with_("magnet_parts.part").find(id)
+def defunct(id: int, decommissioned_at: datetime = Form(datetime.now()), user=Depends(get_user('update'))):
+    magnet = Magnet.with_('magnet_parts.part').find(id)
     if not magnet:
         raise HTTPException(status_code=404, detail="Magnet not found")
 
@@ -187,7 +187,7 @@ def defunct(id: int, user=Depends(get_user("update"))):
             continue
         magnet_part.part.status = Status.IN_STOCK
         magnet_part.part.save()
-        magnet_part.decommissioned_at = datetime.now()
+        magnet_part.decommissioned_at = decommissioned_at
         magnet_part.save()
 
     magnet.status = Status.DEFUNCT

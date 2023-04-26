@@ -111,7 +111,7 @@ def mdata(id: int, user=Depends(get_user('read'))):
     return {'results': data}
 
 @router.post("/api/sites/{id}/put_in_operation")
-def put_in_operation(id: int, user=Depends(get_user('update'))):
+def put_in_operation(id: int, commissioned_at: datetime = Form(datetime.now()), user=Depends(get_user('update'))):
     site = Site.with_('site_magnets.magnet.magnet_parts.part').find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
@@ -121,11 +121,15 @@ def put_in_operation(id: int, user=Depends(get_user('update'))):
             continue
         site_magnet.magnet.status = Status.IN_OPERATION
         site_magnet.magnet.save()
+        site_magnet.commissioned_at = commissioned_at
+        site_magnet.save()
         for magnet_part in site_magnet.magnet.magnet_parts:
             if not magnet_part.active:
                 continue
             magnet_part.part.status = Status.IN_OPERATION
             magnet_part.part.save()
+            magnet_part.commissioned_at = commissioned_at
+            magnet_part.save()
 
     site.status = Status.IN_OPERATION
     site.save()
@@ -134,7 +138,7 @@ def put_in_operation(id: int, user=Depends(get_user('update'))):
 
 
 @router.post("/api/sites/{id}/shutdown")
-def shutdown(id: int, user=Depends(get_user('update'))):
+def shutdown(id: int, decommissioned_at: datetime = Form(datetime.now()), user=Depends(get_user('update'))):
     site = Site.with_('site_magnets.magnet').find(id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
@@ -144,7 +148,7 @@ def shutdown(id: int, user=Depends(get_user('update'))):
             continue
         site_magnet.magnet.status = Status.IN_STOCK
         site_magnet.magnet.save()
-        site_magnet.decommissioned_at = datetime.now()
+        site_magnet.decommissioned_at = decommissioned_at
         site_magnet.save()
 
     site.status = Status.DEFUNCT
