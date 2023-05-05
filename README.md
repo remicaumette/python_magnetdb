@@ -131,3 +131,10 @@ To start magnetdb:
 firefox -private http://localhost:8080/
 ```
 
+To start magnetdb swagger UI:
+
+```shell
+firefox -private http://localhost:8000/docs
+```
+
+NB: see https://fastapi.tiangolo.com/tutorial/metadata/ to custom swagger UI
