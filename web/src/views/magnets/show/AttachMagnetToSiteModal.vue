@@ -71,7 +71,7 @@ export default {
   async mounted() {
     const sites = await siteService.list()
     this.siteOptions = sites.items
-        .filter((item) => item.status === 'in_study')
+        .filter((item) => ['in_study', 'in_stock'].includes(item.status))
         .map((item) => ({ name: item.name, value: item.id }))
   }
 }
