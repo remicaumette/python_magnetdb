@@ -50,11 +50,10 @@ services:
   redis:
     image: redis
     container_name: redis-app
-    environment:
-      TZ: 'Europe/Paris'
     ports:
       - 6379:6379
     environment:
+      TZ: 'Europe/Paris'
       VIRTUAL_HOST: redis.lncmig.local
       NETWORK_ACCESS: internal
     depends_on:
@@ -65,7 +64,7 @@ services:
     container_name: postgres-app
     ports:
       - 5432:5432
-    user: "${UID}:${GID}"
+    user: "${UUID}:${GID}"
     environment:
       VIRTUAL_HOST: postgres.lncmig.local
       POSTGRES_USER: magnetdb
@@ -153,7 +152,7 @@ services:
         poetry install --no-cache
         cd ..
         poetry install --no-cache
-        wait-for-it magnetdb.lncmig.local:8080 -t 120 -- poetry run uvicorn python_magnetdb.web:app --reload --host 0.0.0.0
+        wait-for-it magnetdb.lncmig.local:8080 -t 120 -- poetry run uvicorn python_magnetdb.web:app --host 0.0.0.0 --port 8000 --reload
     # eventually perform a migration
     working_dir: /home/feelpp/test
     network_mode: host
