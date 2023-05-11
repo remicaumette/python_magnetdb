@@ -123,7 +123,7 @@ services:
       - /bin/bash
       - -c
       - |
-        npm install -g npm@9.6.3
+        npm install -g npm@9.6.6
         mkdir -p /root/.config/yarn
         npx browserslist@latest --update-db
         yarn install
