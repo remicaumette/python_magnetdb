@@ -1,3 +1,5 @@
+from typing import List
+
 import orator
 from fastapi import APIRouter, Query, HTTPException, Depends
 from fastapi.params import Form
@@ -6,19 +8,20 @@ from ...dependencies import get_user
 from ...models.audit_log import AuditLog
 from ...models.material import Material
 from ...models.part import Part
-from ...models.magnet import Magnet
-from ...models.site import Site
 
 router = APIRouter()
 
 
 @router.get("/api/parts")
 def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
-          query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False)):
+          query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False),
+          status: List[str] = Query(default=None, alias="status[]")):
     parts = Part \
         .order_by(sort_by or 'created_at', 'desc' if sort_desc else 'asc')
     if query is not None and query.strip() != '':
         parts = parts.where('name', 'ilike', f'%{query}%')
+    if status is not None:
+        parts = parts.where_in('status', status)
     parts = parts.paginate(per_page, page)
     return {
         "current_page": parts.current_page,

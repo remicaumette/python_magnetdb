@@ -1,8 +1,8 @@
 from datetime import datetime
+from typing import List
 
 import orator.exceptions.query
 from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
-from python_magnetdb.models.site import Site
 
 from ...dependencies import get_user
 from ...models.attachment import Attachment
@@ -16,19 +16,15 @@ router = APIRouter()
 
 
 @router.get("/api/magnets")
-def index(
-    user=Depends(get_user("read")),
-    page: int = 1,
-    per_page: int = Query(default=25, lte=100),
-    query: str = Query(None),
-    sort_by: str = Query(None),
-    sort_desc: bool = Query(False),
-):
-    magnets = Magnet.with_("site_magnets").order_by(
-        sort_by or "created_at", "desc" if sort_desc else "asc"
-    )
-    if query is not None and query.strip() != "":
-        magnets = magnets.where("name", "ilike", f"%{query}%")
+def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
+          query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False),
+          status: List[str] = Query(default=None, alias="status[]")):
+    magnets = Magnet.with_('site_magnets') \
+        .order_by(sort_by or 'created_at', 'desc' if sort_desc else 'asc')
+    if query is not None and query.strip() != '':
+        magnets = magnets.where('name', 'ilike', f'%{query}%')
+    if status is not None:
+        magnets = magnets.where_in('status', status)
     magnets = magnets.paginate(per_page, page)
 
     items = []

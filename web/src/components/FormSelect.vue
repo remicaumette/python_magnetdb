@@ -1,5 +1,7 @@
 <template>
   <VueSelect
+    v-bind="$attrs"
+    v-on="$listeners"
     label="name"
     :class="{ 'form-select-error': hasError, 'form-select-disabled': disabled }"
     :value="value"

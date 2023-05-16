@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 import orator
 from fastapi import Depends, APIRouter, HTTPException, Query, UploadFile, File, Form
@@ -15,11 +16,14 @@ router = APIRouter()
 
 @router.get("/api/sites")
 def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
-          query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False)):
+          query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False),
+          status: List[str] = Query(default=None, alias="status[]")):
     sites = Site.with_('site_magnets.magnet') \
         .order_by(sort_by or 'created_at', 'desc' if sort_desc else 'asc')
     if query is not None and query.strip() != '':
         sites = sites.where('name', 'ilike', f'%{query}%')
+    if status is not None:
+        sites = sites.where_in('status', status)
     sites = sites.paginate(per_page, page)
 
     items = []

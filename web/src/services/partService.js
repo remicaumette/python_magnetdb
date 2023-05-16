@@ -1,10 +1,11 @@
 import client from "./client";
 
-export function list({ query, page, perPage, sortBy, sortDesc } = {}) {
+export function list({ query, page, perPage, sortBy, sortDesc, status } = {}) {
   return client.get('/api/parts', {
     params: {
       page,
       query,
+      status,
       sort_by: sortBy,
       sort_desc: sortDesc,
       per_page: perPage,

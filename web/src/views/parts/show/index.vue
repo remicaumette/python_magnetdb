@@ -56,6 +56,7 @@
               :options="materialOptions"
               :default-value="part.material.id"
               class="w-full"
+              @search="searchMaterial"
           />
           <FormValues v-slot="{ values }">
             <router-link
@@ -183,6 +184,14 @@ export default {
     }
   },
   methods: {
+    searchMaterial(query, loading) {
+      loading(true)
+      materialService.list({ query })
+        .then((res) => {
+          this.materialOptions = res.items.map(item => ({name: item.name, value: item.id}))
+        })
+        .finally(() => loading(false))
+    },
     defunct() {
       return partService.defunct({ partId: this.part.id })
           .then(this.fetch)
