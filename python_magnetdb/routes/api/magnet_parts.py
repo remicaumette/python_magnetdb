@@ -32,6 +32,7 @@ def create(magnet_id: int, user=Depends(get_user("create")), part_id: int = Form
     return magnet_part.serialize()
 
 
+"""
 # TODO add an update method to change 'commissioned_at', 'decommissioned_at' from models: models/magnet_part.py MagnetPart
 # how to get MagnetPart id
 @router.patch("/api/magnets/{magnet_id}/parts")
@@ -51,3 +52,4 @@ def update(
     magnet_part.save()
     AuditLog.log(user, "MagnetPart updated", resource=magnet_part)
     return magnet_part.serialize()
+"""
