@@ -79,7 +79,7 @@ def run_simulation_setup(simulation):
             with open(f"{tempdir}/config.json", "r") as config_file:
                 config = json.load(config_file)
                 print(f"run_simulation_setup: config={config}")
-                (yamlfile, cfgfile, jsonfile, xaofile, meshfile) = setup(
+                (yamlfile, cfgfile, jsonfile, xaofile, meshfile, csvfiles) = setup(
                     env, args, config, f"{tempdir}/{simulation.resource.name}", currents
                 )
                 simulation.setup_state = {
@@ -88,6 +88,7 @@ def run_simulation_setup(simulation):
                     "jsonfile": jsonfile[len(tempdir) + 1 :],
                     "xaofile": xaofile,
                     "meshfile": meshfile,
+                    "csvfiles": csvfiles,
                 }
             # subprocess.run([f"pwd"], shell=True, check=True)
             # subprocess.run([f"ls -alrth"], shell=True, check=True)

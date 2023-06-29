@@ -63,9 +63,13 @@ def run_simulation(simulation):
                                      multithreading=True, manager=JobManager(otype=JobManagerType.none, queues=[]),
                                      mgkeydir=None)
                 cmds = setup_cmds(env, args, node_spec, simulation.setup_state['yamlfile'],
-                                  simulation.setup_state['cfgfile'], simulation.setup_state['jsonfile'],
+                                  simulation.setup_state['cfgfile'],
+                                  simulation.setup_state['jsonfile'],
                                   simulation.setup_state['xaofile'],
-                                  simulation.setup_state['meshfile'], tempdir, currents)
+                                  simulation.setup_state['meshfile'],
+                                  simulation.setup_state['csvfiles'],
+                                  tempdir,
+                                  currents)
 
                 # Save cmds in a file
                 with open("cmds.txt", "a") as f:
