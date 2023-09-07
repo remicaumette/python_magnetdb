@@ -156,8 +156,8 @@ export default {
       return this.fetch(values)
     },
     async fetch(values) {
-      // this.error = null
       try {
+        this.error = null
         const {results: data, params, allowed_currents: allowedCurrents} = await visualisationService.bmap({
           ...values,
           resource_id: this.$route.query.resource_id,
