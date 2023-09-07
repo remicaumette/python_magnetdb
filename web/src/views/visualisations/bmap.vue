@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4">
-    <Alert :error="error"/>
+    <Alert v-if="error" :error="error" class="alert alert-danger"/>
 
     <div v-if="resource" class="display-1">
       {{ resource.name }}
@@ -156,6 +156,7 @@ export default {
       return this.fetch(values)
     },
     async fetch(values) {
+      // this.error = null
       try {
         const {results: data, params, allowed_currents: allowedCurrents} = await visualisationService.bmap({
           ...values,
@@ -198,22 +199,24 @@ export default {
         }
 
         this.chart.options.scales.y.title.text = data.yaxis
-        this.chart.data = {
-          labels: data.x,
-          datasets: [
-            {
-              label: this.$refs.form.values.pkey,
-              backgroundColor: '#FF0000',
-              borderColor: '#FF0000',
-              data: data.y,
-            },
-            {
-              label: `${this.$refs.form.values.pkey} max`,
-              backgroundColor: '#00FF00',
-              borderColor: '#00FF00',
-              data: data.ymax,
-            },
-          ],
+        if (this.$refs.form) {
+          this.chart.data = {
+            labels: data.x,
+            datasets: [
+              {
+                label: this.$refs.form.values.pkey,
+                backgroundColor: '#FF0000',
+                borderColor: '#FF0000',
+                data: data.y,
+              },
+              {
+                label: `${this.$refs.form.values.pkey} max`,
+                backgroundColor: '#00FF00',
+                borderColor: '#00FF00',
+                data: data.ymax,
+              },
+            ],
+          }
         }
         this.chart.update()
         this.$router.replace({
