@@ -1,4 +1,4 @@
-FROM node:14 AS builder
+FROM node:16-bullseye AS builder
 
 WORKDIR /app
 
@@ -20,4 +20,4 @@ FROM nginx
 COPY config/nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-RUN chown -R nginx.nginx /usr/share/nginx/html/
+RUN chown -R nginx:nginx /usr/share/nginx/html/

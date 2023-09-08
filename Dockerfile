@@ -1,4 +1,5 @@
-FROM trophime/magnettools:latest-poetry
+# FROM magnettools:bookworm-poetry
+FROM magnettools:bullseye-poetry
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 DEBIAN_FRONTEND=noninteractive
 RUN echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
