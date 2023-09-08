@@ -96,7 +96,7 @@
                 label="Pkey"
                 name="pkey"
                 :component="FormSelect"
-                :options="['A', 'Br', 'Bz', 'B']"
+                :options="['A', 'Br', 'Bz', 'B', 'dBz/dz', 'd²Bz/dz²']"
             />
           </div>
           <div class="w-1/3">
