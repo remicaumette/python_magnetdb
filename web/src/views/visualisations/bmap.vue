@@ -47,7 +47,7 @@
                   label="N"
                   name="n"
                   :component="FormSlider"
-                  :min="50"
+                  :min="120"
                   :max="1000"
                   :step="1"
               />
@@ -96,7 +96,7 @@
                 label="Pkey"
                 name="pkey"
                 :component="FormSelect"
-                :options="['A', 'Br', 'Bz', 'B', 'dBz/dz', 'd²Bz/dz²']"
+                :options="['A', 'Br', 'Bz', 'B', 'dBr/dr', 'dBr/dz', 'dBz/dr', 'dBz/dz', 'G']"
             />
           </div>
           <div class="w-1/3">
