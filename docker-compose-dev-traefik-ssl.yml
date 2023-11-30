@@ -19,19 +19,15 @@ services:
       - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
   web-api:
     container_name: magnetdb-api
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
     command:
       - /bin/bash
       - -c
       - |
-        cd python_magnetsetup
-        poetry cache clear
         poetry update
         poetry lock
-        cd ..
-        poetry update
-        poetry lock
-        poetry install
         poetry run uvicorn python_magnetdb.web:app --reload --host 0.0.0.0
     working_dir: /home/feelpp/test
     volumes:
@@ -63,20 +59,16 @@ services:
       FRONT_SECURITY_AUTHORIZATION_HOST_SERVER: auth.lemon.magnetdb-dev.local
   web-worker:
     container_name: magnetdb-worker
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
     privileged: true
     command:
       - /bin/bash
       - -c
       - |
-        cd python_magnetsetup
-        poetry cache clear
         poetry update
         poetry lock
-        cd ..
-        poetry update
-        poetry lock
-        poetry install
         poetry run watchmedo auto-restart -d ./python_magnetdb/ -p '**/*.py' `poetry run celery -A python_magnetdb.worker worker --loglevel=info`
     working_dir: /home/feelpp/test
     volumes:

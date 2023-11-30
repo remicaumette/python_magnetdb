@@ -8,9 +8,9 @@ See `python_magnetrun` for more details
 
 0. Pre-requisites
 
-On your host:
+On your host, set /etc/hosts:
 ```shell
-echo "127.0.0.1 handler.sso.lncmig.local api.manager.sso.lncmig.local manager.sso.lncmig.local sso.lncmig.local test.sso.lncmig.local" | sudo tee -a /etc/hosts
+... | sudo tee -a /etc/hosts
 ```
 
 Create a self signed certificate for the magnetdb server:
@@ -24,14 +24,7 @@ mkcerts -install
 chmod 600 certs/*.key
 ```
 
-
-1. Install python dependencies:
-
-```shell
-poetry install
-```
-
-2. Start dependencies with docker:
+1. Start dependencies with docker:
 
 ```shell
 docker-compose -f docker-compose-dev-traefik-ssl.yml up
@@ -58,47 +51,14 @@ Note: if you see error messages about pgadmin, try to fix permissions on pgadmin
  Connect to magnetdb-api container
 
 ```shell
+docker exec -it magnetdb-api bash
+```
+
+
+```shell
 poetry run orator migrate -c python_magnetdb/database.py
 ```
 
-
-<!--
-6. Setup front-end:
-   
-```shell
-cd web
-npx browserslist@latest --update-db
-sudo npm install --location=global npm@8.13.2
-yarn install
-cd ..
-```
-
-
-7. Start front-end:
-
-```shell
-cd web
-export API_ENDPOINT=http://localhost:8000
-yarn serve
-```
-
-8. Start back-end:
-
-```shell
-export API_ENDPOINT=http://localhost:8000
-export S3_ENDPOINT=localhost:9000 S3_ACCESS_KEY=minio S3_SECRET_KEY=minio123 S3_BUCKET=magnetdb
-poetry run uvicorn python_magnetdb.web:app --reload --log-level=debug
-```
-
-9. Start worker:
-
-```shell
-export API_ENDPOINT=http://localhost:8000
-export S3_ENDPOINT=localhost:9000 S3_ACCESS_KEY=minio S3_SECRET_KEY=minio123 S3_BUCKET=magnetdb
-export IMAGES_DIR=/images
-poetry run watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- poetry run celery -A python_magnetdb.worker worker --loglevel=INFO
-```
--->
 
 7. Run seeds:
 
