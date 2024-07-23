@@ -10,7 +10,7 @@ See `python_magnetrun` for more details
 
 On your host, set /etc/hosts:
 ```shell
-... | sudo tee -a /etc/hosts
+echo "127.0.0.1 magnetdb-dev.local api.magnetdb-dev.local lemon.magnetdb-dev.local manager.lemon.magnetdb-dev.local auth.lemon.magnetdb-dev.local pgadmin.magnetdb-dev.local minio.magnetdb-dev.local traefik.magnetdb-dev.local" | sudo tee -a /etc/hosts
 ```
 
 Create a self signed certificate for the magnetdb server:
@@ -18,9 +18,10 @@ Create a self signed certificate for the magnetdb server:
 ```shell
 mkdir -p certs
 cd certs
-mkcerts -CAROOT
-mkcerts ...
-mkcerts -install
+mkcert -CAROOT
+mkcert 'magnetdb-dev.local'
+mkcert '*.magnetdb-dev.local'
+mkcert -install
 chmod 600 certs/*.key
 ```
 
