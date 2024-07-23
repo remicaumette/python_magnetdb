@@ -34,8 +34,8 @@ def run_simulation_setup(simulation):
     print(f"currents={currents}")
 
     with tempfile.TemporaryDirectory() as tempdir:
-        done = subprocess.run([f"rm -rf {tempdir}"], shell=True)
-        done = subprocess.run([f"mkdir -p {tempdir}"], shell=True)
+        subprocess.run([f"rm -rf {tempdir}"], shell=True)
+        subprocess.run([f"mkdir -p {tempdir}"], shell=True)
 
         print(f"generating config in {tempdir}...")
         prepare_directory(simulation, tempdir)
