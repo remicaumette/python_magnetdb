@@ -1,5 +1,5 @@
-import MagnetTools.Bmap as bmap
-import MagnetTools.MagnetTools as mt
+import magnettools.Bmap as bmap
+import magnettools.magnettools as mt
 import numpy as np
 
 
@@ -8,24 +8,30 @@ plotmethod = {
     'Br': (bmap.getBr, '[T]', 'Magnetic Field Bz'),
     'B': (bmap.getB, '[T]', 'Magnetic Field'),
     'A': (bmap.getA, '[A/m]', 'Magnetic Potential'),
+    'dBr/dr': (bmap.getdBrdr, '[T/m]', 'Gradient of Magnetic Field Br'),
+    'dBr/dz': (bmap.getdBrdz, '[T/m]', 'Gradient of Magnetic Field Br'),
+    'dBz/dr': (bmap.getdBzdr, '[T/m]', 'Gradient of Magnetic Field Bz'),
     'dBz/dz': (bmap.getdBzdz, '[T/m]', 'Gradient of Magnetic Field Bz'),
-    'd²Bz/dz²': (bmap.getd2Bzdz2, '[T/m²]', 'Second order Derivative of Magnetic Field Bz'),
+    'G': (bmap.getGradMagnetoGravPotential, '[%]', 'He Levitation Force Homogeneity')
+    # 'd²Bz/dz²': (bmap.getd2Bzdz2, '[T/m²]', 'Second order Derivative of Magnetic Field Bz'),
 }
 
 
 def prepare_bmap_chart_params(data, i_h, i_b, i_s, n, r0, z0, r, z, pkey, command):
+    # when UMagnets, add hts.json to data??
     (Tubes,Helices,OHelices,BMagnets,UMagnets,Shims) = data
     icurrents = mt.get_currents(Tubes, Helices, BMagnets, UMagnets)
+    print(f'prepare_bmap_chart_params: pkey={pkey}, icurrents={[current for current in icurrents]}')
 
     return (
         i_h if i_h is not None else (icurrents[0] if len(icurrents) > 0 else 0),
         i_b if i_b is not None else (icurrents[1] if len(icurrents) > 1 else 0),
         i_s if i_s is not None else (icurrents[2] if len(icurrents) > 2 else 0),
-        n if n is not None else 80,
+        n if n is not None else 160,
         r0 if r0 is not None else 0,
         z0 if z0 is not None else 0,
-        r if r is not None else (0, 3.14),
-        z if z is not None else (-3.14, 3.14),
+        r if r is not None else (0, 1.00),
+        z if z is not None else (-1.00, 1.00),
         pkey if pkey is not None else "Bz",
         command if command is not None else "1D_z",
         ["i_h", "i_b", "i_s"][:len(icurrents)],
@@ -67,14 +73,28 @@ def compute_bmap_chart(data, i_h, i_b, i_s, n, r0, z0, r, z, pkey, command):
         (Tubes,Helices,OHelices,BMagnets,UMagnets,Shims) = data
         if command == '1D_z':
             x = np.linspace(z[0], z[1], n)
-            B_ = np.vectorize(plotmethod[pkey][0], excluded=[0, 2, 3, 4, 5])
-            Bval = lambda y: B_(r0, x, Tubes, Helices, BMagnets, UMagnets)
+            if pkey in ['G']:
+                B_ = np.vectorize(plotmethod[pkey][0], excluded=[0, 2, 3, 4, 5, 6])
+                Bval = lambda y: B_(r0, x, Tubes, Helices, BMagnets, UMagnets, Shims, G0)
+            elif pkey in ['dBr/dr', 'dBr/dz', 'dBz/dr', 'dBz/dz']:
+                B_ = np.vectorize(plotmethod[pkey][0], excluded=[0, 2, 3, 4, 5, 6])
+                Bval = lambda y: B_(r0, x, Tubes, Helices, BMagnets, UMagnets, Shims)
+            else:
+                B_ = np.vectorize(plotmethod[pkey][0], excluded=[0, 2, 3, 4, 5])
+                Bval = lambda y: B_(r0, x, Tubes, Helices, BMagnets, UMagnets)
             return x, Bval(x)
 
         if command == '1D_r':
             x = np.linspace(r[0], r[1], n)
-            B_ = np.vectorize(plotmethod[pkey][0], excluded=[1, 2, 3, 4, 5])
-            Bval = lambda y: B_(x, z0, Tubes, Helices, BMagnets, UMagnets)
+            if pkey in ['G']:
+                B_ = np.vectorize(plotmethod[pkey][0], excluded=[1, 2, 3, 4, 5, 6])
+                Bval = lambda y: B_(x, y, Tubes, Helices, BMagnets, UMagnets, Shims, G0)
+            elif pkey in ['dBr/dr', 'dBr/dz', 'dBz/dr', 'dBz/dz']:
+                B_ = np.vectorize(plotmethod[pkey][0], excluded=[1, 2, 3, 4, 5, 6])
+                Bval = lambda y: B_(x, y, Tubes, Helices, BMagnets, UMagnets, Shims)
+            else:
+                B_ = np.vectorize(plotmethod[pkey][0], excluded=[1, 2, 3, 4, 5])
+                Bval = lambda y: B_(x, z0, Tubes, Helices, BMagnets, UMagnets)
             return x, Bval(x)
 
     def compute_max():
