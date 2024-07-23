@@ -1,0 +1,76 @@
+# FROM trophime/magnettools:latest-poetry
+FROM trophime/magnettools:bookworm-poetry-new
+
+USER root
+
+# Avoid warnings by switching to noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Setup demo environment variables
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    OMPI_MCA_btl_vader_single_copy_mechanism=none \
+    GOPATH=/usr/local/go \
+    PATH=${PATH}:/usr/local/go/bin
+
+ARG SVERSION=3.7.4
+ARG GVERSION=1.14.12
+ARG OS=linux
+ARG ARCH=amd64
+    
+# Configure apt and install packages
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
+    # \
+    # Verify git, process tools, lsb-release (useful for CLI installs) installed\
+    && apt-get -y install git iproute2 procps lsb-release \
+    #\
+    # Install C++ tools\
+    && apt-get -y install curl wget libpq-dev \
+    && apt-get -y install build-essential python3-minimal libpython3-dev \
+    && apt-get -y install python-is-python3 python3-pip python3-jinja2 \
+    && apt-get -y install python3-autopep8 black yapf3 python3-bandit flake8 pydocstyle pylint python3-pytest mypy \
+    && apt-get -y install texlive-latex-base texlive-latex-extra dvipng \
+    && apt-get -y install python3-gmsh \
+    && apt-get -y install nmap vim-nox \
+    && apt-get install -y sudo \
+    && if [ "$(lsb_release -cs)" = "focal" ]; then echo "Set disable_coredump false" > /etc/sudo.conf; fi \
+    #\
+    # install singularity \
+    && apt-get install -y  build-essential uuid-dev libgpgme-dev squashfs-tools libseccomp-dev pkg-config cryptsetup-bin \
+    && cd /usr/local \
+    && wget https://dl.google.com/go/go$GVERSION.$OS-$ARCH.tar.gz \
+    && tar -C /usr/local -xzvf go$GVERSION.$OS-$ARCH.tar.gz \
+    && rm go$GVERSION.$OS-$ARCH.tar.gz \
+    && wget https://github.com/hpcng/singularity/releases/download/v${SVERSION}/singularity-${SVERSION}.tar.gz \
+    && tar -xzf singularity-${SVERSION}.tar.gz \
+    && rm -f singularity-${SVERSION}.tar.gz \
+    && cd singularity \
+    && ./mconfig \
+    && make -C ./builddir \
+    && make -C ./builddir install \
+    #\
+    # Install node \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install nodejs \
+    && curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | tee /usr/share/keyrings/yarnkey.gpg >/dev/null \
+    && echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list \
+    && apt-get update \
+    && apt-get install yarn \
+    && rm -f /tmp/nodejs-install.js \
+    #
+    # Clean up
+    && apt-get autoremove -y \
+    && apt-get clean -y
+    
+# Switch back to dialog for any ad-hoc use of apt-get
+ENV DEBIAN_FRONTEND=dialog
+
+# RUN # add github ssh key
+#     && mkdir ~${USERNAME}/.ssh/ \
+#     && ssh-keyscan github.com >> ~vscode/.ssh/known_hosts \
+#     && chown -R ${USERNAME}:${USERNAME} ~${USERNAME}/.ssh \
+
+USER feelpp
+
