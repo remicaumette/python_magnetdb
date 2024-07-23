@@ -15,7 +15,7 @@ git submodule update --init --recursive
 
 0. Pre-requisites
 
-On your host:
+On your server:
 ```shell
 echo "127.0.0.1 handler.sso.lncmig.local api.manager.sso.lncmig.local manager.sso.lncmig.local sso.lncmig.local test.sso.lncmig.local" | sudo tee -a /etc/hosts
 echo "127.0.0.1 magnetdb.lncmig.local" | sudo tee -a /etc/hosts
@@ -46,7 +46,7 @@ docker-compose up
 
 The first time you run the service, you would need to:
 
-* Fix the premissions for pgadmin-data
+* Fix the permissions for pgadmin-data
 
 ```shell
 sudo chown -R 5050:5050 pgadmin-data
@@ -88,13 +88,13 @@ poetry run python3 -m python_magnetdb.seed-records
 ```
     
 4. Configure LemonLDAP (https://github.com/LemonLDAPNG/lemonldap-ng-docker):
-   1. Sign in to http://sso.lncmig.local/ with dwho/dwho
+   1. Sign in to http://lemon.magnetdb-dev.local/ with dwho/dwho
    2. Enable OpenID Connect in Administration > WebSSO Manager > General Parameters > Issuer modules > OpenID Connect
    3. Create OpenID relying party in Administration > WebSSO Manager > OpenID Connect Relying Parties > Add OpenID Relying Party
    4. Go in Administration > WebSSO Manager > OpenID Connect Relying Parties > "Name of the relying party" > Options > Basic
    5. Set Client ID to `testid`
    6. Set Client secret to `testsecret`
-   7. Set Allowed redirection addresses for login to `http://localhost:8080/sign_in`
+   7. Set Allowed redirection addresses for login to `http://localhost:8080magnetdb-dev.local/sign_in`
 
 5. Setup pgadmin
 
@@ -116,25 +116,25 @@ docker exec -it lemonldap-app bash
 To change Lemonldap settings
 
 ```shell
-firefox -private http://sso.lncmig.local
+firefox --private-window http://sso.lncmig.local
 ```
 
 To change user role:
 
 ```shell
-firefox -private http://localhost:5050/
+firefox --private-window http://localhost:5050/
 ```
 
 To start magnetdb:
 
 ```shell
-firefox -private http://localhost:8080/
+firefox --private-window http://localhost:8080/
 ```
 
 To start magnetdb swagger UI:
 
 ```shell
-firefox -private http://localhost:8000/docs
+firefox --private-window http://localhost:8000/docs
 ```
 
 NB: see https://fastapi.tiangolo.com/tutorial/metadata/ to custom swagger UI
