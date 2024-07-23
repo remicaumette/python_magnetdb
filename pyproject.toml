@@ -3,7 +3,7 @@ name = "python_magnetdb"
 version = "0.1.0"
 description = "MagnetDB platform"
 authors = ["Christophe Trophime <christophe.trophime@lncmi.cnrs.fr>",
-           "Remi Caumette <remicaumette@icloud.com>" 
+           "Remi Caumette <remicaumette@icloud.com>"
           ]
 
 [tool.poetry.dependencies]
@@ -27,6 +27,8 @@ tabulate = "^0.9.0"
 magnettools = {path = "/home/feelpp/magnettools"}
 python-magnetsetup = {path = "python_magnetsetup"}
 watchdog="^1.0.2"
+django = "^5.0.7"
+psycopg = {extras = ["binary"], version = "^3.2.1"}
 
 [tool.poetry.dev-dependencies]
 

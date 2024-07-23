@@ -34,4 +34,3 @@ RUN mkdir -p ~${USERNAME}/.ssh/ \
 ENV DEBIAN_FRONTEND=dialog
 
 USER $USERNAME
-
