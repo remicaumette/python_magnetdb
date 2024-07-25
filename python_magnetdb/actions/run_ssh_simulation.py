@@ -1,7 +1,7 @@
 from typing import TextIO
 from typing import Type
-from ..models.server import Server
-from ..models.simulation import Simulation
+from ..oldmodels.server import Server
+from ..oldmodels.simulation import Simulation
 
 
 import os
@@ -16,7 +16,7 @@ from python_magnetsetup.job import JobManager, JobManagerType
 from python_magnetsetup.node import NodeSpec, NodeType
 from python_magnetsetup.setup import setup_cmds
 
-from python_magnetdb.models.attachment import Attachment
+from python_magnetdb.oldmodels.attachment import Attachment
 
 
 def run_cmd(connection: Connection, cmd: str, stdout: TextIO):
@@ -38,7 +38,7 @@ def run_ssh_simulation(simulation: Type[Simulation], server: Type[Server], cores
     simulation.status = "in_progress"
     simulation.save()
     simulation.load('currents.magnet.parts')
-    
+
     currents = {current.magnet.name: {'value': current.value, 'type': current.magnet.get_type() } for current in simulation.currents}
     print(f'currents={currents}')
 
@@ -58,7 +58,7 @@ def run_ssh_simulation(simulation: Type[Simulation], server: Type[Server], cores
                     print(f'Failed to connect to {server.host} with magnetdb private ssh key')
                     print(f'Trying to connect with {server.username} native ssh key')
                     connection = Connection(host=server.host, user=server.username)
-                    
+
                 log_file.write("Downloading setup archive...\n")
                 simulation.setup_output_attachment.download(f"{local_tempdir}/setup.tar.gz")
                 remote_temp_dir = run_cmd(connection, 'mktemp -d', log_file).strip()
@@ -108,7 +108,7 @@ def run_ssh_simulation(simulation: Type[Simulation], server: Type[Server], cores
                 with connection.cd(geom_dir):
                     log_file.write(f"Performing CAD...\n")
                     run_cmd(connection, cmds['CAD'], log_file)
-                    
+
                 with connection.cd(remote_temp_dir):
                     for (key, value) in cmds.items():
                         # TODO ignore Run only if model is not including elasticity

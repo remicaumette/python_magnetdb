@@ -3,7 +3,7 @@ import os
 import shutil
 
 from python_magnetdb.actions.generate_simulation_config import generate_magnet_config
-from python_magnetdb.models.magnet import Magnet
+from python_magnetdb.oldmodels.magnet import Magnet
 
 
 def mkdir(dir):

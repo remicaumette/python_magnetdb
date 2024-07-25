@@ -4,9 +4,9 @@ import requests
 from fastapi import APIRouter, Form
 from uuid import uuid4 as uuid
 
-from ...models.audit_log import AuditLog
-from ...models.user import User
-from ...security import generate_user_token, front_authorization_server, authorization_server, \
+from ...oldmodels.audit_log import AuditLog
+from ...oldmodels.user import User
+from python_magnetdb.actions.security import generate_user_token, front_authorization_server, authorization_server, \
     authorization_host_server, client_id, client_secret
 
 router = APIRouter()

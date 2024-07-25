@@ -3,11 +3,11 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Form, Depends
 
 from ...dependencies import get_user
-from ...models.audit_log import AuditLog
-from ...models.magnet import Magnet
-from ...models.site import Site
-from ...models.site_magnet import SiteMagnet
-from ...models.status import Status
+from ...oldmodels.audit_log import AuditLog
+from ...oldmodels.magnet import Magnet
+from ...oldmodels.site import Site
+from ...oldmodels.site_magnet import SiteMagnet
+from ...oldmodels.status import Status
 
 router = APIRouter()
 

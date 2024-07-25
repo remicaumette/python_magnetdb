@@ -5,10 +5,10 @@ import orator.exceptions.query
 from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
 
 from ...dependencies import get_user
-from ...models.attachment import Attachment
-from ...models.audit_log import AuditLog
-from ...models.magnet import Magnet
-from ...models.status import Status
+from ...oldmodels.attachment import Attachment
+from ...oldmodels.audit_log import AuditLog
+from ...oldmodels.magnet import Magnet
+from ...oldmodels.status import Status
 
 from ...actions.generate_magnet_directory import generate_magnet_directory
 

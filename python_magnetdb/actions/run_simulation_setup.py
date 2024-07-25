@@ -11,7 +11,7 @@ from python_magnetsetup.setup import setup
 
 from python_magnetdb.actions.generate_magnet_directory import generate_magnet_directory
 from python_magnetdb.actions.generate_site_directory import generate_site_directory
-from python_magnetdb.models.attachment import Attachment
+from python_magnetdb.oldmodels.attachment import Attachment
 
 
 def prepare_directory(simulation, directory):

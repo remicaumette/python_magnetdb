@@ -1,17 +1,13 @@
-from orator import Model
-from orator.orm import belongs_to
+from django.db import models
 
 
-class PartGeometry(Model):
-    __table__ = "part_geometries"
-    __fillable__ = ['part_id', 'type', 'attachment_id']
+class PartGeometry(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    type = models.CharField(max_length=255, null=False)
+    part = models.ForeignKey('Part', on_delete=models.CASCADE, null=False)
+    attachment = models.ForeignKey('StorageAttachment', on_delete=models.CASCADE, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
+    updated_at = models.DateTimeField(auto_now=True, null=False)
 
-    @belongs_to('part_id')
-    def part(self):
-        from .part import Part
-        return Part
-
-    @belongs_to('attachment_id')
-    def attachment(self):
-        from .attachment import Attachment
-        return Attachment
+    class Meta:
+        db_table = 'part_geometries'

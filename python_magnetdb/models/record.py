@@ -1,17 +1,14 @@
-from orator import Model
-from orator.orm import belongs_to
+from django.db import models
 
 
-class Record(Model):
-    __table__ = "records"
-    __fillable__ = ['name', 'description', 'site_id', 'attachment_id', 'created_at']
+class Record(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    name = models.CharField(max_length=255, null=False)
+    description = models.TextField(null=True)
+    site = models.ForeignKey('Site', on_delete=models.CASCADE, null=False)
+    attachment = models.ForeignKey('StorageAttachment', on_delete=models.CASCADE, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
+    updated_at = models.DateTimeField(auto_now=True, null=False)
 
-    @belongs_to('site_id')
-    def site(self):
-        from .site import Site
-        return Site
-
-    @belongs_to('attachment_id')
-    def attachment(self):
-        from .attachment import Attachment
-        return Attachment
+    class Meta:
+        db_table = 'records'

@@ -2,8 +2,8 @@ from fastapi import Depends, APIRouter, HTTPException, Query, Form
 
 from ...actions.generate_server_key_pairs import generate_server_key_pairs
 from ...dependencies import get_user
-from ...models.audit_log import AuditLog
-from ...models.server import Server
+from ...oldmodels.audit_log import AuditLog
+from ...oldmodels.server import Server
 
 router = APIRouter()
 

@@ -5,7 +5,7 @@ from argparse import Namespace
 from os.path import basename
 from traceback import print_exception
 
-from python_magnetdb.models.attachment import Attachment
+from python_magnetdb.oldmodels.attachment import Attachment
 from python_magnetsetup.config import appenv
 from python_magnetsetup.job import JobManager, JobManagerType
 from python_magnetsetup.node import NodeSpec, NodeType

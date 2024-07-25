@@ -1,41 +1,24 @@
-from orator import Model
-from orator.orm import belongs_to, has_many, has_many_through, morph_many
-
-from .attachment import Attachment
-from .cad_attachment import CadAttachment
-from .magnet_part import MagnetPart
-from .site_magnet import SiteMagnet
+from django.db import models
 
 
-class Magnet(Model):
-    __table__ = "magnets"
-    __fillable__ = ['name', 'description', 'status', 'design_office_reference']
+class Magnet(models.Model):
+    class Meta:
+        db_table = 'magnets'
 
-    @belongs_to('geometry_attachment_id')
-    def geometry(self):
-        return Attachment
-
-    @morph_many('resource')
-    def cad(self):
-        return CadAttachment
-
-    @has_many
-    def magnet_parts(self):
-        return MagnetPart
-
-    @has_many_through(MagnetPart, 'magnet_id', 'id')
-    def parts(self):
-        from .part import Part
-        return Part
-
-    @has_many
-    def site_magnets(self):
-        return SiteMagnet
-
-    @has_many_through(SiteMagnet)
-    def sites(self):
-        from .site import Site
-        return Site
+    id = models.BigAutoField(primary_key=True)
+    name = models.CharField(max_length=255, unique=True, null=False)
+    description = models.TextField(null=True)
+    status = models.CharField(max_length=255, null=False)
+    # cad_attachments = models.ManyToOneRel("CadAttachment", field_name="site")
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
+    updated_at = models.DateTimeField(auto_now=True, null=False)
+    design_office_reference = models.CharField(max_length=255, null=True)
+    geometry_attachment = models.ForeignKey('StorageAttachment', on_delete=models.SET_NULL, null=True)
+    # magnet_parts = models.ManyToOneRel('MagnetPart', field_name="site")
+    parts = models.ManyToManyField('Part', through='MagnetPart', related_name='magnets')
+    # site_magnets = models.ManyToOneRel('SiteMagnet', field_name="site")
+    sites = models.ManyToManyField('Site', through='SiteMagnet', related_name='magnets')
+    # simulations = models.ManyToOneRel("Simulation", field_name="site")
 
     def get_type(self):
         for part in self.magnet_parts:

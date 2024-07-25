@@ -9,11 +9,11 @@ from ... import worker
 from ...actions.generate_simulation_config import generate_simulation_config
 from ...actions.get_simulation_measures import get_simulation_measures
 from ...dependencies import get_user
-from ...models.audit_log import AuditLog
-from ...models.magnet import Magnet
-from ...models.simulation import Simulation
-from ...models.simulation_current import SimulationCurrent
-from ...models.site import Site
+from ...oldmodels.audit_log import AuditLog
+from ...oldmodels.magnet import Magnet
+from ...oldmodels.simulation import Simulation
+from ...oldmodels.simulation_current import SimulationCurrent
+from ...oldmodels.site import Site
 
 router = APIRouter()
 

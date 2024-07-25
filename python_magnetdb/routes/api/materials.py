@@ -5,8 +5,8 @@ from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, Query, Depends
 
 from ...dependencies import get_user
-from ...models.audit_log import AuditLog
-from ...models.material import Material
+from ...oldmodels.audit_log import AuditLog
+from ...oldmodels.material import Material
 
 router = APIRouter()
 

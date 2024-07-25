@@ -2,15 +2,18 @@ from datetime import datetime
 from typing import List
 
 import orator
+from django.core.paginator import Paginator
+from django.db.models import Prefetch
 from fastapi import Depends, APIRouter, HTTPException, Query, UploadFile, File, Form
 
+from .serializers import model_serializer
+from ...actions.generate_simulation_config import generate_site_config
 from ...dependencies import get_user
-from ...models.attachment import Attachment
+from ...models import SiteMagnet
 from ...models.audit_log import AuditLog
 from ...models.site import Site
 from ...models.status import Status
 
-from ...actions.generate_simulation_config import generate_site_config
 router = APIRouter()
 
 
@@ -18,30 +21,25 @@ router = APIRouter()
 def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
           query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False),
           status: List[str] = Query(default=None, alias="status[]")):
-    sites = Site.with_('site_magnets.magnet') \
-        .order_by(sort_by or 'created_at', 'desc' if sort_desc else 'asc')
+    sites = Site.objects.prefetch_related(Prefetch(
+        'sitemagnet_set',
+        queryset=SiteMagnet.objects.prefetch_related('magnet')
+    ))
+    sites = sites.order_by(sort_by or 'created_at')
+    if sort_desc:
+        sites = sites.desc()
     if query is not None and query.strip() != '':
-        sites = sites.where('name', 'ilike', f'%{query}%')
+        sites = sites.filter(name__icontains=query)
     if status is not None:
-        sites = sites.where_in('status', status)
-    sites = sites.paginate(per_page, page)
+        sites = sites.filter(status__in=status)
+    paginator = Paginator(sites.all(), per_page)
+    items = [model_serializer(site) for site in paginator.get_page(page).object_list]
 
-    items = []
-    for site in sites:
-        item = site.serialize()
-        item['commissioned_at'] = sorted(
-            list(map(lambda curr: curr.commissioned_at, site.site_magnets)), reverse=True
-        )[0] if len(site.site_magnets) > 0 else None
-        decommissioned_at = list(
-            filter(lambda curr: curr is not None, map(lambda curr: curr.decommissioned_at, list(site.site_magnets)))
-        )
-        item['decommissioned_at'] = sorted(decommissioned_at, reverse=True)[0] if len(decommissioned_at) > 0 else None
-        items.append(item)
-
+    print(items)
     return {
-        "current_page": sites.current_page,
-        "last_page": sites.last_page,
-        "total": sites.total,
+        "current_page": page,
+        "last_page": paginator.num_pages,
+        "total": paginator.count,
         "items": items,
     }
 

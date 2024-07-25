@@ -1,3 +1,9 @@
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'python_magnetdb.settings')
+
+import django
+django.setup()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

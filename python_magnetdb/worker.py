@@ -1,10 +1,13 @@
 import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'python_magnetdb.settings')
+
+import django
+django.setup()
 
 from celery import Celery
 
-import python_magnetdb.database
-from python_magnetdb.models.server import Server
-from python_magnetdb.models.simulation import Simulation
+from python_magnetdb.oldmodels.server import Server
+from python_magnetdb.oldmodels.simulation import Simulation
 
 app = Celery('tasks', broker=os.getenv('REDIS_ADDR') or 'redis://localhost:6379/0')
 

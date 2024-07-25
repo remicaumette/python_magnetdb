@@ -5,9 +5,9 @@ from fastapi import APIRouter, Query, HTTPException, Depends
 from fastapi.params import Form
 
 from ...dependencies import get_user
-from ...models.audit_log import AuditLog
-from ...models.material import Material
-from ...models.part import Part
+from ...oldmodels.audit_log import AuditLog
+from ...oldmodels.material import Material
+from ...oldmodels.part import Part
 
 router = APIRouter()
 

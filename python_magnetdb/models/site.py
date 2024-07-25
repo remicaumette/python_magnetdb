@@ -1,28 +1,15 @@
-from orator import Model
-from orator.orm import belongs_to, has_many, has_many_through
-
-from .attachment import Attachment
-from .site_magnet import SiteMagnet
+from django.db import models
 
 
-class Site(Model):
-    __table__ = "sites"
-    __fillable__ = ['name', 'description', 'status']
+class Site(models.Model):
+    class Meta:
+        db_table = 'sites'
 
-    @belongs_to('config_attachment_id')
-    def config(self):
-        return Attachment
-
-    @has_many
-    def records(self):
-        from .record import Record
-        return Record
-
-    @has_many
-    def site_magnets(self):
-        return SiteMagnet
-
-    @has_many_through(SiteMagnet, 'site_id', 'id')
-    def magnets(self):
-        from .magnet import Magnet
-        return Magnet
+    id = models.BigAutoField(primary_key=True)
+    name = models.CharField(max_length=255, unique=True, null=False)
+    description = models.TextField(null=True)
+    status = models.CharField(max_length=255, null=False)
+    config_attachment = models.ForeignKey('StorageAttachment', on_delete=models.SET_NULL, null=True)
+    magnets = models.ManyToManyField('Magnet', through='SiteMagnet')
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
+    updated_at = models.DateTimeField(auto_now=True, null=False)

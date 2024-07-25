@@ -5,7 +5,7 @@ from os.path import join, isfile
 
 from pandas import read_csv
 
-from ..models.simulation import Simulation
+from ..oldmodels.simulation import Simulation
 
 
 def find_measures_files(path: str):

@@ -3,8 +3,8 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from fastapi.responses import StreamingResponse
 
 from ...dependencies import get_user
-from ...models.audit_log import AuditLog
-from ...models.attachment import Attachment
+from ...oldmodels.audit_log import AuditLog
+from ...oldmodels.attachment import Attachment
 
 router = APIRouter()
 

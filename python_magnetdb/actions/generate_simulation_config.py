@@ -1,7 +1,7 @@
-from python_magnetdb.models.site import Site
+from python_magnetdb.oldmodels.site import Site
 
-from python_magnetdb.models.magnet import Magnet
-from python_magnetdb.models.material import Material
+from python_magnetdb.oldmodels.magnet import Magnet
+from python_magnetdb.oldmodels.material import Material
 
 
 def format_material(material):

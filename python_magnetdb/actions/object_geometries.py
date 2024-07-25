@@ -2,7 +2,7 @@ import tempfile
 
 from python_magnetdb.actions.generate_simulation_config import generate_site_config
 
-from python_magnetdb.models.site import Site
+from python_magnetdb.oldmodels.site import Site
 from python_magnetsetup.ana import magnet_setup, msite_setup
 from python_magnetsetup.config import appenv
 

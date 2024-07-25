@@ -7,10 +7,10 @@ from pydantic import BaseModel
 from fastapi import APIRouter, Query, HTTPException, Form, UploadFile, File, Depends
 
 from ...dependencies import get_user
-from ...models.attachment import Attachment
-from ...models.audit_log import AuditLog
-from ...models.record import Record
-from ...models.site import Site
+from ...oldmodels.attachment import Attachment
+from ...oldmodels.audit_log import AuditLog
+from ...oldmodels.record import Record
+from ...oldmodels.site import Site
 from ...utils.record_visualization import columns as columns_with_name
 
 router = APIRouter()
@@ -51,7 +51,7 @@ class RecordPayload(BaseModel):
     description: Optional[str]
     site_id: int
     attachment_id: int
-    
+
 @router.post("/api/clirecords")
 def clicreate(payload: RecordPayload, user=Depends(get_user('create'))):
     print(f'record/clicreate: name={payload.name}, attachment_id={payload.attachment_id}')

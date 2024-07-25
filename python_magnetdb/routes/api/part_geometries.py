@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile
 from fastapi.params import Form, File
-from python_magnetdb.models.part import Part
+from python_magnetdb.oldmodels.part import Part
 
 from ...dependencies import get_user
-from ...models.attachment import Attachment
-from ...models.audit_log import AuditLog
-from ...models.part_geometry import PartGeometry
+from ...oldmodels.attachment import Attachment
+from ...oldmodels.audit_log import AuditLog
+from ...oldmodels.part_geometry import PartGeometry
 
 router = APIRouter()
 

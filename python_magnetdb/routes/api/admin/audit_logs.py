@@ -1,7 +1,7 @@
 from fastapi import Depends, APIRouter, Query
 
 from ....dependencies import get_user
-from ....models.audit_log import AuditLog
+from ....oldmodels.audit_log import AuditLog
 
 router = APIRouter()
 

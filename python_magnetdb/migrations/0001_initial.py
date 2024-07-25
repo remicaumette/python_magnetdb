@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
                 ('resource_id', models.BigIntegerField(null=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('resource_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='contenttypes.contenttype')),
+                ('resource_type', models.TextField(null=True)),
                 ('attachment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='magnetdb.storageattachment')),
             ],
             options={
@@ -105,7 +105,6 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('design_office_reference', models.CharField(max_length=255, null=True)),
-                ('cao_attachment', models.ManyToManyField(to='magnetdb.cadattachment')),
             ],
             options={
                 'db_table': 'magnets',
@@ -141,7 +140,6 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('design_office_reference', models.CharField(max_length=255, null=True)),
-                ('cao_attachment', models.ManyToManyField(to='magnetdb.cadattachment')),
                 ('magnet_parts', models.ManyToManyField(related_name='part_magnet_parts', to='magnetdb.magnetpart')),
                 ('magnets', models.ManyToManyField(through='magnetdb.MagnetPart', to='magnetdb.magnet')),
                 ('material', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='magnetdb.material')),
@@ -200,7 +198,7 @@ class Migration(migrations.Migration):
                 ('non_linear', models.BooleanField(null=True)),
                 ('setup_status', models.TextField(default='pending')),
                 ('setup_state', models.JSONField(null=True)),
-                ('resource_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='contenttypes.contenttype')),
+                ('resource_type', models.TextField(null=True)),
             ],
             options={
                 'db_table': 'simulations',

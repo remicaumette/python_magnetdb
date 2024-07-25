@@ -1,29 +1,19 @@
-from orator import Model
-from orator.orm import belongs_to, morph_to
+from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 
-class AuditLog(Model):
-    __table__ = "audit_logs"
-    __fillable__ = ['message', 'metadata', 'user_id', 'resource_id', 'resource_type', 'resource_name']
+class AuditLog(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    message = models.TextField(null=False)
+    metadata = models.JSONField(null=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE, null=False)
+    resource_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
+    resource_id = models.BigIntegerField(null=True)
+    resource = GenericForeignKey("resource_type", "resource_id")
+    resource_name = models.TextField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
+    updated_at = models.DateTimeField(auto_now=True, null=False)
 
-    @morph_to
-    def resource(self):
-        return
-
-    @belongs_to('user_id')
-    def user(self):
-        from python_magnetdb.models.user import User
-        return User
-
-    @classmethod
-    def log(cls, user, message, metadata=None, resource=None, resource_name=None):
-        log = cls(message=message, metadata=metadata)
-        log.user().associate(user)
-        if resource is not None:
-            log.resource().associate(resource)
-            if hasattr(resource, 'name'):
-                log.resource_name = resource.name
-        if resource_name is not None:
-            log.resource_name = resource_name
-        log.save()
-        return log
+    class Meta:
+        db_table = 'audit_logs'
