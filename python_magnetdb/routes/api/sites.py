@@ -21,11 +21,7 @@ router = APIRouter()
 def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(default=25, lte=100),
           query: str = Query(None), sort_by: str = Query(None), sort_desc: bool = Query(False),
           status: List[str] = Query(default=None, alias="status[]")):
-    sites = Site.objects.prefetch_related(Prefetch(
-        'sitemagnet_set',
-        queryset=SiteMagnet.objects.prefetch_related('magnet')
-    ))
-    sites = sites.order_by(sort_by or 'created_at')
+    sites = Site.objects.prefetch_related('sitemagnet_set__magnet').order_by(sort_by or 'created_at')
     if sort_desc:
         sites = sites.desc()
     if query is not None and query.strip() != '':
@@ -35,7 +31,6 @@ def index(user=Depends(get_user('read')), page: int = 1, per_page: int = Query(d
     paginator = Paginator(sites.all(), per_page)
     items = [model_serializer(site) for site in paginator.get_page(page).object_list]
 
-    print(items)
     return {
         "current_page": page,
         "last_page": paginator.num_pages,
@@ -60,19 +55,10 @@ def create(user=Depends(get_user('create')), name: str = Form(...), description:
 
 @router.get("/api/sites/{id}")
 def show(id: int, user=Depends(get_user('read'))):
-    site = Site.with_('config', 'site_magnets.magnet', 'records').find(id)
+    site = Site.objects.prefetch_related('sitemagnet_set__magnet', 'record_set', 'config_attachment').filter(id=id).get()
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
-
-    res = site.serialize()
-    res['commissioned_at'] = sorted(
-        list(map(lambda curr: curr.commissioned_at, list(site.site_magnets))), reverse=True
-    )[0] if len(site.site_magnets) > 0 else None
-    decommissioned_at = list(
-        filter(lambda curr: curr is not None, map(lambda curr: curr.decommissioned_at, list(site.site_magnets)))
-    )
-    res['decommissioned_at'] = sorted(decommissioned_at, reverse=True)[0] if len(decommissioned_at) > 0 else None
-    return res
+    return model_serializer(site)
 
 
 @router.patch("/api/sites/{id}")
